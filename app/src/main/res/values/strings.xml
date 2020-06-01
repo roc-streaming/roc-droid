@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">roc-droid</string>
+    <string name="start">start</string>
+    <string name="stop">stop</string>
+    <string name="device_ip">device ip:</string>
+</resources>
