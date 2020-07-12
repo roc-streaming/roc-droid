@@ -13,7 +13,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.github.rocproject.roc.*
+import org.rocstreaming.roctoolkit.*
 import java.net.NetworkInterface
 
 const val SAMPLE_RATE = 44100
