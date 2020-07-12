@@ -8,7 +8,7 @@ android {
     ndkVersion "21.1.6352462"
 
     defaultConfig {
-        applicationId "com.github.rocproject.rocdroid"
+        applicationId "org.rocstreaming.rocdroid"
         minSdkVersion 26
         targetSdkVersion 29
         versionCode 1

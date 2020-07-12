@@ -1,4 +1,4 @@
-package com.github.rocproject.rocdroid
+package org.rocstreaming.rocdroid
 
 import android.media.AudioAttributes
 import android.media.AudioAttributes.USAGE_MEDIA
