@@ -1,4 +1,4 @@
-package com.github.rocproject.rocdroid
+package org.rocstreaming.rocdroid
 
 import org.junit.Test
 
