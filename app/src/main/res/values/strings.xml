@@ -1,6 +1,22 @@
 <resources>
     <string name="app_name">roc-droid</string>
-    <string name="start">start</string>
-    <string name="stop">stop</string>
-    <string name="device_ip">device ip:</string>
+
+    <string name="receiver">Receiver</string>
+    <string name="receiver_expl"><![CDATA[Start a sender on the remove device. Use this device IP (<tt>%s</tt>) as remote. Use default ports, 10001 for source, 10002 for repair, and start the receiver.]]></string>
+    <string name="start_receiver">Start receiver</string>
+    <string name="stop_receiver">Stop receiver</string>
+
+    <string name="sender">Sender</string>
+    <string name="sender_expl">Start a receiver on the remote device, with ports 11001 as source, 11002 as repair. Put the remote device IP below and start the sender.</string>
+    <string name="receiver_ip">Receiver IP</string>
+    <string name="default_receiver_ip">192.168.0.1</string>
+    <string name="start_sender">Start sender</string>
+    <string name="stop_sender">Stop sender</string>
+    <string name="invalid_ip_title">Invalid IP address</string>
+    <string name="invalid_ip_message">The receiver IP address looks invalid.</string>
+    <string name="allow_mic_title">Mic permission</string>
+    <string name="allow_mic_message">The app needs permission to record audio from your phone mic.</string>
+    <string name="allow_mic_ok_message">Thanks! The sender will now start.</string>
+
+    <string name="ok">OK</string>
 </resources>
