@@ -95,8 +95,8 @@ class MainActivity : AppCompatActivity() {
 
         val bufferSize = AudioTrack.getMinBufferSize(
             audioFormat.sampleRate,
-            audioFormat.encoding,
-            audioFormat.channelMask
+            audioFormat.channelMask,
+            audioFormat.encoding
         )
 
         return AudioTrack(
