@@ -34,10 +34,15 @@ Screenshot
 
 <img src="https://raw.githubusercontent.com/roc-streaming/roc-droid/master/screenshot.webp" data-canonical-src="https://raw.githubusercontent.com/roc-streaming/roc-droid/master/screenshot.webp" width="300"/>
 
+Dependencies
+------------
+
+The app uses [Java bindings for Roc Toolkit](https://github.com/roc-streaming/roc-java). You don't need to install them manually; gradle will automatically download AAR from bintray, which contains both libroc and Java bindings built for all Android ABIs.
+
 Building
 --------
 
-*TODO*
+The easiest way to build the app is using Android Studio.
 
 Authors
 -------
