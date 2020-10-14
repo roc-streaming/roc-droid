@@ -203,9 +203,7 @@ class MainActivity : AppCompatActivity() {
     private fun createAudioTrack(): AudioTrack {
         val audioAttributes = AudioAttributes.Builder().apply {
             setUsage(AudioAttributes.USAGE_MEDIA)
-            setLegacyStreamType(AudioManager.STREAM_SYSTEM)
             setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            setFlags(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
         }.build()
         val audioFormat = AudioFormat.Builder().apply {
             setSampleRate(SAMPLE_RATE)
@@ -217,13 +215,14 @@ class MainActivity : AppCompatActivity() {
             audioFormat.channelMask,
             audioFormat.encoding
         )
-        return AudioTrack(
-            audioAttributes,
-            audioFormat,
-            bufferSize,
-            AudioTrack.MODE_STREAM,
-            AudioManager.AUDIO_SESSION_ID_GENERATE
-        )
+        return AudioTrack.Builder().apply {
+            setAudioAttributes(audioAttributes)
+            setAudioFormat(audioFormat)
+            setBufferSizeInBytes(bufferSize)
+            setTransferMode(AudioTrack.MODE_STREAM)
+            setSessionId(AudioManager.AUDIO_SESSION_ID_GENERATE)
+            setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
+        }.build()
     }
 
     private fun createAudioRecord(): AudioRecord {
