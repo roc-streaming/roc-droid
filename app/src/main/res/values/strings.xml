@@ -19,4 +19,12 @@
     <string name="allow_mic_ok_message">Thanks! The sender will now start.</string>
 
     <string name="ok">OK</string>
+
+    <string name="notification_channel_name">Sender and Receiver foreground service</string>
+    <string name="notification_receiver_running">Receiver running</string>
+    <string name="notification_sender_running">Sender running</string>
+    <string name="notification_sender_and_receiver_running">Sender and Receiver running</string>
+    <string name="notification_sender_and_receiver_not_running">Neither Sender or Receiver running</string>
+    <string name="notification_title">Roc State</string>
+    <string name="notification_stop_action">Stop</string>
 </resources>
