@@ -20,7 +20,11 @@ private const val RTP_PORT_REPAIR = 11002
 
 private const val CHANNEL_ID = "SenderReceiverService"
 private const val NOTIFICATION_ID = 1
-private const val BROADCAST_STOP_ACTION = "org.rocstreaming.rocdroid.NotificationStopAction"
+
+private const val BROADCAST_STOP_SENDER_ACTION =
+    "org.rocstreaming.rocdroid.NotificationSenderStopAction"
+private const val BROADCAST_STOP_RECEIVER_ACTION =
+    "org.rocstreaming.rocdroid.NotificationReceiverStopAction"
 
 class SenderReceiverService : Service() {
 
@@ -32,9 +36,10 @@ class SenderReceiverService : Service() {
 
     private val notificationStopActionReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            stopForegroundService()
-            stopSender()
-            stopReceiver()
+            when (intent.action) {
+                BROADCAST_STOP_SENDER_ACTION -> stopSender()
+                BROADCAST_STOP_RECEIVER_ACTION -> stopReceiver()
+            }
         }
     }
 
@@ -50,7 +55,10 @@ class SenderReceiverService : Service() {
 
     override fun onCreate() {
         createNotificationChannel()
-        registerReceiver(notificationStopActionReceiver, IntentFilter(BROADCAST_STOP_ACTION))
+        registerReceiver(notificationStopActionReceiver, IntentFilter().apply {
+            addAction(BROADCAST_STOP_SENDER_ACTION)
+            addAction(BROADCAST_STOP_RECEIVER_ACTION)
+        })
     }
 
     override fun onDestroy() {
@@ -76,17 +84,29 @@ class SenderReceiverService : Service() {
             mainActivityIntent,
             PendingIntent.FLAG_UPDATE_CURRENT
         )
-        val stopIntent = Intent(BROADCAST_STOP_ACTION)
-        val pendingStopIntent = PendingIntent.getBroadcast(
+        val stopSenderIntent = Intent(BROADCAST_STOP_SENDER_ACTION)
+        val pendingStopSenderIntent = PendingIntent.getBroadcast(
             this@SenderReceiverService,
             0,
-            stopIntent,
+            stopSenderIntent,
             PendingIntent.FLAG_UPDATE_CURRENT
         )
-        val stopAction = Notification.Action.Builder(
+        val stopReceiverIntent = Intent(BROADCAST_STOP_RECEIVER_ACTION)
+        val pendingStopReceiverIntent = PendingIntent.getBroadcast(
+            this@SenderReceiverService,
+            0,
+            stopReceiverIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val stopSenderAction = Notification.Action.Builder(
             Icon.createWithResource(this@SenderReceiverService, R.drawable.ic_stop),
-            getString(R.string.notification_stop_action),
-            pendingStopIntent
+            getString(R.string.notification_stop_sender_action),
+            pendingStopSenderIntent
+        ).build()
+        val stopReceiverAction = Notification.Action.Builder(
+            Icon.createWithResource(this@SenderReceiverService, R.drawable.ic_stop),
+            getString(R.string.notification_stop_receiver_action),
+            pendingStopReceiverIntent
         ).build()
         return Notification.Builder(this, CHANNEL_ID).apply {
             setContentTitle(getString(R.string.notification_title))
@@ -94,7 +114,12 @@ class SenderReceiverService : Service() {
             setSmallIcon(R.drawable.ic_launcher_foreground)
             setVisibility(Notification.VISIBILITY_PUBLIC)
             setContentIntent(pendingMainActivityIntent)
-            addAction(stopAction)
+            if (sending) {
+                addAction(stopSenderAction)
+            }
+            if (receiving) {
+                addAction(stopReceiverAction)
+            }
         }.build()
     }
 

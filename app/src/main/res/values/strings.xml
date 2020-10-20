@@ -26,5 +26,6 @@
     <string name="notification_sender_and_receiver_running">Sender and Receiver running</string>
     <string name="notification_sender_and_receiver_not_running">Neither Sender or Receiver running</string>
     <string name="notification_title">Roc State</string>
-    <string name="notification_stop_action">Stop</string>
+    <string name="notification_stop_sender_action">Stop Sender</string>
+    <string name="notification_stop_receiver_action">Stop Receiver</string>
 </resources>
