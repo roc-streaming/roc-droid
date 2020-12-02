@@ -44,6 +44,20 @@ Building
 
 The easiest way to build the app is using Android Studio.
 
+Alternatively, you can build and deploy APK from command-line.
+
+Build:
+
+```
+$ ./gradlew assembleDebug
+```
+
+Install:
+
+```
+$ adb install app/build/outputs/apk/debug/app-debug.apk
+```
+
 Authors
 -------
 
