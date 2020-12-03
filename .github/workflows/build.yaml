@@ -1,0 +1,21 @@
+name: build
+on: [pull_request, push]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, macos-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install SDK
+        uses: malinskiy/action-android/install-sdk@release/0.0.9
+
+      - name: Install NDK
+        run: sdkmanager --install "ndk;21.1.6352462"
+
+      - name: Build
+        run: ./gradlew build
