@@ -1,5 +1,7 @@
 # Roc for Android!
 
+[![Build](https://github.com/roc-streaming/roc-droid/workflows/build/badge.svg)](https://github.com/roc-streaming/roc-droid/actions)
+
 Android app implementing Roc sender and receiver. **Work in progress!**
 
 Features:
