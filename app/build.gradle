@@ -3,14 +3,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
-    ndkVersion "21.1.6352462"
+    compileSdkVersion project.compileSdkVersion.toInteger()
+    buildToolsVersion project.buildToolsVersion
+    ndkVersion project.ndkVersion
 
     defaultConfig {
         applicationId "org.rocstreaming.rocdroid"
-        minSdkVersion 26
-        targetSdkVersion 29
+        minSdkVersion project.minSdkVersion.toInteger()
+        targetSdkVersion project.targetSdkVersion.toInteger()
         versionCode 1
         versionName "1.0"
 
@@ -33,10 +33,10 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+               'proguard-rules.pro'
         }
     }
-
 }
 
 dependencies {
