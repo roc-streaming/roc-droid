@@ -51,7 +51,7 @@ Alternatively, you can build and deploy APK from command-line.
 Build:
 
 ```
-$ ./gradlew assembleDebug
+$ ./gradlew build
 ```
 
 Install:
