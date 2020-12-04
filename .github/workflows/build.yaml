@@ -15,7 +15,7 @@ jobs:
         uses: malinskiy/action-android/install-sdk@release/0.0.9
 
       - name: Install NDK
-        run: sdkmanager --install "ndk;21.1.6352462"
+        run: sdkmanager --install "ndk;$(grep ndkVersion app/gradle.properties | cut -d= -f2)"
 
       - name: Build
         run: ./gradlew build
