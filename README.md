@@ -7,7 +7,7 @@ Android app implementing Roc sender and receiver. **Work in progress!**
 Features:
 
 * **receive** sound from remote Roc-compatible sender and **play** to local audio device
-* **record** sound from local audio device and **send** to remote Roc-compatible receiver
+* **capture** sound from apps or microphone and **send** to remote Roc-compatible receiver
 
 About Roc
 ---------

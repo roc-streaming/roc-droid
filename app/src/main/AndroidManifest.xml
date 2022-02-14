@@ -17,6 +17,7 @@
         <service
             android:name=".SenderReceiverService"
             android:exported="false"
+            android:foregroundServiceType="mediaProjection"
             />
 
         <activity

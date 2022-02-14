@@ -72,22 +72,37 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/headerSender" />
 
+    <CheckBox
+        android:id="@+id/usePlaybackCapture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:checked="false"
+        android:enabled="false"
+        android:minHeight="48dp"
+        android:text="@string/usePlaybackCapture"
+        android:visibility="visible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/senderExplanation" />
+
     <EditText
         android:id="@+id/receiverIp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:autofillHints=""
         android:ems="10"
         android:fontFamily="monospace"
         android:hint="@string/receiver_ip"
         android:inputType="number|phone"
-        android:autofillHints=""
+        android:minHeight="48dp"
         android:singleLine="true"
         android:text="@string/default_receiver_ip"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/senderExplanation" />
+        app:layout_constraintTop_toBottomOf="@+id/usePlaybackCapture" />
 
     <Button
         android:id="@+id/startSender"
@@ -101,5 +116,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/receiverIp"
         tools:layout_constraintStart_toStartOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
