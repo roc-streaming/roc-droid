@@ -7,8 +7,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.drawable.Icon
 import android.media.*
+import android.media.projection.MediaProjection
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import org.rocstreaming.roctoolkit.*
 
@@ -151,11 +154,19 @@ class SenderReceiverService : Service() {
         return getString(R.string.notification_sender_and_receiver_not_running)//this shouldn't happen
     }
 
-    fun startSender(ip: String) {
+    fun preStartSender() {
+        if (isForegroundRunning) {
+            updateNotification(true, isReceiverAlive())
+        } else {
+            startForegroundService(true, isReceiverAlive())
+        }
+    }
+
+    fun startSender(ip: String, projection: MediaProjection?) {
         if (senderThread?.isAlive == true) return
 
-        senderThread = Thread(Runnable {
-            val record = createAudioRecord()
+        senderThread = Thread {
+            val record = createAudioRecord(projection)
 
             val config = SenderConfig.Builder(
                 SAMPLE_RATE,
@@ -204,21 +215,15 @@ class SenderReceiverService : Service() {
                 senderChanged?.invoke(false)
                 updateNotification(false, isReceiverAlive())
             }
-        })
+        }
 
         senderThread!!.start()
-
-        if (isForegroundRunning) {
-            updateNotification(true, isReceiverAlive())
-        } else {
-            startForegroundService(true, isReceiverAlive())
-        }
     }
 
     fun startReceiver() {
         if (receiverThread?.isAlive == true) return
 
-        receiverThread = Thread(Runnable {
+        receiverThread = Thread {
             val audioTrack = createAudioTrack()
             audioTrack.play()
 
@@ -254,7 +259,7 @@ class SenderReceiverService : Service() {
             audioTrack.release()
             receiverChanged?.invoke(false)
             updateNotification(isSenderAlive(), false)
-        })
+        }
 
         receiverThread!!.start()
 
@@ -311,24 +316,44 @@ class SenderReceiverService : Service() {
             setAudioFormat(audioFormat)
             setBufferSizeInBytes(bufferSize)
             setTransferMode(AudioTrack.MODE_STREAM)
-            setSessionId(AudioManager.AUDIO_SESSION_ID_GENERATE)
             setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
         }.build()
     }
 
-    private fun createAudioRecord(): AudioRecord {
+    private fun createAudioRecord(projection: MediaProjection?): AudioRecord {
+        val format = AudioFormat.Builder().apply {
+            setSampleRate(SAMPLE_RATE)
+            setChannelMask(AudioFormat.CHANNEL_IN_STEREO)
+            setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
+        }.build()
         val bufferSize = AudioRecord.getMinBufferSize(
             SAMPLE_RATE,
             AudioFormat.CHANNEL_IN_STEREO,
             AudioFormat.ENCODING_PCM_FLOAT
         )
+
+        return if(projection != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            createPaybackRecord(projection, format, bufferSize)
+        } else {
+            AudioRecord.Builder().apply {
+                setAudioSource(MediaRecorder.AudioSource.DEFAULT)
+                setAudioFormat(format)
+                setBufferSizeInBytes(bufferSize)
+            }.build()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun createPaybackRecord(projection: MediaProjection, format: AudioFormat, bufferSize: Int): AudioRecord {
+        val config = AudioPlaybackCaptureConfiguration.Builder(projection).apply {
+            addMatchingUsage(AudioAttributes.USAGE_MEDIA)
+            addMatchingUsage(AudioAttributes.USAGE_UNKNOWN)
+            addMatchingUsage(AudioAttributes.USAGE_GAME)
+        }.build()
+
         return AudioRecord.Builder().apply {
-            setAudioSource(MediaRecorder.AudioSource.DEFAULT)
-            setAudioFormat(AudioFormat.Builder().apply {
-                setChannelMask(AudioFormat.CHANNEL_IN_STEREO)
-                setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
-                setSampleRate(SAMPLE_RATE)
-            }.build())
+            setAudioPlaybackCaptureConfig(config)
+            setAudioFormat(format)
             setBufferSizeInBytes(bufferSize)
         }.build()
     }

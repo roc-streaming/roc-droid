@@ -28,4 +28,5 @@
     <string name="notification_title">Roc State</string>
     <string name="notification_stop_sender_action">Stop Sender</string>
     <string name="notification_stop_receiver_action">Stop Receiver</string>
+    <string name="usePlaybackCapture"><![CDATA[Capture sound of other apps.\nDoes not work with Spotify, requires >= Android 10]]></string>
 </resources>
