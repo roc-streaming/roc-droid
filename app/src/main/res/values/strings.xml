@@ -7,7 +7,7 @@
     <string name="stop_receiver">Stop receiver</string>
 
     <string name="sender">Sender</string>
-    <string name="sender_expl">Start a receiver on the remote device, with ports 11001 as source, 11002 as repair. Put the remote device IP below and start the sender.</string>
+    <string name="sender_expl">Start a receiver on the remote device, with ports 10001 as source, 10002 as repair. Put the remote device IP below and start the sender.</string>
     <string name="receiver_ip">Receiver IP</string>
     <string name="default_receiver_ip">192.168.0.1</string>
     <string name="start_sender">Start sender</string>
