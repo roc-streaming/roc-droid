@@ -18,8 +18,8 @@ import org.rocstreaming.roctoolkit.*
 private const val SAMPLE_RATE = 44100
 private const val BUFFER_SIZE = 100
 
-private const val RTP_PORT_SOURCE = 11001
-private const val RTP_PORT_REPAIR = 11002
+private const val DEFAULT_RTP_PORT_SOURCE = 10001
+private const val DEFAULT_RTP_PORT_REPAIR = 10002
 
 private const val CHANNEL_ID = "SenderReceiverService"
 private const val NOTIFICATION_ID = 1
@@ -185,11 +185,11 @@ class SenderReceiverService : Service() {
                     try {
                         sender.connect(
                             PortType.AUDIO_SOURCE, Protocol.RTP_RS8M_SOURCE,
-                            Address(Family.AUTO, ip, RTP_PORT_SOURCE)
+                            Address(Family.AUTO, ip, DEFAULT_RTP_PORT_SOURCE)
                         )
                         sender.connect(
                             PortType.AUDIO_REPAIR, Protocol.RS8M_REPAIR,
-                            Address(Family.AUTO, ip, RTP_PORT_REPAIR)
+                            Address(Family.AUTO, ip, DEFAULT_RTP_PORT_REPAIR)
                         )
                     } catch (e: Exception) {
                         AlertDialog.Builder(this@SenderReceiverService).apply {
@@ -238,12 +238,12 @@ class SenderReceiverService : Service() {
                     receiver.bind(
                         PortType.AUDIO_SOURCE,
                         Protocol.RTP_RS8M_SOURCE,
-                        Address(Family.AUTO, "0.0.0.0", 10001)
+                        Address(Family.AUTO, "0.0.0.0", DEFAULT_RTP_PORT_SOURCE)
                     )
                     receiver.bind(
                         PortType.AUDIO_REPAIR,
                         Protocol.RS8M_REPAIR,
-                        Address(Family.AUTO, "0.0.0.0", 10002)
+                        Address(Family.AUTO, "0.0.0.0", DEFAULT_RTP_PORT_REPAIR)
                     )
 
                     receiverChanged?.invoke(true)
