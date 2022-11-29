@@ -4,17 +4,23 @@ import android.Manifest
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.media.AudioManager
+import android.media.projection.MediaProjection
+import android.media.projection.MediaProjectionManager
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.text.Html
 import android.view.View
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -24,7 +30,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var receiverIpEdit: EditText
+    private lateinit var usePlaybackCapture: CheckBox
     private lateinit var senderReceiverService: SenderReceiverService
+    private lateinit var projectionLauncher: ActivityResultLauncher<Intent>
+    private lateinit var projection: MediaProjection
+    private lateinit var projectionManager: MediaProjectionManager
+    private lateinit var prefs: SharedPreferences
 
     private val senderReceiverServiceConnection = object : ServiceConnection {
 
@@ -48,7 +59,16 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.receiverExplanation).text =
             Html.fromHtml(getText(R.string.receiver_expl).toString().format(getIpAddresses()), 0)
 
+        prefs = getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
         receiverIpEdit = findViewById(R.id.receiverIp)
+        receiverIpEdit.setText(prefs.getString("receiver_ip", getText(R.string.default_receiver_ip).toString()))
+
+        usePlaybackCapture = findViewById(R.id.usePlaybackCapture)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            usePlaybackCapture.isEnabled = true
+            usePlaybackCapture.isChecked = prefs.getBoolean("playback_capture", true)
+        }
+
 
         requestPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -64,6 +84,14 @@ class MainActivity : AppCompatActivity() {
 
         val serviceIntent = Intent(this, SenderReceiverService::class.java)
         bindService(serviceIntent, senderReceiverServiceConnection, BIND_AUTO_CREATE)
+
+        projectionLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+            if (result.data != null) {
+                projection = projectionManager.getMediaProjection(result.resultCode, result.data!!)
+                val ip = receiverIpEdit.text.toString()
+                senderReceiverService.startSender(ip, projection)
+            }
+        }
     }
 
     override fun onResume() {
@@ -91,10 +119,23 @@ class MainActivity : AppCompatActivity() {
         if (senderReceiverService.isSenderAlive()) {
             senderReceiverService.stopSender()
         } else {
+            val editor = prefs.edit()
+            editor.putBoolean("playback_capture", usePlaybackCapture.isChecked)
+            editor.putString("receiver_ip", receiverIpEdit.text.toString())
+            editor.apply()
+
             if (!askForRecordAudioPermission()) return
 
-            val ip = receiverIpEdit.text.toString()
-            senderReceiverService.startSender(ip)
+            if(usePlaybackCapture.isChecked) {
+                senderReceiverService.preStartSender()
+                projectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+                val projectionIntent = projectionManager.createScreenCaptureIntent()
+                startForegroundService(projectionIntent)
+                projectionLauncher.launch(projectionIntent)
+            } else {
+                val ip = receiverIpEdit.text.toString()
+                senderReceiverService.startSender(ip, null)
+            }
         }
     }
 
