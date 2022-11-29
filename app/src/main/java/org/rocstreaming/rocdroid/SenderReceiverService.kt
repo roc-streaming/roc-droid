@@ -52,7 +52,7 @@ class SenderReceiverService : Service() {
         fun getService(): SenderReceiverService = this@SenderReceiverService
     }
 
-    override fun onBind(intent: Intent): IBinder? {
+    override fun onBind(intent: Intent): IBinder {
         return binder
     }
 
@@ -179,7 +179,7 @@ class SenderReceiverService : Service() {
 
                 record.startRecording()
 
-                Sender(context, config).use { sender ->
+                Sender(context, config).use useSender@ { sender ->
                     sender.bind(Address(Family.AUTO, "0.0.0.0", 0))
 
                     try {
@@ -198,7 +198,7 @@ class SenderReceiverService : Service() {
                             setCancelable(false)
                             setPositiveButton(R.string.ok) { _, _ -> }
                         }.show()
-                        return@use
+                        return@useSender
                     }
 
                     senderChanged?.invoke(true)
