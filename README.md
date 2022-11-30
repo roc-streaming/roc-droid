@@ -39,7 +39,7 @@ Screenshot
 Dependencies
 ------------
 
-The app uses [Java bindings for Roc Toolkit](https://github.com/roc-streaming/roc-java). You don't need to install them manually; gradle will automatically download AAR from bintray, which contains both libroc and Java bindings built for all Android ABIs.
+The app uses [Java bindings for Roc Toolkit](https://github.com/roc-streaming/roc-java). You don't need to install them manually; gradle will automatically download AAR from maven central, which contains both libroc and Java bindings built for all Android ABIs.
 
 Building
 --------
@@ -58,6 +58,20 @@ Install:
 
 ```
 $ adb install app/build/outputs/apk/debug/app-debug.apk
+```
+
+Code Format:
+
+To check code style use:
+
+```
+$ ./gradlew spotlessCheck
+```
+
+To apply code style use:
+
+```
+$ ./gradlew spotlessApply
 ```
 
 Authors

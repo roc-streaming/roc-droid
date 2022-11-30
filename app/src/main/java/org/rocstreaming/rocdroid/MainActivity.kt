@@ -43,7 +43,8 @@ class MainActivity : AppCompatActivity() {
             senderReceiverService = (binder as SenderReceiverService.LocalBinder).getService()
             senderReceiverService.setStateChangedListeners(
                 senderChanged = { state: Boolean -> runOnUiThread { setSenderButtonState(state) } },
-                receiverChanged = { state: Boolean -> runOnUiThread { setReceiverButtonState(state) } })
+                receiverChanged = { state: Boolean -> runOnUiThread { setReceiverButtonState(state) } }
+            )
         }
 
         override fun onServiceDisconnected(componentName: ComponentName) {
@@ -64,11 +65,10 @@ class MainActivity : AppCompatActivity() {
         receiverIpEdit.setText(prefs.getString("receiver_ip", getText(R.string.default_receiver_ip).toString()))
 
         usePlaybackCapture = findViewById(R.id.usePlaybackCapture)
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             usePlaybackCapture.isEnabled = true
             usePlaybackCapture.isChecked = prefs.getBoolean("playback_capture", true)
         }
-
 
         requestPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -126,7 +126,7 @@ class MainActivity : AppCompatActivity() {
 
             if (!askForRecordAudioPermission()) return
 
-            if(usePlaybackCapture.isChecked) {
+            if (usePlaybackCapture.isChecked) {
                 senderReceiverService.preStartSender()
                 projectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
                 val projectionIntent = projectionManager.createScreenCaptureIntent()

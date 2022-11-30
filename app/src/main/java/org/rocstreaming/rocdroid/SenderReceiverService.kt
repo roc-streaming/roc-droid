@@ -1,19 +1,37 @@
 package org.rocstreaming.rocdroid
 
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.drawable.Icon
-import android.media.*
+import android.media.AudioAttributes
+import android.media.AudioFormat
+import android.media.AudioPlaybackCaptureConfiguration
+import android.media.AudioRecord
+import android.media.AudioTrack
+import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import org.rocstreaming.roctoolkit.*
+import org.rocstreaming.roctoolkit.Address
+import org.rocstreaming.roctoolkit.ChannelSet
+import org.rocstreaming.roctoolkit.Family
+import org.rocstreaming.roctoolkit.FrameEncoding
+import org.rocstreaming.roctoolkit.PortType
+import org.rocstreaming.roctoolkit.Protocol
+import org.rocstreaming.roctoolkit.Receiver
+import org.rocstreaming.roctoolkit.ReceiverConfig
+import org.rocstreaming.roctoolkit.Sender
+import org.rocstreaming.roctoolkit.SenderConfig
 
 private const val SAMPLE_RATE = 44100
 private const val BUFFER_SIZE = 100
@@ -58,10 +76,13 @@ class SenderReceiverService : Service() {
 
     override fun onCreate() {
         createNotificationChannel()
-        registerReceiver(notificationStopActionReceiver, IntentFilter().apply {
-            addAction(BROADCAST_STOP_SENDER_ACTION)
-            addAction(BROADCAST_STOP_RECEIVER_ACTION)
-        })
+        registerReceiver(
+            notificationStopActionReceiver,
+            IntentFilter().apply {
+                addAction(BROADCAST_STOP_SENDER_ACTION)
+                addAction(BROADCAST_STOP_RECEIVER_ACTION)
+            }
+        )
     }
 
     override fun onDestroy() {
@@ -151,7 +172,7 @@ class SenderReceiverService : Service() {
         if (sending) {
             return getString(R.string.notification_sender_running)
         }
-        return getString(R.string.notification_sender_and_receiver_not_running)//this shouldn't happen
+        return getString(R.string.notification_sender_and_receiver_not_running) // this shouldn't happen
     }
 
     fun preStartSender() {
@@ -179,16 +200,18 @@ class SenderReceiverService : Service() {
 
                 record.startRecording()
 
-                Sender(context, config).use useSender@ { sender ->
+                Sender(context, config).use useSender@{ sender ->
                     sender.bind(Address(Family.AUTO, "0.0.0.0", 0))
 
                     try {
                         sender.connect(
-                            PortType.AUDIO_SOURCE, Protocol.RTP_RS8M_SOURCE,
+                            PortType.AUDIO_SOURCE,
+                            Protocol.RTP_RS8M_SOURCE,
                             Address(Family.AUTO, ip, DEFAULT_RTP_PORT_SOURCE)
                         )
                         sender.connect(
-                            PortType.AUDIO_REPAIR, Protocol.RS8M_REPAIR,
+                            PortType.AUDIO_REPAIR,
+                            Protocol.RS8M_REPAIR,
                             Address(Family.AUTO, ip, DEFAULT_RTP_PORT_REPAIR)
                         )
                     } catch (e: Exception) {
@@ -332,7 +355,7 @@ class SenderReceiverService : Service() {
             AudioFormat.ENCODING_PCM_FLOAT
         )
 
-        return if(projection != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        return if (projection != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             createPaybackRecord(projection, format, bufferSize)
         } else {
             AudioRecord.Builder().apply {
@@ -344,7 +367,11 @@ class SenderReceiverService : Service() {
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    private fun createPaybackRecord(projection: MediaProjection, format: AudioFormat, bufferSize: Int): AudioRecord {
+    private fun createPaybackRecord(
+        projection: MediaProjection,
+        format: AudioFormat,
+        bufferSize: Int
+    ): AudioRecord {
         val config = AudioPlaybackCaptureConfiguration.Builder(projection).apply {
             addMatchingUsage(AudioAttributes.USAGE_MEDIA)
             addMatchingUsage(AudioAttributes.USAGE_UNKNOWN)
