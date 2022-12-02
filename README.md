@@ -51,13 +51,13 @@ Alternatively, you can build and deploy APK from command-line.
 Build:
 
 ```
-$ ./gradlew build
+./gradlew build
 ```
 
 Install:
 
 ```
-$ adb install app/build/outputs/apk/debug/app-debug.apk
+adb install app/build/outputs/apk/debug/app-debug.apk
 ```
 
 Code Format:
@@ -65,13 +65,13 @@ Code Format:
 To check code style use:
 
 ```
-$ ./gradlew spotlessCheck
+./gradlew spotlessCheck
 ```
 
 To apply code style use:
 
 ```
-$ ./gradlew spotlessApply
+./gradlew spotlessApply
 ```
 
 Authors
