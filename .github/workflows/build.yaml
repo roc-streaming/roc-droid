@@ -54,7 +54,7 @@ jobs:
       - name: Get release info
         id: get-info
         run: |
-          echo "VERSION=${GITHUB_REF#refs/v*/}" >> $GITHUB_ENV
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
       - name: Build
         run: ./gradlew build
