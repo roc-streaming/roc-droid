@@ -1,3 +1,47 @@
+def getVersionName = { ->
+    def manifest = new XmlSlurper().parse(file('src/main/AndroidManifest.xml'))
+    def manifestName = manifest.@'android:versionName'.text()
+
+    def gitStdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags', '--abbrev=0'
+        standardOutput = gitStdout
+    }
+    def gitTag = gitStdout.toString().trim().replaceAll('v', '')
+
+    if (manifestName != gitTag) {
+        throw new GradleException(
+            "Mismatched android:versionName in AndroidManifest.xml and git tag: "+
+                "versionName = $manifestName, "+
+                "gitTag = $gitTag")
+    }
+
+    return manifestName
+}
+
+def getVersionCode = { ->
+    def manifest = new XmlSlurper().parse(file('src/main/AndroidManifest.xml'))
+    def manifestName = manifest.@'android:versionName'.text()
+    def manifestCode = manifest.@'android:versionCode'.text()
+
+    def expectedCode = 0
+    def mult = 1
+    manifestName.tokenize('.').reverse().each {
+        expectedCode += it.toInteger() * mult
+        mult *= 1000
+    }
+
+    if (manifestCode != expectedCode.toString()) {
+        throw new GradleException(
+            "Mismatched android:versionName and android:versionCode in AndroidManifest.xml: "+
+                "versionName = $manifestName, "+
+                "versionCode = $manifestCode, "+
+                "expectedCode = $expectedCode")
+    }
+
+    return manifestCode.toInteger()
+}
+
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
@@ -8,13 +52,13 @@ android {
     ndkVersion project.ndkVersion
 
     defaultConfig {
-        applicationId "org.rocstreaming.rocdroid"
+        applicationId 'org.rocstreaming.rocdroid'
         minSdkVersion project.minSdkVersion.toInteger()
         targetSdkVersion project.targetSdkVersion.toInteger()
-        versionCode 1
-        versionName "1.0"
+        versionName getVersionName()
+        versionCode getVersionCode()
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
     compileOptions {
@@ -23,7 +67,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = '1.8'
     }
 
     lintOptions {
