@@ -54,13 +54,14 @@ Build:
 ./gradlew build
 ```
 
-Install:
+Install to device:
 
 ```
 adb install app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Code Format:
+Development
+-----------
 
 To check code style use:
 
