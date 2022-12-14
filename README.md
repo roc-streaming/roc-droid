@@ -16,7 +16,7 @@ Download
 
 * Download from IzzyOnDroid:
 
-  <a href='https://apt.izzysoft.de/fdroid/api/v1/shield/org.rocstreaming.rocdroid'><img height='70' src='https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png'></a>
+  <a href='https://apt.izzysoft.de/fdroid/index/apk/org.rocstreaming.rocdroid'><img height='70' src='https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png'></a>
 
 Screenshot
 ----------
