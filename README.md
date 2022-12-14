@@ -9,6 +9,20 @@ Features:
 * **receive** sound from remote Roc-compatible sender and **play** to local audio device
 * **capture** sound from apps or microphone and **send** to remote Roc-compatible receiver
 
+Download
+--------
+
+* Download APK from [latest release](https://github.com/roc-streaming/roc-droid/releases/latest)
+
+* Download from IzzyOnDroid:
+
+  <a href='https://apt.izzysoft.de/fdroid/api/v1/shield/org.rocstreaming.rocdroid'><img height='70' src='https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png'></a>
+
+Screenshot
+----------
+
+<img src="https://raw.githubusercontent.com/roc-streaming/roc-droid/master/screenshot.webp" data-canonical-src="https://raw.githubusercontent.com/roc-streaming/roc-droid/master/screenshot.webp" width="300"/>
+
 About Roc
 ---------
 
@@ -31,18 +45,10 @@ Key features:
 
 See [Roc Toolkit](https://github.com/roc-streaming/roc-toolkit) documentation for details.
 
-Screenshot
-----------
-
-<img src="https://raw.githubusercontent.com/roc-streaming/roc-droid/master/screenshot.webp" data-canonical-src="https://raw.githubusercontent.com/roc-streaming/roc-droid/master/screenshot.webp" width="300"/>
-
-Dependencies
-------------
-
-The app uses [Java bindings for Roc Toolkit](https://github.com/roc-streaming/roc-java). You don't need to install them manually; gradle will automatically download AAR from maven central, which contains both libroc and Java bindings built for all Android ABIs.
-
 Building
 --------
+
+The app uses [Java bindings for Roc Toolkit](https://github.com/roc-streaming/roc-java). You don't need to install them manually; gradle will automatically download AAR from maven central, which contains both libroc and Java bindings built for all Android ABIs.
 
 The easiest way to build the app is using Android Studio.
 
