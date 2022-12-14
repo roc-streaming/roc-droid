@@ -81,6 +81,12 @@ To apply code style use:
 ./gradlew spotlessApply
 ```
 
+To check consistency of version name and code:
+
+```
+./gradlew checkVersion
+```
+
 Authors
 -------
 
