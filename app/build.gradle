@@ -1,45 +1,61 @@
-def getVersionName = { ->
+def getManifestVersions = { ->
     def manifest = new XmlSlurper().parse(file('src/main/AndroidManifest.xml'))
-    def manifestName = manifest.@'android:versionName'.text()
+    def versionName = manifest.@'android:versionName'.text()
+    def versionCode = manifest.@'android:versionCode'.text().toInteger()
+    return [versionName, versionCode]
+}
+
+def getVersionName = { ->
+    def (versionName, _) = getManifestVersions()
+    return versionName
+}
+
+def getVersionCode = { ->
+    def (_, versionCode) = getManifestVersions()
+    return versionCode
+}
+
+def validateVersion = { ->
+    def (versionName, versionCode) = getManifestVersions()
+
+    project.logger.lifecycle("Checking version name and code...")
+    project.logger.lifecycle("versionName = $versionName")
+    project.logger.lifecycle("versionCode = $versionCode")
 
     def gitStdout = new ByteArrayOutputStream()
     exec {
         commandLine 'git', 'describe', '--tags', '--abbrev=0'
         standardOutput = gitStdout
     }
-    def gitTag = gitStdout.toString().trim().replaceAll('v', '')
+    def versionGit = gitStdout.toString().trim().replaceAll('v', '')
 
-    if (manifestName != gitTag) {
+    if (versionName != versionGit) {
         throw new GradleException(
             "Mismatched android:versionName in AndroidManifest.xml and git tag: "+
-                "versionName = $manifestName, "+
-                "gitTag = $gitTag")
+                "versionName = $versionName, "+
+                "versionGit = $versionGit")
     }
-
-    return manifestName
-}
-
-def getVersionCode = { ->
-    def manifest = new XmlSlurper().parse(file('src/main/AndroidManifest.xml'))
-    def manifestName = manifest.@'android:versionName'.text()
-    def manifestCode = manifest.@'android:versionCode'.text()
 
     def expectedCode = 0
     def mult = 1
-    manifestName.tokenize('.').reverse().each {
+    versionName.tokenize('.').reverse().each {
         expectedCode += it.toInteger() * mult
         mult *= 1000
     }
 
-    if (manifestCode != expectedCode.toString()) {
+    if (versionCode != expectedCode) {
         throw new GradleException(
             "Mismatched android:versionName and android:versionCode in AndroidManifest.xml: "+
-                "versionName = $manifestName, "+
-                "versionCode = $manifestCode, "+
+                "versionName = $versionName, "+
+                "versionCode = $versionCode, "+
                 "expectedCode = $expectedCode")
     }
+}
 
-    return manifestCode.toInteger()
+task checkVersion {
+    doLast {
+        validateVersion()
+    }
 }
 
 apply plugin: 'com.android.application'
