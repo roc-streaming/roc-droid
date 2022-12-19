@@ -1,6 +1,4 @@
-# Roc for Android!
-
-[![Build](https://github.com/roc-streaming/roc-droid/workflows/build/badge.svg)](https://github.com/roc-streaming/roc-droid/actions)
+# Roc for Android! [![Build](https://github.com/roc-streaming/roc-droid/workflows/build/badge.svg)](https://github.com/roc-streaming/roc-droid/actions) [![GitHub release](https://img.shields.io/github/release/roc-streaming/roc-droid.svg)](https://github.com/roc-streaming/roc-droid/releases) [![Matrix chat](https://matrix.to/img/matrix-badge.svg)](https://app.element.io/#/room/#roc-streaming:matrix.org)
 
 Android app implementing Roc sender and receiver. **Work in progress!**
 
