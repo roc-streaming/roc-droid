@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">roc-droid</string>
+    <string name="app_name">Roc Droid</string>
 
     <string name="receiver">Receiver</string>
     <string name="receiver_expl"><![CDATA[Start a sender on the remove device. Use this device IP (<tt>%s</tt>) as remote. Use default ports, 10001 for source, 10002 for repair, and start the receiver.]]></string>
@@ -29,4 +29,19 @@
     <string name="notification_stop_sender_action">Stop Sender</string>
     <string name="notification_stop_receiver_action">Stop Receiver</string>
     <string name="usePlaybackCapture"><![CDATA[Capture sound of other apps.\nDoes not work with Spotify, requires >= Android 10]]></string>
+
+    <string name="receiver_start_remote_sender">1. Start sender on the remote device</string>
+    <string name="receiver_use_IP">2. Use one of IP addresses of this device as the remote on the sender</string>
+    <string name="receiver_start_receiver">5. Start receiver on this device</string>
+
+    <string name="sender_start_remote_receiver">1. Start receiver on the remote device</string>
+    <string name="sender_put_IP_address">4. Put IP address of the remote receiver device below</string>
+    <string name="sender_choose_audio_source">5. Choose source to capture audio from</string>
+    <string name="sender_audio_source_current_apps">Currently playing apps</string>
+    <string name="sender_audio_source_microphone">Microphone</string>
+    <string name="sender_start_sender">6. Start sender on this device</string>
+    <string name="dialog_choose_audio_source">Source to capture audio from</string>
+
+    <string name="receiver_sender_port_for_source">%s. Use this port for source stream</string>
+    <string name="receiver_sender_port_for_repair">%s. Use this port for repair stream</string>
 </resources>

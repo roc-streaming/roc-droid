@@ -20,6 +20,7 @@ import android.media.projection.MediaProjection
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import org.rocstreaming.roctoolkit.Address
@@ -48,7 +49,6 @@ private const val BROADCAST_STOP_RECEIVER_ACTION =
     "org.rocstreaming.rocdroid.NotificationReceiverStopAction"
 
 class SenderReceiverService : Service() {
-
     private var receiverThread: Thread? = null
     private var senderThread: Thread? = null
     private var receiverChanged: ((Boolean) -> Unit)? = null
@@ -385,12 +385,16 @@ class SenderReceiverService : Service() {
         }.build()
     }
 
-    fun setStateChangedListeners(
-        senderChanged: (Boolean) -> Unit,
+    fun setSenderStateChangedListeners(
+        senderChanged: (Boolean) -> Unit
+    ) {
+        this.senderChanged = senderChanged
+    }
+
+    fun setReceiverStateChangedListeners(
         receiverChanged: (Boolean) -> Unit
     ) {
         this.receiverChanged = receiverChanged
-        this.senderChanged = senderChanged
     }
 
     fun removeListeners() {
