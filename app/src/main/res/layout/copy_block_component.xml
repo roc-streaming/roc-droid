@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/copy_block"
+    android:background="@drawable/copy_block"
+    android:layout_width="wrap_content"
+    android:layout_height="40dp"
+    android:layout_margin="8dp"
+    android:padding="5dp"
+    android:orientation="horizontal">
+    
+    <TextView
+        android:id="@+id/block_label"
+        android:layout_width="wrap_content"
+        android:textColor="@color/colorBlack"
+        android:textSize="18dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="24dp"
+        android:fontFamily="@font/montserrat_regular"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="@+id/copy_icon"
+        android:layout_height="wrap_content"/>
+
+    <ImageView
+        android:id="@+id/copy_icon"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:srcCompat="@drawable/ic_copy"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
