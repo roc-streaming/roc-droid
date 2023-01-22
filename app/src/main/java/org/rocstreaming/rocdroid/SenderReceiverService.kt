@@ -48,6 +48,8 @@ private const val BROADCAST_STOP_SENDER_ACTION =
 private const val BROADCAST_STOP_RECEIVER_ACTION =
     "org.rocstreaming.rocdroid.NotificationReceiverStopAction"
 
+private const val LOG_TAG = "[rocdroid.SenderReceiverService]"
+
 class SenderReceiverService : Service() {
     private var receiverThread: Thread? = null
     private var senderThread: Thread? = null
@@ -71,10 +73,14 @@ class SenderReceiverService : Service() {
     }
 
     override fun onBind(intent: Intent): IBinder {
+        Log.d(LOG_TAG, "Bind Service")
+
         return binder
     }
 
     override fun onCreate() {
+        Log.d(LOG_TAG, "Creating Sender/Receiver Service")
+
         createNotificationChannel()
         registerReceiver(
             notificationStopActionReceiver,
@@ -86,11 +92,15 @@ class SenderReceiverService : Service() {
     }
 
     override fun onDestroy() {
+        Log.d(LOG_TAG, "Destroying Sender/Receiver Service")
+
         super.onDestroy()
         unregisterReceiver(notificationStopActionReceiver)
     }
 
     private fun createNotificationChannel() {
+        Log.d(LOG_TAG, "Creating Notification Channel")
+
         val channel = NotificationChannel(
             CHANNEL_ID,
             getString(R.string.notification_channel_name),
@@ -101,6 +111,15 @@ class SenderReceiverService : Service() {
     }
 
     private fun buildNotification(sending: Boolean, receiving: Boolean): Notification {
+        Log.d(
+            LOG_TAG,
+            String.format(
+                "Building Notification for %s %s",
+                if (sending) "Sender" else "",
+                if (receiving) "Receiver" else ""
+            )
+        )
+
         val mainActivityIntent = Intent(this, MainActivity::class.java)
         val pendingMainActivityIntent = PendingIntent.getActivity(
             this,
@@ -148,6 +167,15 @@ class SenderReceiverService : Service() {
     }
 
     private fun updateNotification(sending: Boolean, receiving: Boolean) {
+        Log.d(
+            LOG_TAG,
+            String.format(
+                "Updating Notification for %s %s",
+                if (sending) "Sender" else "",
+                if (receiving) "Receiver" else ""
+            )
+        )
+
         if (!isForegroundRunning) {
             return
         }
@@ -163,6 +191,8 @@ class SenderReceiverService : Service() {
     }
 
     private fun getContentText(sending: Boolean, receiving: Boolean): String {
+        Log.d(LOG_TAG, "Getting Notification Content Text")
+
         if (sending && receiving) {
             return getString(R.string.notification_sender_and_receiver_running)
         }
@@ -176,6 +206,8 @@ class SenderReceiverService : Service() {
     }
 
     fun preStartSender() {
+        Log.d(LOG_TAG, "Prestart Sender")
+
         if (isForegroundRunning) {
             updateNotification(true, isReceiverAlive())
         } else {
@@ -184,6 +216,8 @@ class SenderReceiverService : Service() {
     }
 
     fun startSender(ip: String, projection: MediaProjection?) {
+        Log.d(LOG_TAG, "Starting Sender")
+
         if (senderThread?.isAlive == true) return
 
         senderThread = Thread {
@@ -244,6 +278,8 @@ class SenderReceiverService : Service() {
     }
 
     fun startReceiver() {
+        Log.d(LOG_TAG, "Starting Receiver")
+
         if (receiverThread?.isAlive == true) return
 
         receiverThread = Thread {
@@ -294,32 +330,53 @@ class SenderReceiverService : Service() {
     }
 
     fun stopSender() {
+        Log.d(LOG_TAG, "Stopping Sender")
+
         senderThread?.interrupt()
     }
 
     fun stopReceiver() {
+        Log.d(LOG_TAG, "Stopping Receiver")
+
         receiverThread?.interrupt()
     }
 
     fun isReceiverAlive(): Boolean {
+        Log.d(LOG_TAG, "Checking If Receiver Alive")
+
         return receiverThread?.isAlive == true
     }
 
     fun isSenderAlive(): Boolean {
+        Log.d(LOG_TAG, "Checking If Sender Alive")
+
         return senderThread?.isAlive == true
     }
 
     private fun startForegroundService(sending: Boolean, receiving: Boolean) {
+        Log.d(
+            LOG_TAG,
+            String.format(
+                "Starting Foreground Service for %s %s",
+                if (sending) "Sender" else "",
+                if (receiving) "Receiver" else ""
+            )
+        )
+
         isForegroundRunning = true
         startForeground(NOTIFICATION_ID, buildNotification(sending, receiving))
     }
 
     private fun stopForegroundService() {
+        Log.d(LOG_TAG, "Stopping Foreground Service")
+
         isForegroundRunning = false
         stopForeground(true)
     }
 
     private fun createAudioTrack(): AudioTrack {
+        Log.d(LOG_TAG, "Creating Audio Track")
+
         val audioAttributes = AudioAttributes.Builder().apply {
             setUsage(AudioAttributes.USAGE_MEDIA)
             setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -344,6 +401,8 @@ class SenderReceiverService : Service() {
     }
 
     private fun createAudioRecord(projection: MediaProjection?): AudioRecord {
+        Log.d(LOG_TAG, "Creating Audio Record")
+
         val format = AudioFormat.Builder().apply {
             setSampleRate(SAMPLE_RATE)
             setChannelMask(AudioFormat.CHANNEL_IN_STEREO)
@@ -372,6 +431,8 @@ class SenderReceiverService : Service() {
         format: AudioFormat,
         bufferSize: Int
     ): AudioRecord {
+        Log.d(LOG_TAG, "Creating Playback Record")
+
         val config = AudioPlaybackCaptureConfiguration.Builder(projection).apply {
             addMatchingUsage(AudioAttributes.USAGE_MEDIA)
             addMatchingUsage(AudioAttributes.USAGE_UNKNOWN)
@@ -388,16 +449,22 @@ class SenderReceiverService : Service() {
     fun setSenderStateChangedListeners(
         senderChanged: (Boolean) -> Unit
     ) {
+        Log.d(LOG_TAG, "Setting Sender State Changed Listener")
+
         this.senderChanged = senderChanged
     }
 
     fun setReceiverStateChangedListeners(
         receiverChanged: (Boolean) -> Unit
     ) {
+        Log.d(LOG_TAG, "Setting Receiver State Changed Listener")
+
         this.receiverChanged = receiverChanged
     }
 
     fun removeListeners() {
+        Log.d(LOG_TAG, "Removing State Changed Listeners")
+
         this.receiverChanged = null
         this.senderChanged = null
     }

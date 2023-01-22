@@ -1,6 +1,7 @@
 package org.rocstreaming.rocdroid.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,8 @@ import org.rocstreaming.rocdroid.SenderReceiverService
 import org.rocstreaming.rocdroid.component.CopyBlock
 import java.net.NetworkInterface
 
+private const val LOG_TAG = "[rocdroid.fragment.ReceiverFragment]"
+
 class ReceiverFragment : Fragment() {
 
     private lateinit var receiverService: SenderReceiverService
@@ -22,6 +25,8 @@ class ReceiverFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Log.d(LOG_TAG, "Create Receiver Fragment View")
+
         val view = inflater.inflate(R.layout.receiver_fragment, container, false)
 
         view.findViewById<CopyBlock>(R.id.sourcePortValue)?.setText("10001")
@@ -51,8 +56,12 @@ class ReceiverFragment : Fragment() {
 
     fun startStopReceiver(@Suppress("UNUSED_PARAMETER") view: View) {
         if (receiverService.isReceiverAlive()) {
+            Log.d(LOG_TAG, "Stopping Receiver")
+
             receiverService.stopReceiver()
         } else {
+            Log.d(LOG_TAG, "Starting Receiver")
+
             receiverService.startReceiver()
         }
     }
@@ -62,6 +71,8 @@ class ReceiverFragment : Fragment() {
         showActiveIcon: (Int) -> Unit,
         hideActiveIcon: (Int) -> Unit
     ) {
+        Log.d(LOG_TAG, "Add Receiver State Changed Listener")
+
         receiverService = service
 
         receiverService.setReceiverStateChangedListeners(
@@ -76,6 +87,8 @@ class ReceiverFragment : Fragment() {
     }
 
     private fun getIpAddresses(): List<String> {
+        Log.d(LOG_TAG, "Getting Receiver IP Addresses")
+
         try {
             return NetworkInterface.getNetworkInterfaces().toList()
                 .flatMap { it.inetAddresses.toList() }

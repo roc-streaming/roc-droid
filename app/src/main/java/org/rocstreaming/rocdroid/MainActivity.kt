@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.media.AudioManager
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
@@ -16,8 +17,9 @@ import org.rocstreaming.rocdroid.adapter.ViewPagerAdapter
 import org.rocstreaming.rocdroid.fragment.ReceiverFragment
 import org.rocstreaming.rocdroid.fragment.SenderFragment
 
-class MainActivity : AppCompatActivity() {
+private const val LOG_TAG = "[rocdroid.MainActivity]"
 
+class MainActivity : AppCompatActivity() {
     private lateinit var pager: ViewPager2
     private lateinit var tabs: TabLayout
     private val senderFragment = SenderFragment()
@@ -59,6 +61,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Log.d(LOG_TAG, "Create Main Activity")
 
         setContentView(R.layout.activity_main)
         volumeControlStream = AudioManager.STREAM_MUSIC
