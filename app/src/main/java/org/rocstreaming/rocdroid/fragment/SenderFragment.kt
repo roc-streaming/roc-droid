@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,9 +27,9 @@ import org.rocstreaming.rocdroid.R
 import org.rocstreaming.rocdroid.SenderReceiverService
 import org.rocstreaming.rocdroid.component.CopyBlock
 
+private const val LOG_TAG = "[rocdroid.fragment.SenderFragment]"
 
 class SenderFragment : Fragment() {
-
     private lateinit var selectedAudioSource: String
     private lateinit var audioSources: Array<String>
     private var selectedAudioSourceIndex: Int = 0
@@ -47,6 +48,8 @@ class SenderFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Log.d(LOG_TAG, "Create Sender Fragment View")
+
         val view = inflater.inflate(R.layout.sender_fragment, container, false)
 
         usePlaybackCapture = view.findViewById(R.id.audio_source)
@@ -73,7 +76,7 @@ class SenderFragment : Fragment() {
             view.findViewById(R.id.audio_source_dialog_button)
 
         showAudioSourceDialog.setOnClickListener {
-            showRadioConfirmationDialog()
+            showAudioSourcesDialog()
         }
 
         view.findViewById<Button>(R.id.startSenderButton).setOnClickListener {
@@ -108,6 +111,8 @@ class SenderFragment : Fragment() {
         showActiveIcon: (Int) -> Unit,
         hideActiveIcon: (Int) -> Unit
     ) {
+        Log.d(LOG_TAG, "Add Receiver State Changed Listener")
+
         senderService = service
 
         senderService.setSenderStateChangedListeners(
@@ -121,18 +126,24 @@ class SenderFragment : Fragment() {
         )
     }
 
-    private fun showRadioConfirmationDialog() {
+    private fun showAudioSourcesDialog() {
+        Log.d(LOG_TAG, "Showing Select Audio Source Dialog")
+
         selectedAudioSource = audioSources[selectedAudioSourceIndex]
         MaterialAlertDialogBuilder(requireActivity())
             .setTitle(getText(R.string.dialog_choose_audio_source).toString())
-            .setSingleChoiceItems(audioSources, selectedAudioSourceIndex) { dialog_, which ->
+            .setSingleChoiceItems(audioSources, selectedAudioSourceIndex) { _, which ->
                 selectedAudioSourceIndex = which
                 selectedAudioSource = audioSources[which]
             }
-            .setPositiveButton("Ok") { dialog, which ->
+            .setPositiveButton("Ok") { _, _ ->
+                Log.d(LOG_TAG, String.format("Selected Audio Source: %s", selectedAudioSource))
+
                 view?.findViewById<TextView>(R.id.audio_source)?.text = selectedAudioSource
             }
-            .setNegativeButton("Cancel") { dialog, which ->
+            .setNegativeButton("Cancel") { dialog, _ ->
+                Log.d(LOG_TAG, "Dismiss Audio Source Dialog")
+
                 dialog.dismiss()
             }
             .show()
@@ -144,8 +155,12 @@ class SenderFragment : Fragment() {
 
     fun startStopSender(@Suppress("UNUSED_PARAMETER") view: View?) {
         if (senderService.isSenderAlive()) {
+            Log.d(LOG_TAG, "Stopping Sender")
+
             senderService.stopSender()
         } else {
+            Log.d(LOG_TAG, "Starting Sender")
+
             val editor = prefs.edit()
             editor.putBoolean("playback_capture", isUsePlayback())
             editor.putString("receiver_ip", receiverIpEdit.text.toString())
