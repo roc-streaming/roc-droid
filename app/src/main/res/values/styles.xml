@@ -7,6 +7,13 @@
         <item name="fontFamily">@font/open_sans_regular</item>
     </style>
 
+    <style name="SplashTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:background">@color/white</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name = "android:windowActionBar">false</item>
+        <item name = "android:windowNoTitle">true</item>
+    </style>
+
     <style name="textViewStyle" parent="TextAppearance.AppCompat">
         <item name="android:textColor">@color/colorBlack</item>
         <item name="android:textSize">@dimen/font_big</item>
