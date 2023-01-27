@@ -42,19 +42,19 @@ class ReceiverFragment : Fragment() {
         }
 
         view.findViewById<TextView>(R.id.portForSource).text =
-            getText(R.string.receiver_sender_port_for_source).toString().format(3)
+            getString(R.string.receiver_sender_port_for_source).format(3)
 
         view.findViewById<TextView>(R.id.portForRepair).text =
-            getText(R.string.receiver_sender_port_for_repair).toString().format(4)
+            getString(R.string.receiver_sender_port_for_repair).format(4)
 
         view.findViewById<Button>(R.id.startReceiverButton).setOnClickListener {
-            startStopReceiver(view)
+            startStopReceiver()
         }
 
         return view
     }
 
-    fun startStopReceiver(@Suppress("UNUSED_PARAMETER") view: View) {
+    private fun startStopReceiver() {
         if (receiverService.isReceiverAlive()) {
             Log.d(LOG_TAG, "Stopping Receiver")
 
@@ -68,8 +68,8 @@ class ReceiverFragment : Fragment() {
 
     fun onServiceConnected(
         service: SenderReceiverService,
-        showActiveIcon: (Int) -> Unit,
-        hideActiveIcon: (Int) -> Unit
+        showActiveIcon: () -> Unit,
+        hideActiveIcon: () -> Unit
     ) {
         Log.d(LOG_TAG, "Add Receiver State Changed Listener")
 
@@ -79,8 +79,8 @@ class ReceiverFragment : Fragment() {
             receiverChanged = { state: Boolean ->
                 activity?.runOnUiThread {
                     activity?.findViewById<Button>(R.id.startReceiverButton)?.text =
-                        getText(if (state) R.string.stop_receiver else R.string.start_receiver)
-                    if (state) showActiveIcon(0) else hideActiveIcon(0)
+                        getString(if (state) R.string.stop_receiver else R.string.start_receiver)
+                    if (state) showActiveIcon() else hideActiveIcon()
                 }
             }
         )

@@ -58,19 +58,18 @@ class SenderFragment : Fragment() {
         prefs = activity?.getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)!!
 
         audioSources = arrayOf(
-            getText(R.string.sender_audio_source_current_apps).toString(),
-            getText(R.string.sender_audio_source_microphone).toString()
+            getString(R.string.sender_audio_source_current_apps),
+            getString(R.string.sender_audio_source_microphone)
         )
 
-        view.findViewById<TextView>(R.id.audio_source)?.text =
-            audioSources[selectedAudioSourceIndex]
+        usePlaybackCapture?.text = audioSources[selectedAudioSourceIndex]
         view.findViewById<CopyBlock>(R.id.sourcePortValue)?.setText("10001")
         view.findViewById<CopyBlock>(R.id.repairPortValue)?.setText("10002")
 
         view.findViewById<TextView>(R.id.portForSource).text =
-            getText(R.string.receiver_sender_port_for_source).toString().format(2)
+            getString(R.string.receiver_sender_port_for_source).format(2)
         view.findViewById<TextView>(R.id.portForRepair).text =
-            getText(R.string.receiver_sender_port_for_repair).toString().format(3)
+            getString(R.string.receiver_sender_port_for_repair).format(3)
 
         val showAudioSourceDialog: ConstraintLayout =
             view.findViewById(R.id.audio_source_dialog_button)
@@ -80,7 +79,7 @@ class SenderFragment : Fragment() {
         }
 
         view.findViewById<Button>(R.id.startSenderButton).setOnClickListener {
-            startStopSender(null)
+            startStopSender()
         }
 
         projectionLauncher = registerForActivityResult(StartActivityForResult()) { result ->
@@ -98,7 +97,7 @@ class SenderFragment : Fragment() {
                         setTitle(R.string.allow_mic_title)
                         setMessage(getString(R.string.allow_mic_ok_message))
                         setCancelable(false)
-                        setPositiveButton(R.string.ok) { _, _ -> startStopSender(null) }
+                        setPositiveButton(R.string.ok) { _, _ -> startStopSender() }
                     }.show()
                 }
             }
@@ -108,8 +107,8 @@ class SenderFragment : Fragment() {
 
     fun onServiceConnected(
         service: SenderReceiverService,
-        showActiveIcon: (Int) -> Unit,
-        hideActiveIcon: (Int) -> Unit
+        showActiveIcon: () -> Unit,
+        hideActiveIcon: () -> Unit
     ) {
         Log.d(LOG_TAG, "Add Receiver State Changed Listener")
 
@@ -119,8 +118,8 @@ class SenderFragment : Fragment() {
             senderChanged = { state: Boolean ->
                 activity?.runOnUiThread {
                     activity?.findViewById<Button>(R.id.startSenderButton)?.text =
-                        getText(if (state) R.string.stop_sender else R.string.start_sender)
-                    if (state) showActiveIcon(1) else hideActiveIcon(1)
+                        getString(if (state) R.string.stop_sender else R.string.start_sender)
+                    if (state) showActiveIcon() else hideActiveIcon()
                 }
             }
         )
@@ -131,7 +130,7 @@ class SenderFragment : Fragment() {
 
         selectedAudioSource = audioSources[selectedAudioSourceIndex]
         MaterialAlertDialogBuilder(requireActivity())
-            .setTitle(getText(R.string.dialog_choose_audio_source).toString())
+            .setTitle(R.string.dialog_choose_audio_source)
             .setSingleChoiceItems(audioSources, selectedAudioSourceIndex) { _, which ->
                 selectedAudioSourceIndex = which
                 selectedAudioSource = audioSources[which]
@@ -153,7 +152,7 @@ class SenderFragment : Fragment() {
         return usePlaybackCapture.text == audioSources[0]
     }
 
-    fun startStopSender(@Suppress("UNUSED_PARAMETER") view: View?) {
+    private fun startStopSender() {
         if (senderService.isSenderAlive()) {
             Log.d(LOG_TAG, "Stopping Sender")
 

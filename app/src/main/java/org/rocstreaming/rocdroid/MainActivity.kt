@@ -36,13 +36,13 @@ class MainActivity : AppCompatActivity() {
 
             senderFragment.onServiceConnected(
                 senderReceiverService,
-                ::showActiveIcon,
-                ::hideActiveIcon
+                { showActiveIcon(1) },
+                { hideActiveIcon(1) }
             )
             receiverFragment.onServiceConnected(
                 senderReceiverService,
-                ::showActiveIcon,
-                ::hideActiveIcon
+                { showActiveIcon(0) },
+                { hideActiveIcon(0) }
             )
         }
 
@@ -71,8 +71,8 @@ class MainActivity : AppCompatActivity() {
         tabs = findViewById(R.id.tabs)
 
         tabsTitle = arrayOf(
-            getText(R.string.receiver).toString(),
-            getText(R.string.sender).toString()
+            getString(R.string.receiver),
+            getString(R.string.sender)
         )
 
         val adapter = ViewPagerAdapter(

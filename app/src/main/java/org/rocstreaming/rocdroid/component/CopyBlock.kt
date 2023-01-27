@@ -30,8 +30,6 @@ class CopyBlock : ConstraintLayout {
         view.findViewById<ConstraintLayout>(R.id.copy_block).setOnClickListener {
             setClipboard(context, findViewById<TextView>(R.id.block_label).text.toString())
         }
-
-        view
     }
 
     fun setText(text: String) {

@@ -9,7 +9,7 @@ import org.rocstreaming.rocdroid.fragment.SenderFragment
 
 private const val NUM_TABS = 2
 
-public class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
+class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
     FragmentStateAdapter(fragmentManager, lifecycle) {
     private lateinit var receiverFragment: ReceiverFragment
     private lateinit var senderFragment: SenderFragment
