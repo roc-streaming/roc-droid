@@ -62,7 +62,7 @@ class SenderFragment : Fragment() {
             getString(R.string.sender_audio_source_microphone)
         )
 
-        usePlaybackCapture?.text = audioSources[selectedAudioSourceIndex]
+        usePlaybackCapture.text = audioSources[selectedAudioSourceIndex]
         view.findViewById<CopyBlock>(R.id.sourcePortValue)?.setText("10001")
         view.findViewById<CopyBlock>(R.id.repairPortValue)?.setText("10002")
 
