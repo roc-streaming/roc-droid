@@ -22,6 +22,15 @@
             android:foregroundServiceType="mediaProjection" />
 
         <activity
+            android:name=".AboutActivity"
+            android:exported="false"
+            android:label="@string/app_about">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+
+        <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateHidden|adjustResize|adjustPan">
