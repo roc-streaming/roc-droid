@@ -64,44 +64,30 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toBottomOf="@+id/IPAddressesWrapper" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/sourcePort"
+            <org.rocstreaming.rocdroid.component.CopyBlock
+                android:id="@+id/sourcePortValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/portForSource">
-
-                <org.rocstreaming.rocdroid.component.CopyBlock
-                    android:id="@+id/sourcePortValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                app:layout_constraintTop_toBottomOf="@+id/portForSource"/>
 
             <TextView
                 android:id="@+id/portForRepair"
                 style="@style/textViewStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/sourcePort" />
+                app:layout_constraintTop_toBottomOf="@+id/sourcePortValue" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/repairPort"
+            <org.rocstreaming.rocdroid.component.CopyBlock
+                android:id="@+id/repairPortValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/portForRepair">
-
-                <org.rocstreaming.rocdroid.component.CopyBlock
-                    android:id="@+id/repairPortValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                app:layout_constraintTop_toBottomOf="@+id/portForRepair"/>
 
             <TextView
                 android:id="@+id/staertReceiver"
@@ -109,7 +95,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/receiver_start_receiver"
-                app:layout_constraintTop_toBottomOf="@+id/repairPort" />
+                app:layout_constraintTop_toBottomOf="@+id/repairPortValue" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
