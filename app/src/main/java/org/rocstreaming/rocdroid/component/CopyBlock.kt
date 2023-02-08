@@ -26,11 +26,10 @@ class CopyBlock : ConstraintLayout {
         Log.d(LOG_TAG, "Init Copy Block")
 
         val view: View = inflate(context, R.layout.copy_block_component, this)
-
         textBlock = view.findViewById<TextView>(R.id.block_label)
 
         view.findViewById<ConstraintLayout>(R.id.copy_block).setOnClickListener {
-            setClipboard(context, findViewById<TextView>(R.id.block_label).text.toString(), it.findViewById<ImageView>(R.id.copy_icon))
+            setClipboard(context, textBlock.text, it.findViewById(R.id.copy_icon))
         }
     }
 
@@ -40,7 +39,7 @@ class CopyBlock : ConstraintLayout {
         textBlock?.text = text
     }
 
-    fun setClipboard(context: Context, text: String, icon: ImageView) {
+    private fun setClipboard(context: Context, text: CharSequence, icon: ImageView) {
         Log.d(LOG_TAG, String.format("Copying Text: %s", text))
 
         val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -51,13 +50,12 @@ class CopyBlock : ConstraintLayout {
         animateImageChange(context, icon, R.drawable.ic_done)
         Handler().postDelayed({
             animateImageChange(context, icon, R.drawable.ic_copy)
-        }, 1250)
-        /*val myToast = Toast.makeText(context, "Copied!", Toast.LENGTH_SHORT)
-        myToast.setGravity(Gravity.CENTER, 0, 200)
-        myToast.show()*/
+        }, 1000)
     }
 
     private fun animateImageChange(c: Context?, icon: ImageView, image: Int) {
+        Log.d(LOG_TAG, String.format("Changing image in Copy Block"))
+
         val animOut: Animation = AnimationUtils.loadAnimation(c, android.R.anim.fade_out)
         val animIn: Animation = AnimationUtils.loadAnimation(c, android.R.anim.fade_in)
         animOut.setAnimationListener(object : Animation.AnimationListener {
