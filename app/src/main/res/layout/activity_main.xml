@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="@color/colorSecondary">
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabs"
@@ -13,7 +14,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:tabBackground="@color/colorSecondary"
+        app:tabBackground="@color/colorSecondaryDark"
         app:tabIndicatorHeight="0dp"
         app:tabInlineLabel="true"
         app:tabMode="fixed">

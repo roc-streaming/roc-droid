@@ -5,6 +5,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:fontFamily">@font/open_sans_regular</item>
         <item name="fontFamily">@font/open_sans_regular</item>
+        <item name="android:windowBackground">@color/colorSecondary</item>
     </style>
 
     <style name="textViewStyle" parent="TextAppearance.AppCompat">

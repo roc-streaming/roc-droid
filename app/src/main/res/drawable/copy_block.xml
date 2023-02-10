@@ -8,14 +8,14 @@
                 android:type="radial"
                 android:gradientRadius="250dp"
                 android:startColor="@color/white"
-                android:endColor="@color/colorSecondary" />           
+                android:endColor="@color/colorSecondaryDark" />
         </shape>
     </item>
     <item >
        <shape android:shape="rectangle"  >
             <corners android:radius="8dip" />
             <stroke android:width="0dip"/>
-            <solid android:color="@color/colorSecondary" />            
+            <solid android:color="@color/colorSecondaryDark" />
        </shape>
     </item>
 </selector>
