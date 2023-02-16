@@ -154,7 +154,7 @@ class SenderReceiverService : Service() {
         return Notification.Builder(this, CHANNEL_ID).apply {
             setContentTitle(getString(R.string.notification_title))
             setContentText(getContentText(sending, receiving))
-            setSmallIcon(R.drawable.ic_launcher_foreground)
+            setSmallIcon(R.drawable.ic_notification)
             setVisibility(Notification.VISIBILITY_PUBLIC)
             setContentIntent(pendingMainActivityIntent)
             if (sending) {
