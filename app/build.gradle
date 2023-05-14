@@ -64,15 +64,24 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion project.compileSdkVersion.toInteger()
+
     buildToolsVersion project.buildToolsVersion
     ndkVersion project.ndkVersion
 
     defaultConfig {
         applicationId 'org.rocstreaming.rocdroid'
+
         minSdkVersion project.minSdkVersion.toInteger()
         targetSdkVersion project.targetSdkVersion.toInteger()
+
         versionName getVersionName()
         versionCode getVersionCode()
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "roc-droid-${versionName}.apk"
+        }
     }
 
     compileOptions {
@@ -88,10 +97,25 @@ android {
         abortOnError false
     }
 
+    signingConfigs {
+        release {
+            if (System.getenv("SIGNING_STORE_FILE") != null) {
+                storeFile file(System.getenv("SIGNING_STORE_FILE"))
+                storePassword System.getenv("SIGNING_STORE_PASSWORD")
+                keyAlias System.getenv("SIGNING_KEY_ALIAS")
+                keyPassword System.getenv("SIGNING_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
+
+            if (System.getenv("SIGNING_STORE_FILE") != null) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }
