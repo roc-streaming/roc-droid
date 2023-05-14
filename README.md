@@ -87,6 +87,38 @@ To check consistency of version name and code:
 ./gradlew checkVersion
 ```
 
+Signing
+-------
+
+Keystore with certificates was generated using this command:
+
+```
+keytool -genkey -v -keystore roc-droid.jks -alias apk -keyalg RSA -keysize 2048 -validity 10000
+```
+
+Then it was encoded to base64:
+
+```
+base64 roc-droid.jks
+```
+
+Then the following secrets were added to the repo:
+
+* `SIGNING_STORE_BASE64` - base64-encoded keystore (`roc-droid.jks`)
+* `SIGNING_STORE_PASSWORD` - keystore password
+* `SIGNING_KEY_ALIAS` - key alias (`apk`)
+* `SIGNING_KEY_PASSWORD` - key password (same as keystore password)
+
+GitHub actions decode `SIGNING_STORE_BASE64` into a temporary `.jks` file and set `SIGNING_*` environment variables with the name of the file and credentials.
+
+Then the following command is run:
+
+```
+./gradlew assembleRelease
+```
+
+It reads credentials from the environment variables and signs release APK using them.
+
 Authors
 -------
 

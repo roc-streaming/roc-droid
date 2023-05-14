@@ -31,10 +31,12 @@ jobs:
         uses: malinskiy/action-android/install-sdk@release/0.1.4
 
       - name: Install NDK
-        run: sdkmanager --install "ndk;$(grep ndkVersion app/gradle.properties | cut -d= -f2)"
+        run: |
+          sdkmanager --install "ndk;$(grep ndkVersion app/gradle.properties | cut -d= -f2)"
 
       - name: Build
-        run: ./gradlew build
+        run: |
+          ./gradlew build
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -51,25 +53,26 @@ jobs:
         uses: malinskiy/action-android/install-sdk@release/0.1.4
 
       - name: Install NDK
-        run: sdkmanager --install "ndk;$(grep ndkVersion app/gradle.properties | cut -d= -f2)"
-
-      - name: Get release info
-        id: get-info
         run: |
-          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+          sdkmanager --install "ndk;$(grep ndkVersion app/gradle.properties | cut -d= -f2)"
 
       - name: Check version
-        run: ./gradlew checkVersion
+        run: |
+          ./gradlew checkVersion
 
-      - name: Build
-        run: ./gradlew build
-
-      - name: Copy and rename binary
-        run: cp app/build/outputs/apk/debug/app-debug.apk roc-droid-${{ env.VERSION }}.apk
+      - name: Build APK
+        env:
+          SIGNING_STORE_FILE: roc-droid.jks
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          echo "${{ secrets.SIGNING_STORE_BASE64 }}" | base64 -di > app/${{ env.SIGNING_STORE_FILE }}
+          ./gradlew assembleRelease
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: roc-droid-${{ env.VERSION }}.apk
+          files: app/build/outputs/apk/release/roc-droid-*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
