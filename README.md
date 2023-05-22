@@ -63,7 +63,7 @@ Build:
 Install to device:
 
 ```
-adb install app/build/outputs/apk/debug/app-debug.apk
+adb install app/build/outputs/apk/debug/roc-droid-*.apk
 ```
 
 Development
