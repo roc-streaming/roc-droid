@@ -23,16 +23,18 @@ import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import org.rocstreaming.roctoolkit.Address
 import org.rocstreaming.roctoolkit.ChannelSet
-import org.rocstreaming.roctoolkit.Family
+import org.rocstreaming.roctoolkit.ClockSource
+import org.rocstreaming.roctoolkit.Endpoint
 import org.rocstreaming.roctoolkit.FrameEncoding
-import org.rocstreaming.roctoolkit.PortType
+import org.rocstreaming.roctoolkit.Interface
 import org.rocstreaming.roctoolkit.Protocol
-import org.rocstreaming.roctoolkit.Receiver
-import org.rocstreaming.roctoolkit.ReceiverConfig
-import org.rocstreaming.roctoolkit.Sender
-import org.rocstreaming.roctoolkit.SenderConfig
+import org.rocstreaming.roctoolkit.RocContext
+import org.rocstreaming.roctoolkit.RocReceiver
+import org.rocstreaming.roctoolkit.RocReceiverConfig
+import org.rocstreaming.roctoolkit.RocSender
+import org.rocstreaming.roctoolkit.RocSenderConfig
+import org.rocstreaming.roctoolkit.Slot
 
 private const val SAMPLE_RATE = 44100
 private const val BUFFER_SIZE = 100
@@ -223,30 +225,30 @@ class SenderReceiverService : Service() {
         senderThread = Thread {
             val record = createAudioRecord(projection)
 
-            val config = SenderConfig.Builder(
-                SAMPLE_RATE,
-                ChannelSet.STEREO,
-                FrameEncoding.PCM_FLOAT
-            ).build()
+            val config = RocSenderConfig.builder()
+                .frameSampleRate(44100)
+                .frameChannels(ChannelSet.STEREO)
+                .frameEncoding(FrameEncoding.PCM_FLOAT)
+                .clockSource(ClockSource.INTERNAL)
+                .build()
 
-            org.rocstreaming.roctoolkit.Context().use { context ->
+            RocContext().use { context ->
                 if (record.state != AudioRecord.STATE_INITIALIZED) return@use
 
                 record.startRecording()
 
-                Sender(context, config).use useSender@{ sender ->
-                    sender.bind(Address(Family.AUTO, "0.0.0.0", 0))
+                RocSender(context, config).use useSender@{ sender ->
 
                     try {
                         sender.connect(
-                            PortType.AUDIO_SOURCE,
-                            Protocol.RTP_RS8M_SOURCE,
-                            Address(Family.AUTO, ip, DEFAULT_RTP_PORT_SOURCE)
+                            Slot.DEFAULT,
+                            Interface.AUDIO_SOURCE,
+                            Endpoint(Protocol.RTP_RS8M_SOURCE, ip, DEFAULT_RTP_PORT_SOURCE)
                         )
                         sender.connect(
-                            PortType.AUDIO_REPAIR,
-                            Protocol.RS8M_REPAIR,
-                            Address(Family.AUTO, ip, DEFAULT_RTP_PORT_REPAIR)
+                            Slot.DEFAULT,
+                            Interface.AUDIO_REPAIR,
+                            Endpoint(Protocol.RS8M_REPAIR, ip, DEFAULT_RTP_PORT_REPAIR)
                         )
                     } catch (e: Exception) {
                         AlertDialog.Builder(this@SenderReceiverService).apply {
@@ -286,23 +288,24 @@ class SenderReceiverService : Service() {
             val audioTrack = createAudioTrack()
             audioTrack.play()
 
-            val config = ReceiverConfig.Builder(
-                SAMPLE_RATE,
-                ChannelSet.STEREO,
-                FrameEncoding.PCM_FLOAT
-            ).build()
+            val config = RocReceiverConfig.builder()
+                .frameSampleRate(44100)
+                .frameChannels(ChannelSet.STEREO)
+                .frameEncoding(FrameEncoding.PCM_FLOAT)
+                .clockSource(ClockSource.INTERNAL)
+                .build()
 
-            org.rocstreaming.roctoolkit.Context().use { context ->
-                Receiver(context, config).use { receiver ->
+            RocContext().use { context ->
+                RocReceiver(context, config).use { receiver ->
                     receiver.bind(
-                        PortType.AUDIO_SOURCE,
-                        Protocol.RTP_RS8M_SOURCE,
-                        Address(Family.AUTO, "0.0.0.0", DEFAULT_RTP_PORT_SOURCE)
+                        Slot.DEFAULT,
+                        Interface.AUDIO_SOURCE,
+                        Endpoint(Protocol.RTP_RS8M_SOURCE, "0.0.0.0", DEFAULT_RTP_PORT_SOURCE)
                     )
                     receiver.bind(
-                        PortType.AUDIO_REPAIR,
-                        Protocol.RS8M_REPAIR,
-                        Address(Family.AUTO, "0.0.0.0", DEFAULT_RTP_PORT_REPAIR)
+                        Slot.DEFAULT,
+                        Interface.AUDIO_REPAIR,
+                        Endpoint(Protocol.RS8M_REPAIR, "0.0.0.0", DEFAULT_RTP_PORT_REPAIR)
                     )
 
                     receiverChanged?.invoke(true)
