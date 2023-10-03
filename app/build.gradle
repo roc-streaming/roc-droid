@@ -63,9 +63,8 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion project.compileSdkVersion.toInteger()
+    compileSdk project.compileSdkVersion.toInteger()
 
-    buildToolsVersion project.buildToolsVersion
     ndkVersion project.ndkVersion
 
     defaultConfig {
