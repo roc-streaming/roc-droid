@@ -62,6 +62,11 @@ class SenderFragment : Fragment() {
             getString(R.string.sender_audio_source_microphone)
         )
 
+        val receiverIp = prefs.getString("receiver_ip", null)
+            ?: resources.getString(R.string.default_receiver_ip)
+
+        receiverIpEdit.setText(receiverIp)
+
         usePlaybackCapture.text = audioSources[selectedAudioSourceIndex]
         view.findViewById<CopyBlock>(R.id.sourcePortValue)?.setText("10001")
         view.findViewById<CopyBlock>(R.id.repairPortValue)?.setText("10002")
@@ -114,38 +119,32 @@ class SenderFragment : Fragment() {
 
         senderService = service
 
-        senderService.setSenderStateChangedListeners(
-            senderChanged = { state: Boolean ->
-                activity?.runOnUiThread {
-                    activity?.findViewById<Button>(R.id.startSenderButton)?.text =
-                        getString(if (state) R.string.stop_sender else R.string.start_sender)
-                    if (state) showActiveIcon() else hideActiveIcon()
-                }
+        senderService.setSenderStateChangedListeners(senderChanged = { state: Boolean ->
+            activity?.runOnUiThread {
+                activity?.findViewById<Button>(R.id.startSenderButton)?.text =
+                    getString(if (state) R.string.stop_sender else R.string.start_sender)
+                if (state) showActiveIcon() else hideActiveIcon()
             }
-        )
+        })
     }
 
     private fun showAudioSourcesDialog() {
         Log.d(LOG_TAG, "Showing Select Audio Source Dialog")
 
         selectedAudioSource = audioSources[selectedAudioSourceIndex]
-        MaterialAlertDialogBuilder(requireActivity())
-            .setTitle(R.string.dialog_choose_audio_source)
+        MaterialAlertDialogBuilder(requireActivity()).setTitle(R.string.dialog_choose_audio_source)
             .setSingleChoiceItems(audioSources, selectedAudioSourceIndex) { _, which ->
                 selectedAudioSourceIndex = which
                 selectedAudioSource = audioSources[which]
-            }
-            .setPositiveButton("Ok") { _, _ ->
+            }.setPositiveButton("Ok") { _, _ ->
                 Log.d(LOG_TAG, String.format("Selected Audio Source: %s", selectedAudioSource))
 
                 view?.findViewById<TextView>(R.id.audio_source)?.text = selectedAudioSource
-            }
-            .setNegativeButton("Cancel") { dialog, _ ->
+            }.setNegativeButton("Cancel") { dialog, _ ->
                 Log.d(LOG_TAG, "Dismiss Audio Source Dialog")
 
                 dialog.dismiss()
-            }
-            .show()
+            }.show()
     }
 
     fun isUsePlayback(): Boolean {
@@ -189,6 +188,7 @@ class SenderFragment : Fragment() {
             // Permission already granted.
             true
         }
+
         shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) -> {
             AlertDialog.Builder(requireActivity()).apply {
                 setTitle(getString(R.string.allow_mic_title))
@@ -198,6 +198,7 @@ class SenderFragment : Fragment() {
             }.show()
             false
         }
+
         else -> {
             requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
             false
