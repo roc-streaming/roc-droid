@@ -6,13 +6,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.rocstreaming.rocdroid.R
-import org.rocstreaming.rocdroid.model.*
+import org.rocstreaming.rocdroid.model.License
 
 class LicenseAdapter(private val licenses: List<License>) :
     RecyclerView.Adapter<LicenseAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R .layout.item_license, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_license, parent, false)
         return ViewHolder(view)
     }
 
