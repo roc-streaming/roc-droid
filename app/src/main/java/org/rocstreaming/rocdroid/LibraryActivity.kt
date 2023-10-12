@@ -1,7 +1,7 @@
 package org.rocstreaming.rocdroid
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.rocstreaming.rocdroid.adapter.LicenseAdapter
@@ -16,8 +16,7 @@ class LibraryActivity : AppCompatActivity() {
         val adapter = LicenseAdapter(arrayList)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
-
     }
 
-    val arrayList = listOf<License>(License("roc-droid","org.roc-streaming.roctoolkit:roc-android:0.2.1"))
+    val arrayList = listOf<License>(License("roc-droid", "org.roc-streaming.roctoolkit:roc-android:0.2.1"))
 }
