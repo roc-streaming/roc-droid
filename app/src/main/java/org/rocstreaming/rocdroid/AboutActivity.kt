@@ -14,6 +14,7 @@ class AboutActivity : AppCompatActivity() {
     private lateinit var bugTrackerButton: Button
     private lateinit var contributorsButton: Button
     private lateinit var licenseButton: Button
+    private lateinit var libraryButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +26,7 @@ class AboutActivity : AppCompatActivity() {
         bugTrackerButton = findViewById(R.id.about_bug_tracker)
         contributorsButton = findViewById(R.id.about_contributors)
         licenseButton = findViewById(R.id.app_license)
+        libraryButton = findViewById(R.id.library_used)
 
         val manager = this.packageManager
         val info = manager.getPackageInfo(this.packageName, PackageManager.GET_ACTIVITIES)
@@ -42,6 +44,10 @@ class AboutActivity : AppCompatActivity() {
         }
         licenseButton.setOnClickListener {
             openLink(getString(R.string.uri_license))
+        }
+        libraryButton.setOnClickListener {
+            val intent = Intent(this, LibraryActivity::class.java)
+            startActivity(intent)
         }
     }
 

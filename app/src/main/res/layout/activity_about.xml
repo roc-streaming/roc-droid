@@ -62,6 +62,20 @@
             android:gravity="center_vertical"
             android:text="@string/about_contributors"
             android:textSize="@dimen/font_big" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/library_used"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            app:iconSize="24dp"
+            app:icon="@raw/contributors"
+            android:gravity="center_vertical"
+            android:text="@string/libraries_used"
+            android:textSize="@dimen/font_big" />
+
+
     </LinearLayout>
 
     <TextView
