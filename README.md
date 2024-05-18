@@ -14,9 +14,14 @@ Download
 
 * Download APK from [latest release](https://github.com/roc-streaming/roc-droid/releases/latest)
 
-* Download from IzzyOnDroid:
+* Download from F-Droid or IzzyOnDroid:
 
-  <a href='https://apt.izzysoft.de/fdroid/index/apk/org.rocstreaming.rocdroid'><img height='70' src='https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png'></a>
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/org.rocstreaming.rocdroid/)
+[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png"
+     alt="Get it on F-Droid"
+     height="80">](https://apt.izzysoft.de/fdroid/index/apk/org.rocstreaming.rocdroid)
 
 Screenshot
 ----------
