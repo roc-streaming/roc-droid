@@ -11,12 +11,14 @@ import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 
+private const val LOG_TAG = "[rocdroid.ReceiverTileService]"
 
 class ReceiverTileService : TileService() {
 
     private var senderReceiverService: SenderReceiverService? = null
 
     private val senderReceiverServiceConnection = object : ServiceConnection {
+
         override fun onServiceConnected(componentName: ComponentName, binder: IBinder) {
             val binder = binder as SenderReceiverService.LocalBinder
             senderReceiverService = binder.getService()
@@ -30,6 +32,7 @@ class ReceiverTileService : TileService() {
 
 
     override fun onCreate() {
+        Log.d(LOG_TAG, "Creating Reciver Tile Service")
 
         var intent = Intent(this.baseContext, SenderReceiverService::class.java)
         this.applicationContext.bindService(intent,senderReceiverServiceConnection, BIND_AUTO_CREATE)
@@ -37,6 +40,7 @@ class ReceiverTileService : TileService() {
     }
 
     override fun onStartListening() {
+        Log.d(LOG_TAG, "Start listening to Tile")
 
         if ( senderReceiverService!!.isReceiverAlive() ) {
             this.qsTile.state =  Tile.STATE_ACTIVE
@@ -48,6 +52,7 @@ class ReceiverTileService : TileService() {
     }
 
     override fun onClick() {
+        Log.d(LOG_TAG, "Tile click event")
 
         if (senderReceiverService != null) {
             if ( senderReceiverService!!.isReceiverAlive() ) {
