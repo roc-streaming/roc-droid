@@ -53,12 +53,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Java
-        run: |
-          if [[ '${{ runner.arch }}' == 'X64' ]]; then
-            echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
-          else
-            echo "JAVA_HOME=$JAVA_HOME_17_arm64" >> $GITHUB_ENV
-          fi
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64$JAVA_HOME_17_arm64" >> $GITHUB_ENV
 
       - name: Install SDK
         uses: malinskiy/action-android/install-sdk@release/0.1.4
