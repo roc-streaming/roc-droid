@@ -20,8 +20,7 @@ class ReceiverTileService : TileService() {
     private val senderReceiverServiceConnection = object : ServiceConnection {
 
         override fun onServiceConnected(componentName: ComponentName, binder: IBinder) {
-            val binder = binder as SenderReceiverService.LocalBinder
-            senderReceiverService = binder.getService()
+            senderReceiverService = (binder as SenderReceiverService.LocalBinder).getService()
         }
 
         override fun onServiceDisconnected(componentName: ComponentName) {
@@ -32,9 +31,9 @@ class ReceiverTileService : TileService() {
 
 
     override fun onCreate() {
-        Log.d(LOG_TAG, "Creating Reciver Tile Service")
+        Log.d(LOG_TAG, "Creating Receiver Tile Service")
 
-        var intent = Intent(this.baseContext, SenderReceiverService::class.java)
+        val intent = Intent(this.baseContext, SenderReceiverService::class.java)
         this.applicationContext.bindService(intent,senderReceiverServiceConnection, BIND_AUTO_CREATE)
 
     }
