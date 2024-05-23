@@ -54,4 +54,5 @@
     <string name="app_logo">App Logo</string>
     <string name="icon_copy">Copy</string>
     <string name="open_dropdown_icon">Open dropdown</string>
+    <string name="quick_tile_receiver">Roc Droid receiver</string>
 </resources>
