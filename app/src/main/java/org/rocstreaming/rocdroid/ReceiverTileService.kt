@@ -36,7 +36,7 @@ class ReceiverTileService : TileService() {
     override fun onStartListening() {
         Log.d(LOG_TAG, "Start listening to Tile")
 
-        if (senderReceiverService!!.isReceiverAlive()) {
+        if (senderReceiverService?.isReceiverAlive() == true) {
             this.qsTile.state = Tile.STATE_ACTIVE
         } else {
             this.qsTile.state = Tile.STATE_INACTIVE
@@ -48,12 +48,12 @@ class ReceiverTileService : TileService() {
     override fun onClick() {
         Log.d(LOG_TAG, "Tile click event")
 
-        if (senderReceiverService != null) {
-            if (senderReceiverService!!.isReceiverAlive()) {
-                senderReceiverService!!.stopReceiver()
+        senderReceiverService?.let {
+            if (it.isReceiverAlive()) {
+                it.stopReceiver()
                 this.qsTile.state = Tile.STATE_INACTIVE
             } else {
-                senderReceiverService!!.startReceiver()
+                it.startReceiver()
                 this.qsTile.state = Tile.STATE_ACTIVE
             }
         }
