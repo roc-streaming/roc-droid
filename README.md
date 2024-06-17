@@ -1,6 +1,6 @@
 # Roc for Android!
 
-[![Build](https://github.com/roc-streaming/roc-droid/workflows/build/badge.svg)](https://github.com/roc-streaming/roc-droid/actions) [![GitHub release](https://img.shields.io/github/release/roc-streaming/roc-droid.svg)](https://github.com/roc-streaming/roc-droid/releases) [![Matrix chat](https://matrix.to/img/matrix-badge.svg)](https://app.element.io/#/room/#roc-streaming:matrix.org)
+[![Build](https://github.com/roc-streaming/roc-droid/actions/workflows/build.yaml/badge.svg)](https://github.com/roc-streaming/roc-droid/actions/workflows/build.yaml) [![GitHub release](https://img.shields.io/github/release/roc-streaming/roc-droid.svg)](https://github.com/roc-streaming/roc-droid/releases) [![Matrix chat](https://matrix.to/img/matrix-badge.svg)](https://app.element.io/#/room/#roc-streaming:matrix.org)
 
 Android app implementing Roc sender and receiver. **Work in progress!**
 
@@ -28,27 +28,31 @@ Screenshot
 
 <img src="https://raw.githubusercontent.com/roc-streaming/roc-droid/master/screenshot.webp" data-canonical-src="https://raw.githubusercontent.com/roc-streaming/roc-droid/master/screenshot.webp" width="300"/>
 
-About Roc
----------
+Features
+--------
+
+Key features of [Roc Toolkit](https://github.com/roc-streaming/roc-toolkit) streaming engine, used by Roc Droid:
+
+* real-time streaming with guaranteed latency;
+* robust work on unreliable networks like Wi-Fi, due to use of Forward Erasure Correction codes;
+* CD-quality audio;
+* multiple profiles for different CPU and latency requirements;
+* relying on open, standard protocols, like RTP and FECFRAME;
+* interoperability with both Roc and third-party software.
 
 Compatible senders and receivers include:
 
-* [command-line tools](https://roc-streaming.org/toolkit/docs/tools/command_line_tools.html)
-* [sound server modules](https://roc-streaming.org/toolkit/docs/tools/sound_server_modules.html) (PulseAudio, PipeWire)
-* [C library](https://roc-streaming.org/toolkit/docs/api.html)
-* [language bindings](https://github.com/roc-streaming/roc-java/) (Go, Java)
+* [cross-platform command-line tools](https://roc-streaming.org/toolkit/docs/tools/command_line_tools.html)
+* [modules for sound servers](https://roc-streaming.org/toolkit/docs/tools/sound_server_modules.html) (PulseAudio, PipeWire, macOS CoreAudio)
+* [C library](https://roc-streaming.org/toolkit/docs/api.html) and [bindings for other languages](https://roc-streaming.org/toolkit/docs/api/bindings.html)
 
-Key features:
+## Donations
 
-* real-time streaming with guaranteed latency;
-* restoring lost packets using Forward Erasure Correction codes;
-* converting between the sender and receiver clock domains;
-* CD-quality audio;
-* multiple profiles for different CPU and latency requirements;
-* portability;
-* relying on open, standard protocols.
+If you would like to support the project financially, please refer to [this page](https://roc-streaming.org/toolkit/docs/about_project/sponsors.html). This project is developed by volunteers in their free time, and your donations will help to spend more time on the project and keep it growing.
 
-See [Roc Toolkit](https://github.com/roc-streaming/roc-toolkit) documentation for details.
+Thank you!
+
+<a href="https://liberapay.com/roc-streaming"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 
 Building
 --------
