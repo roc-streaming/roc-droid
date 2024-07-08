@@ -1,0 +1,47 @@
+analyzer:
+  exclude:
+    # @TODO - check this
+    - 'build/**'
+    - '**/*.g.dart'
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false
+  errors:
+    todo: ignore
+
+linter:
+  rules:
+    # based on effective_dart rules
+    # https://github.com/tenhobi/effective_dart/blob/master/lib/analysis_options.1.2.0.yaml
+    # https://dart-lang.github.io/linter/lints/
+    - annotate_overrides
+    - avoid_catches_without_on_clauses
+    - avoid_catching_errors
+    - avoid_relative_lib_imports
+    - avoid_return_types_on_setters
+    - avoid_returning_null
+    - camel_case_extensions
+    - camel_case_types
+    - constant_identifier_names
+    - curly_braces_in_flow_control_structures
+    - directives_ordering
+    - empty_constructor_bodies
+    - file_names
+    - hash_and_equals
+    - implementation_imports
+    - library_names
+    - library_prefixes
+    - no_leading_underscores_for_library_prefixes
+    - no_leading_underscores_for_local_identifiers
+    - non_constant_identifier_names
+    - prefer_equal_for_default_values
+    - prefer_generic_function_type_aliases
+    - prefer_mixin
+    - prefer_relative_imports
+    - slash_for_doc_comments
+    - type_annotate_public_apis
+    - type_init_formals
+    - unawaited_futures
+    - unnecessary_const
+    - unnecessary_new
+    - use_rethrow_when_possible
