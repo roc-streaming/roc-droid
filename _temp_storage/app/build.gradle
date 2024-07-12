@@ -1,0 +1,133 @@
+def getManifestVersions = { ->
+    def manifest = new XmlSlurper().parse(file('src/main/AndroidManifest.xml'))
+    def versionName = manifest.@'android:versionName'.text()
+    def versionCode = manifest.@'android:versionCode'.text().toInteger()
+    return [versionName, versionCode]
+}
+
+def getVersionName = { ->
+    def (versionName, _) = getManifestVersions()
+    return versionName
+}
+
+def getVersionCode = { ->
+    def (_, versionCode) = getManifestVersions()
+    return versionCode
+}
+
+def validateVersion = { ->
+    def (versionName, versionCode) = getManifestVersions()
+
+    project.logger.lifecycle("Checking version name and code...")
+    project.logger.lifecycle("versionName = $versionName")
+    project.logger.lifecycle("versionCode = $versionCode")
+
+    def gitStdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags', '--abbrev=0'
+        standardOutput = gitStdout
+    }
+    def versionGit = gitStdout.toString().trim().replaceAll('v', '')
+
+    if (versionName != versionGit) {
+        throw new GradleException(
+            "Mismatched android:versionName in AndroidManifest.xml and git tag: "+
+                "versionName = $versionName, "+
+                "versionGit = $versionGit")
+    }
+
+    def expectedCode = 0
+    def mult = 1
+    versionName.tokenize('.').reverse().each {
+        expectedCode += it.toInteger() * mult
+        mult *= 1000
+    }
+
+    if (versionCode != expectedCode) {
+        throw new GradleException(
+            "Mismatched android:versionName and android:versionCode in AndroidManifest.xml: "+
+                "versionName = $versionName, "+
+                "versionCode = $versionCode, "+
+                "expectedCode = $expectedCode")
+    }
+}
+
+task checkVersion {
+    doLast {
+        validateVersion()
+    }
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdk project.compileSdkVersion.toInteger()
+
+    ndkVersion project.ndkVersion
+
+    defaultConfig {
+        applicationId 'org.rocstreaming.rocdroid'
+
+        minSdkVersion project.minSdkVersion.toInteger()
+        targetSdkVersion project.targetSdkVersion.toInteger()
+
+        versionName getVersionName()
+        versionCode getVersionCode()
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "roc-droid-${versionName}.apk"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    signingConfigs {
+        release {
+            if (System.getenv("SIGNING_STORE_FILE") != null) {
+                storeFile file(System.getenv("SIGNING_STORE_FILE"))
+                storePassword System.getenv("SIGNING_STORE_PASSWORD")
+                keyAlias System.getenv("SIGNING_KEY_ALIAS")
+                keyPassword System.getenv("SIGNING_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
+
+            if (System.getenv("SIGNING_STORE_FILE") != null) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.roc-streaming.roctoolkit:roc-android:0.2.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.core:core-ktx:1.3.0'
+    implementation 'androidx.activity:activity-ktx:1.2.4'
+    implementation 'androidx.fragment:fragment-ktx:1.3.6'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'androidx.viewpager2:viewpager2:1.0.0'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.25'
+}
