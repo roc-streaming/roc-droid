@@ -1,0 +1,17 @@
+<resources>
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:fontFamily">@font/open_sans_regular</item>
+        <item name="fontFamily">@font/open_sans_regular</item>
+    </style>
+
+    <style name="textViewStyle" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/colorBlack</item>
+        <item name="android:textSize">@dimen/font_big</item>
+        <item name="android:layout_marginStart">@dimen/margin_divider</item>
+        <item name="android:layout_marginTop">@dimen/margin_divider</item>
+        <item name="android:layout_marginEnd">@dimen/margin_divider</item>
+    </style>
+</resources>

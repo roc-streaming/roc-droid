@@ -1,5 +1,0 @@
-<resources>
-   <declare-styleable name="CopyBlock">
-       <attr name="text" format="string" />
-   </declare-styleable>
-</resources>
