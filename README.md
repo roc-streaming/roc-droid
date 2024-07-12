@@ -18,17 +18,17 @@
 
 Architecture:
 
-* **Overview** – [Application architecture description](/docs/architecture.md)
+* **Overview** – [Application architecture description](/docs/architecture_overview.md)
 
-* **UI** – [User interface architecture description](/lib/src/ui/README.md)
+* **UI** – [User interface architecture description](/docs/architecture_ui.md)
 
-* **Model** – [Model architecture description](/lib/src/model/README.md)
+* **Model** – [Model architecture description](/docs/architecture_model.md)
 
-* **Agent** – [Agent architecture description](/lib/src/agent/README.md)
+* **Agent** – [Agent architecture description](/docs/architecture_agent.md)
 
 Tests:
 
-* **Unit testing** - [Unit testing description](/test/README.md)
+* **Unit testing** - [Unit testing description](/docs/unit_tests.md)
 
 Setups:
 

@@ -24,8 +24,8 @@ The roc-droid implementation is comprised of three modules:
 
 The roc-droid modules are described in the following documents:
 
-* **UI** – [User interface architecture description](/lib/src/ui/README.md)
+* **UI** – [User interface architecture description](/docs/architecture_ui.md)
 
-* **Model** – [Model architecture description](/lib/src/model/README.md)
+* **Model** – [Model architecture description](/docs/architecture_model.md)
 
-* **Agent** – [Agent architecture description](/lib/src/agent/README.md)
+* **Agent** – [Agent architecture description](/docs/architecture_agent.md)
