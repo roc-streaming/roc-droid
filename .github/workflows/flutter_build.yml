@@ -1,0 +1,43 @@
+name: flutter_build
+
+on:
+  push:
+    branches:
+      - flutter
+    tags:
+      - v*
+
+  pull_request:
+    branches:
+      - flutter
+
+  workflow_dispatch:
+
+  schedule:
+    - cron: '0 0 * * 1'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Run analyzer
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Build Android APK
+        run: flutter build apk
