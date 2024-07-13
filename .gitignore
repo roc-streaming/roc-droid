@@ -50,3 +50,6 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
+
+# Old project
+/app
