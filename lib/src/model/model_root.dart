@@ -1,20 +1,12 @@
-part of '../model.dart';
+import 'receiver.dart';
+import 'sender.dart';
 
 /// Root class of the main model.
 class ModelRoot {
-  @observable
-  Receiver _receiver;
-
-  @computed
-  Receiver get receiver => _receiver;
-
-  @observable
-  Sender _sender;
-
-  @computed
-  Sender get sender => _sender;
+  final Receiver receiver;
+  final Sender sender;
 
   ModelRoot()
-      : _receiver = Receiver(),
-        _sender = Sender();
+      : receiver = Receiver(),
+        sender = Sender();
 }

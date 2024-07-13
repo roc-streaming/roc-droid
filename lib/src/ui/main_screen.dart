@@ -1,4 +1,4 @@
-part of '../ui.dart';
+import 'package:flutter/material.dart';
 
 // Main screen class implementation - Screen layer.
 class MainScreen extends StatelessWidget {

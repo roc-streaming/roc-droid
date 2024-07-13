@@ -1,4 +1,4 @@
-part of '../../ui.dart';
+import 'package:flutter/material.dart';
 
 // Message PopUp class implementation - Fragment layer.
 class MessagePopup extends StatelessWidget {

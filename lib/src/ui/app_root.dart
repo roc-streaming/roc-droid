@@ -1,4 +1,5 @@
-part of '../ui.dart';
+import 'package:flutter/material.dart';
+import '../model.dart';
 
 // Main app root class - App layer.
 class AppRoot extends StatelessWidget {

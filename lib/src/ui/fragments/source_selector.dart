@@ -1,4 +1,4 @@
-part of '../../ui.dart';
+import 'package:flutter/material.dart';
 
 // Source selector class implementation - Fragment layer.
 class SourceSelector extends StatelessWidget {

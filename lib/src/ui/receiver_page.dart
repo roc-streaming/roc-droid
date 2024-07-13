@@ -1,4 +1,4 @@
-part of '../ui.dart';
+import 'package:flutter/material.dart';
 
 // Receiver page class implementation - Page layer.
 class ReceiverPage extends StatelessWidget {

@@ -1,4 +1,4 @@
-part of '../../ui.dart';
+import 'package:flutter/material.dart';
 
 // Settings pane class implementation - Fragment layer.
 class SettingsPane extends StatelessWidget {
