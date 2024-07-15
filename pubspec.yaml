@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  logger: ^2.4.0
   mobx: ^2.3.3+2
 
 dev_dependencies:

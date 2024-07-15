@@ -1,3 +1,4 @@
+import 'package:logger/logger.dart';
 import 'receiver.dart';
 import 'sender.dart';
 
@@ -5,8 +6,10 @@ import 'sender.dart';
 class ModelRoot {
   final Receiver receiver;
   final Sender sender;
+  final Logger logger;
 
   ModelRoot()
       : receiver = Receiver(),
-        sender = Sender();
+        sender = Sender(),
+        logger = Logger();
 }
