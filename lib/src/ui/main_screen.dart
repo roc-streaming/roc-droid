@@ -1,16 +1,38 @@
 import 'package:flutter/material.dart';
 import '../model/model_root.dart';
+import 'components/roc_app_bar.dart';
+import 'components/roc_bottom_navigation_bar.dart';
 import 'receiver_page.dart';
 import 'sender_page.dart';
 
 // Main screen class implementation - Screen layer.
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   final ModelRoot _modelRoot;
-  final GlobalKey<NavigatorState> _navigationKey = GlobalKey<NavigatorState>();
 
-  MainScreen({
+  const MainScreen({required ModelRoot modelRoot}) : _modelRoot = modelRoot;
+
+  @override
+  State<MainScreen> createState() => _MainScreenState(modelRoot: _modelRoot);
+}
+
+class _MainScreenState extends State<MainScreen> {
+  final ModelRoot _modelRoot;
+  final List<Widget> _pages;
+  int _selectedPage = 0;
+
+  _MainScreenState({
     required ModelRoot modelRoot,
-  }) : _modelRoot = modelRoot;
+  })  : _modelRoot = modelRoot,
+        _pages = [
+          ReceiverPage(modelRoot: modelRoot),
+          SenderPage(modelRoot: modelRoot),
+        ];
+
+  void _onTabTapped(int index) {
+    setState(() {
+      _selectedPage = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,35 +42,12 @@ class MainScreen extends StatelessWidget {
       initialIndex: 0,
       length: 2,
       child: Scaffold(
-        body: _MainScreenNavigator(
-          navigationKey: _navigationKey,
-          body: TabBarView(
-            physics: NeverScrollableScrollPhysics(),
-            children: [
-              ReceiverPage(modelRoot: _modelRoot),
-              SenderPage(modelRoot: _modelRoot),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Main screen navigator definition class.
-class _MainScreenNavigator extends StatelessWidget {
-  final GlobalKey<NavigatorState> navigationKey;
-  final Widget body;
-
-  _MainScreenNavigator({
-    required this.navigationKey,
-    required this.body,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Navigator(
-      key: navigationKey,
+          appBar: RocAppBar(),
+          body: Center(child: _pages.elementAt(_selectedPage)),
+          bottomNavigationBar: RocBottomNavigationBar(
+            selectedPage: _selectedPage,
+            onTabTapped: _onTabTapped,
+          )),
     );
   }
 }
