@@ -1,0 +1,10 @@
+{
+    "appTitle": "Roc Droid",
+    "@appTitle": { "description": "Main title of Roc Droid app" },
+
+    "receiver": "Receiver",
+    "@receiver": { "description": "Receiver page title" },
+
+    "sender": "Sender",
+    "@sender": { "description": "Sender page title" }
+}

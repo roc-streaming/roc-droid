@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localization: ^0.2.0
+  intl: any
   logger: ^2.4.0
   mobx: ^2.3.3+2
 
@@ -20,3 +22,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true

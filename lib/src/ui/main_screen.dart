@@ -42,12 +42,14 @@ class _MainScreenState extends State<MainScreen> {
       initialIndex: 0,
       length: 2,
       child: Scaffold(
-          appBar: RocAppBar(),
-          body: Center(child: _pages.elementAt(_selectedPage)),
-          bottomNavigationBar: RocBottomNavigationBar(
-            selectedPage: _selectedPage,
-            onTabTapped: _onTabTapped,
-          )),
+        appBar: RocAppBar(context),
+        body: Center(child: _pages.elementAt(_selectedPage)),
+        bottomNavigationBar: RocBottomNavigationBar(
+          context,
+          selectedPage: _selectedPage,
+          onTabTapped: _onTabTapped,
+        ),
+      ),
     );
   }
 }
