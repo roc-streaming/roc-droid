@@ -18,9 +18,7 @@ class AppRoot extends StatelessWidget {
     Locale('en', ''), // Supported english language
   ];
 
-  AppRoot({
-    required ModelRoot modelRoot,
-  }) : _modelRoot = modelRoot;
+  AppRoot(ModelRoot modelRoot) : _modelRoot = modelRoot;
 
   @override
   Widget build(BuildContext context) {

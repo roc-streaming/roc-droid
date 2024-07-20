@@ -5,9 +5,7 @@ import '../model/model_root.dart';
 class SenderPage extends StatelessWidget {
   final ModelRoot _modelRoot;
 
-  SenderPage({
-    required ModelRoot modelRoot,
-  }) : _modelRoot = modelRoot;
+  SenderPage(ModelRoot modelRoot) : _modelRoot = modelRoot;
 
   @override
   Widget build(BuildContext context) {

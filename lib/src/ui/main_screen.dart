@@ -12,7 +12,7 @@ class MainScreen extends StatefulWidget {
   const MainScreen({required ModelRoot modelRoot}) : _modelRoot = modelRoot;
 
   @override
-  State<MainScreen> createState() => _MainScreenState(modelRoot: _modelRoot);
+  State<MainScreen> createState() => _MainScreenState(_modelRoot);
 }
 
 class _MainScreenState extends State<MainScreen> {
@@ -20,12 +20,11 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _pages;
   int _selectedPage = 0;
 
-  _MainScreenState({
-    required ModelRoot modelRoot,
-  })  : _modelRoot = modelRoot,
+  _MainScreenState(ModelRoot modelRoot)
+      : _modelRoot = modelRoot,
         _pages = [
-          ReceiverPage(modelRoot: modelRoot),
-          SenderPage(modelRoot: modelRoot),
+          ReceiverPage(modelRoot),
+          SenderPage(modelRoot),
         ];
 
   void _onTabTapped(int index) {
@@ -45,7 +44,7 @@ class _MainScreenState extends State<MainScreen> {
         appBar: RocAppBar(context),
         body: Center(child: _pages.elementAt(_selectedPage)),
         bottomNavigationBar: RocBottomNavigationBar(
-          context,
+          context: context,
           selectedPage: _selectedPage,
           onTabTapped: _onTabTapped,
         ),

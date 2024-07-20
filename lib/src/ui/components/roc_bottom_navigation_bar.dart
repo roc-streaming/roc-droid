@@ -3,8 +3,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Roc's custom bottom navigation bar.
 class RocBottomNavigationBar extends BottomNavigationBar {
-  RocBottomNavigationBar(
-    BuildContext context, {
+  RocBottomNavigationBar({
+    required BuildContext context,
     required int selectedPage,
     required void Function(int) onTabTapped,
   }) : super(

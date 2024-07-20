@@ -7,7 +7,7 @@ import 'package:roc_droid/src/ui.dart';
 void main() {
   testWidgets('The AppRoot widget is built correctly.', (tester) async {
     // Action
-    await tester.pumpWidget(AppRoot(modelRoot: ModelRoot()));
+    await tester.pumpWidget(AppRoot(ModelRoot()));
 
     // Find required widgets
     final scaffoldWidget = find.byType(Scaffold);
