@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../styles/roc_colors.dart';
+
 /// Roc's custom bottom navigation bar.
 class RocBottomNavigationBar extends BottomNavigationBar {
   RocBottomNavigationBar({
@@ -18,6 +20,8 @@ class RocBottomNavigationBar extends BottomNavigationBar {
               label: AppLocalizations.of(context)!.sender,
             ),
           ],
+          backgroundColor: RocColors.lightBlue,
+          selectedItemColor: RocColors.mainBlue,
           currentIndex: selectedPage,
           onTap: onTabTapped,
         );

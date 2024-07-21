@@ -121,6 +121,31 @@ mixin _$Sender on _Sender, Store {
     });
   }
 
+  late final _$_SenderActionController =
+      ActionController(name: '_Sender', context: context);
+
+  @override
+  void setSourcePort(int value) {
+    final _$actionInfo =
+        _$_SenderActionController.startAction(name: '_Sender.setSourcePort');
+    try {
+      return super.setSourcePort(value);
+    } finally {
+      _$_SenderActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setRepairPort(int value) {
+    final _$actionInfo =
+        _$_SenderActionController.startAction(name: '_Sender.setRepairPort');
+    try {
+      return super.setRepairPort(value);
+    } finally {
+      _$_SenderActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''

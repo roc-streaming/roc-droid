@@ -1,15 +1,18 @@
 import 'package:logger/logger.dart';
+
 import 'receiver.dart';
 import 'sender.dart';
 
 /// Root class of the main model.
 class ModelRoot {
-  final Receiver receiver;
-  final Sender sender;
-  final Logger logger;
+  late final Receiver receiver;
+  late final Sender sender;
+  late final Logger logger;
 
-  ModelRoot()
-      : receiver = Receiver(),
-        sender = Sender(),
-        logger = Logger();
+  ModelRoot() {
+    var mainLogger = Logger();
+    receiver = Receiver(mainLogger);
+    sender = Sender(mainLogger);
+    logger = mainLogger;
+  }
 }

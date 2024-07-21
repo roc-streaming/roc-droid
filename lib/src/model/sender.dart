@@ -10,6 +10,8 @@ part 'sender.g.dart';
 class Sender = _Sender with _$Sender;
 
 abstract class _Sender with Store {
+  final Logger _logger;
+
   // Determines whether the sender is running or not
   @observable
   bool _isStarted = false;
@@ -46,23 +48,39 @@ abstract class _Sender with Store {
   @computed
   CaptureSourceType get captureSource => _captureSource;
 
+  _Sender(Logger logger) : _logger = logger;
+
   // Start current sender.
-  void start(Logger logger) {
+  void start() {
     if (isStarted) {
       throw StartActiveSenderError;
     }
 
     _isStarted = !_isStarted;
-    logger.i('Sender started');
+    _logger.i('Sender started');
   }
 
   // Stop current sender.
-  void stop(Logger logger) {
+  void stop() {
     if (!isStarted) {
       throw StopInactiveSenderError;
     }
 
     _isStarted = !_isStarted;
-    logger.i('Sender stopped');
+    _logger.i('Sender stopped');
+  }
+
+  // Update source port value
+  @action
+  void setSourcePort(int value) {
+    _sourcePort = value;
+    _logger.d('Sender source port value changed to: ${_sourcePort}');
+  }
+
+  // Update repair port value
+  @action
+  void setRepairPort(int value) {
+    _repairPort = value;
+    _logger.d('Sender repair port value changed to: ${_repairPort}');
   }
 }

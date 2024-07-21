@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+
 import '../model/model_root.dart';
+import 'components/roc_number_input.dart';
+import 'components/roc_page_view.dart';
+import 'components/roc_stateful_button.dart';
+import 'components/roc_text_row.dart';
 
 // Receiver page class implementation - Page layer.
 class ReceiverPage extends StatelessWidget {
@@ -10,8 +17,33 @@ class ReceiverPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _modelRoot.logger.d('Receiver page build started');
-    return Center(
-      child: Text('Receiver page'),
+    return RocPageView(
+      controllersColumn: [
+        RocTextRow(AppLocalizations.of(context)!.receiverStartSenderStep),
+        RocTextRow(AppLocalizations.of(context)!.receiverUseIPStep),
+        RocTextRow(AppLocalizations.of(context)!.receiverSourceStreamStep),
+        Observer(
+          builder: (_) => RocNumberInput(
+            initialValue: _modelRoot.receiver.sourcePort,
+            function: _modelRoot.receiver.setSourcePort,
+          ),
+        ),
+        RocTextRow(AppLocalizations.of(context)!.receiverRepairStreamStep),
+        Observer(
+          builder: (_) => RocNumberInput(
+            initialValue: _modelRoot.receiver.repairPort,
+            function: _modelRoot.receiver.setRepairPort,
+          ),
+        ),
+        RocTextRow(AppLocalizations.of(context)!.receiverStartStep),
+      ],
+      bottomButton: RocStatefulButton(
+        isStarted: _modelRoot.receiver.isStarted,
+        inactiveFunction: _modelRoot.receiver.start,
+        activeFunction: _modelRoot.receiver.stop,
+        inactiveText: AppLocalizations.of(context)!.startReceiverButton,
+        activeText: AppLocalizations.of(context)!.stopReceiverButton,
+      ),
     );
   }
 }

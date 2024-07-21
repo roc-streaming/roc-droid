@@ -99,6 +99,31 @@ mixin _$Receiver on _Receiver, Store {
     });
   }
 
+  late final _$_ReceiverActionController =
+      ActionController(name: '_Receiver', context: context);
+
+  @override
+  void setSourcePort(int value) {
+    final _$actionInfo = _$_ReceiverActionController.startAction(
+        name: '_Receiver.setSourcePort');
+    try {
+      return super.setSourcePort(value);
+    } finally {
+      _$_ReceiverActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setRepairPort(int value) {
+    final _$actionInfo = _$_ReceiverActionController.startAction(
+        name: '_Receiver.setRepairPort');
+    try {
+      return super.setRepairPort(value);
+    } finally {
+      _$_ReceiverActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''

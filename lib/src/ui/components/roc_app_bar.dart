@@ -11,7 +11,7 @@ class RocAppBar extends AppBar {
             alignment: Alignment.centerLeft,
             child: Text(
               AppLocalizations.of(context)!.appTitle,
-              style: TextStyle(color: RocColors.white),
+              style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
           backgroundColor: RocColors.mainBlue,

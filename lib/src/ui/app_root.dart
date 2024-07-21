@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../model.dart';
 import 'main_screen.dart';
+import 'styles/roc_standard_theme_builder.dart';
 
 // Main app root class - App layer.
 class AppRoot extends StatelessWidget {
@@ -26,6 +27,7 @@ class AppRoot extends StatelessWidget {
 
     return MaterialApp(
       title: 'Roc Droid',
+      theme: RocStandardThemeBuilder.build(),
       home: MainScreen(
         modelRoot: _modelRoot,
       ),

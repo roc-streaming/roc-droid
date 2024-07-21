@@ -9,6 +9,8 @@ part 'receiver.g.dart';
 class Receiver = _Receiver with _$Receiver;
 
 abstract class _Receiver with Store {
+  final Logger _logger;
+
   // Determines whether the receiver is running or not
   @observable
   bool _isStarted = false;
@@ -37,23 +39,39 @@ abstract class _Receiver with Store {
   @computed
   int get repairPort => _repairPort;
 
+  _Receiver(Logger logger) : _logger = logger;
+
   // Start current receiver.
-  void start(Logger logger) {
+  void start() {
     if (isStarted) {
       throw StartActiveReceiverError;
     }
 
     _isStarted = !_isStarted;
-    logger.i('Receiver started');
+    _logger.i('Receiver started');
   }
 
   // Stop current receiver.
-  void stop(Logger logger) {
+  void stop() {
     if (!isStarted) {
       throw StopInactiveReceiverError;
     }
 
     _isStarted = !_isStarted;
-    logger.i('Receiver stopped');
+    _logger.i('Receiver stopped');
+  }
+
+  // Update source port value
+  @action
+  void setSourcePort(int value) {
+    _sourcePort = value;
+    _logger.d('Receiver source port value changed to: ${_sourcePort}');
+  }
+
+  // Update repair port value
+  @action
+  void setRepairPort(int value) {
+    _repairPort = value;
+    _logger.d('Receiver repair port value changed to: ${_repairPort}');
   }
 }
