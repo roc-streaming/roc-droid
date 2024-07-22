@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class RocTextRow extends Container {
   RocTextRow(String text)
       : super(
-          padding: EdgeInsets.only(bottom: 15.0),
+          padding: EdgeInsets.symmetric(vertical: 7.0),
           child: Text(text),
         );
 }

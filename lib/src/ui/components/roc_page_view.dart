@@ -6,7 +6,10 @@ class RocPageView extends Container {
     required List<Widget> controllersColumn,
     required Widget bottomButton,
   }) : super(
-          padding: EdgeInsets.all(35.0),
+          padding: EdgeInsets.symmetric(
+            vertical: 20.0,
+            horizontal: 35.0,
+          ),
           child: Stack(
             children: [
               // Main controllers column

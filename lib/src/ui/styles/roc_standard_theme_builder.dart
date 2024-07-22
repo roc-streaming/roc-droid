@@ -14,6 +14,12 @@ class RocStandardThemeBuilder {
           fontWeight: FontWeight.normal,
           fontSize: 20,
         ),
+        // Roc button text style
+        titleSmall: TextStyle(
+          color: RocColors.white,
+          fontWeight: FontWeight.normal,
+          fontSize: 13,
+        ),
         // The default text style used when no style is assigned
         bodyMedium: TextStyle(
           color: RocColors.darkGray,

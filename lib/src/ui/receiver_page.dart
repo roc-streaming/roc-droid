@@ -3,7 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 import '../model/model_root.dart';
-import 'components/roc_number_input.dart';
+import 'components/roc_data_chip.dart';
 import 'components/roc_page_view.dart';
 import 'components/roc_stateful_button.dart';
 import 'components/roc_text_row.dart';
@@ -23,16 +23,16 @@ class ReceiverPage extends StatelessWidget {
         RocTextRow(AppLocalizations.of(context)!.receiverUseIPStep),
         RocTextRow(AppLocalizations.of(context)!.receiverSourceStreamStep),
         Observer(
-          builder: (_) => RocNumberInput(
-            initialValue: _modelRoot.receiver.sourcePort,
-            function: _modelRoot.receiver.setSourcePort,
+          builder: (_) => RocDataChip(
+            text: _modelRoot.receiver.sourcePort.toString(),
+            logger: _modelRoot.logger,
           ),
         ),
         RocTextRow(AppLocalizations.of(context)!.receiverRepairStreamStep),
         Observer(
-          builder: (_) => RocNumberInput(
-            initialValue: _modelRoot.receiver.repairPort,
-            function: _modelRoot.receiver.setRepairPort,
+          builder: (_) => RocDataChip(
+            text: _modelRoot.receiver.repairPort.toString(),
+            logger: _modelRoot.logger,
           ),
         ),
         RocTextRow(AppLocalizations.of(context)!.receiverStartStep),
