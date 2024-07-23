@@ -83,4 +83,11 @@ abstract class _Sender with Store {
     _repairPort = value;
     _logger.d('Sender repair port value changed to: ${_repairPort}');
   }
+
+  // Update the active source port
+  @action
+  void setReceiverIP(String value) {
+    _receiverIP = value;
+    _logger.d('Sender active source port value changed to: ${_receiverIP}');
+  }
 }

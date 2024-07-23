@@ -61,6 +61,14 @@ abstract class _Receiver with Store {
     _logger.i('Receiver stopped');
   }
 
+  // Update collection of available receiver IP addresses.
+  @action
+  void setReceiverIPs(List<String> addresses) {
+    _receiverIPs = addresses;
+    _logger.d(
+        'Collection of available receiver IP addresses changed to: ${_receiverIPs}');
+  }
+
   // Update source port value
   @action
   void setSourcePort(int value) {

@@ -51,5 +51,11 @@
     "@startSenderButton": { "description": "Start sender button text" },
 
     "stopSenderButton": "STOP SENDER",
-    "@stopSenderButton": { "description": "Stop sender button text" }
+    "@stopSenderButton": { "description": "Stop sender button text" },
+
+    "noIPsShortWarning": "Warning: No IP addresses",
+    "@noIPsShortWarning": { "description": "Short chip warning: No IPs" },
+
+    "noPortShortWarning": "Warning: No port",
+    "@noPortShortWarning": { "description": "Short chip warning: No port" }
 }

@@ -3,8 +3,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 import '../model/model_root.dart';
-import 'components/roc_data_chip.dart';
+import 'components/roc_chip_column.dart';
 import 'components/roc_page_view.dart';
+import 'components/roc_port_chip.dart';
 import 'components/roc_stateful_button.dart';
 import 'components/roc_text_row.dart';
 
@@ -21,19 +22,19 @@ class ReceiverPage extends StatelessWidget {
       controllersColumn: [
         RocTextRow(AppLocalizations.of(context)!.receiverStartSenderStep),
         RocTextRow(AppLocalizations.of(context)!.receiverUseIPStep),
+        Observer(
+          builder: (_) =>
+              RocChipColumn(_modelRoot.receiver.receiverIPs, _modelRoot.logger),
+        ),
         RocTextRow(AppLocalizations.of(context)!.receiverSourceStreamStep),
         Observer(
-          builder: (_) => RocDataChip(
-            text: _modelRoot.receiver.sourcePort.toString(),
-            logger: _modelRoot.logger,
-          ),
+          builder: (_) =>
+              RocPortChip(_modelRoot.receiver.sourcePort, _modelRoot.logger),
         ),
         RocTextRow(AppLocalizations.of(context)!.receiverRepairStreamStep),
         Observer(
-          builder: (_) => RocDataChip(
-            text: _modelRoot.receiver.repairPort.toString(),
-            logger: _modelRoot.logger,
-          ),
+          builder: (_) =>
+              RocPortChip(_modelRoot.receiver.repairPort, _modelRoot.logger),
         ),
         RocTextRow(AppLocalizations.of(context)!.receiverStartStep),
       ],
