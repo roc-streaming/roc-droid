@@ -61,6 +61,7 @@ class _MainScreenState extends State<MainScreen> {
         // Test floating action button
         floatingActionButton:
             _addTestButton ? RocTestFloatingButton(_modelRoot) : null,
+        resizeToAvoidBottomInset: false,
       ),
     );
   }

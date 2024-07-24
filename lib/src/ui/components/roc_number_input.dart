@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../styles/roc_colors.dart';
+
 /// Roc's custom number input widget.
-class RocNumberInput extends Align {
+class RocNumberInput extends Container {
   RocNumberInput(String initialValue, Function(String) function)
       : super(
           alignment: Alignment.center,
-          child: Container(
-            width: 170,
+          padding: EdgeInsets.only(bottom: 15.0),
+          child: SizedBox(
+            width: 170.0,
+            height: 42.0,
             child: TextFormField(
               textAlign: TextAlign.center,
               initialValue: initialValue,
@@ -15,6 +19,10 @@ class RocNumberInput extends Align {
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(RegExp(r'[\d\.]')),
               ],
+              style: TextStyle(
+                fontSize: 17,
+                color: RocColors.darkGray,
+              ),
               onChanged: (value) => function(value),
             ),
           ),
