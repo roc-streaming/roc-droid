@@ -57,6 +57,7 @@ class _MainScreenState extends State<MainScreen> {
         body: Center(child: _pages.elementAt(_selectedPage)),
         bottomNavigationBar: Observer(
           builder: (_) => RocBottomNavigationBar(
+            context: context,
             selectedPage: _selectedPage,
             onTabTapped: _onTabTapped,
             receiverIsStarted: _modelRoot.receiver.isStarted,

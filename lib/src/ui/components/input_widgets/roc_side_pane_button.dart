@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../styles/roc_colors.dart';
 
 /// Roc's custom side pane text button widget.
-class RocSidePaneButton extends Container {
+class RocSidePaneButton extends StatelessWidget {
   final Icon _icon;
   final String _text;
   final Function _function;

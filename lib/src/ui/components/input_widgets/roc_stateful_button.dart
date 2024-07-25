@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../styles/roc_button_style.dart';
+import '../../styles/roc_button_styles.dart';
 
 /// Roc's custom stateful button widget.
 class RocStatefulButton extends StatefulWidget {
@@ -61,7 +61,7 @@ class _RocStatefulButtonState extends State<RocStatefulButton> {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      style: RocButtonStyle.startButton,
+      style: RocButtonStyles.startButton,
       onPressed: _onPressed,
       child: Text(
         _isStarted ? _activeText : _inactiveText,
