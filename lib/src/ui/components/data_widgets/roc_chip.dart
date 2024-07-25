@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../styles/roc_colors.dart';
+import '../../styles/roc_colors.dart';
 
 /// Roc's custom chip widget.
 class RocChip extends Align {

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 
-import '../styles/roc_colors.dart';
 import 'roc_chip.dart';
 
 /// Roc's custom data chip widget.
@@ -22,8 +21,6 @@ class RocDataChip extends RocChip {
                   },
                   icon: Icon(Icons.copy),
                   iconSize: 22.0,
-                  color: RocColors.mainBlue,
-                  padding: EdgeInsets.zero,
                 ),
               ),
             ],

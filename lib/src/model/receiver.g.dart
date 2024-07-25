@@ -103,6 +103,17 @@ mixin _$Receiver on _Receiver, Store {
       ActionController(name: '_Receiver', context: context);
 
   @override
+  void setReceiverIPs(List<String> addresses) {
+    final _$actionInfo = _$_ReceiverActionController.startAction(
+        name: '_Receiver.setReceiverIPs');
+    try {
+      return super.setReceiverIPs(addresses);
+    } finally {
+      _$_ReceiverActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setSourcePort(int value) {
     final _$actionInfo = _$_ReceiverActionController.startAction(
         name: '_Receiver.setSourcePort');

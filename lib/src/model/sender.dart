@@ -70,24 +70,31 @@ abstract class _Sender with Store {
     _logger.i('Sender stopped');
   }
 
-  // Update source port value
+  // Update source port value.
   @action
   void setSourcePort(int value) {
     _sourcePort = value;
     _logger.d('Sender source port value changed to: ${_sourcePort}');
   }
 
-  // Update repair port value
+  // Update repair port value.
   @action
   void setRepairPort(int value) {
     _repairPort = value;
     _logger.d('Sender repair port value changed to: ${_repairPort}');
   }
 
-  // Update the active source port
+  // Update the active source port.
   @action
   void setReceiverIP(String value) {
     _receiverIP = value;
     _logger.d('Sender active source port value changed to: ${_receiverIP}');
+  }
+
+  // Update the active the user-selected capture source enum.
+  @action
+  void setCaptureSource(CaptureSourceType value) {
+    _captureSource = value;
+    _logger.d('Capture source enum value changed to: ${_captureSource}');
   }
 }

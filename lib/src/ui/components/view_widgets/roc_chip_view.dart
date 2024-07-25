@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:logger/logger.dart';
 
-import 'roc_data_chip.dart';
-import 'roc_warning_chip.dart';
+import '../data_widgets/roc_data_chip.dart';
+import '../data_widgets/roc_warning_chip.dart';
 
-/// Roc's custom chip column widget.
-class RocChipColumn extends StatelessWidget {
+/// Roc's custom chip column view widget.
+class RocChipView extends StatelessWidget {
   final List<String> _entries;
   final Logger _logger;
 
-  RocChipColumn(List<String> entries, Logger logger)
+  RocChipView(List<String> entries, Logger logger)
       : _entries = entries,
         _logger = logger;
 

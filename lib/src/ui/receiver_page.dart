@@ -3,11 +3,11 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 import '../model/model_root.dart';
-import 'components/roc_chip_column.dart';
-import 'components/roc_page_view.dart';
-import 'components/roc_port_chip.dart';
-import 'components/roc_stateful_button.dart';
-import 'components/roc_text_row.dart';
+import 'components/data_widgets/roc_port_chip.dart';
+import 'components/data_widgets/roc_text_row.dart';
+import 'components/input_widgets/roc_stateful_button.dart';
+import 'components/view_widgets/roc_chip_view.dart';
+import 'components/view_widgets/roc_page_view.dart';
 
 // Receiver page class implementation - Page layer.
 class ReceiverPage extends StatelessWidget {
@@ -24,7 +24,7 @@ class ReceiverPage extends StatelessWidget {
         RocTextRow(AppLocalizations.of(context)!.receiverUseIPStep),
         Observer(
           builder: (_) =>
-              RocChipColumn(_modelRoot.receiver.receiverIPs, _modelRoot.logger),
+              RocChipView(_modelRoot.receiver.receiverIPs, _modelRoot.logger),
         ),
         RocTextRow(AppLocalizations.of(context)!.receiverSourceStreamStep),
         Observer(

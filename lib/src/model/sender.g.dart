@@ -147,6 +147,28 @@ mixin _$Sender on _Sender, Store {
   }
 
   @override
+  void setReceiverIP(String value) {
+    final _$actionInfo =
+        _$_SenderActionController.startAction(name: '_Sender.setReceiverIP');
+    try {
+      return super.setReceiverIP(value);
+    } finally {
+      _$_SenderActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setCaptureSource(CaptureSourceType value) {
+    final _$actionInfo =
+        _$_SenderActionController.startAction(name: '_Sender.setCaptureSource');
+    try {
+      return super.setCaptureSource(value);
+    } finally {
+      _$_SenderActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 isStarted: ${isStarted},

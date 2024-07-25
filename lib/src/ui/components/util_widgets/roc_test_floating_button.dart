@@ -2,8 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import '../../model/model_root.dart';
-import '../styles/roc_colors.dart';
+import '../../../model/model_root.dart';
 
 /// Roc's custom test floating button widget.
 class RocTestFloatingButton extends StatelessWidget {
@@ -33,7 +32,6 @@ class RocTestFloatingButton extends StatelessWidget {
       },
       icon: Icon(Icons.settings),
       iconSize: 30.0,
-      color: RocColors.mainBlue,
     );
   }
 }

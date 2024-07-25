@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
+import '../model/entities/capture_source_type.dart';
 import '../model/model_root.dart';
-import 'components/roc_number_input.dart';
-import 'components/roc_page_view.dart';
-import 'components/roc_port_chip.dart';
-import 'components/roc_stateful_button.dart';
-import 'components/roc_text_row.dart';
+import 'components/data_widgets/roc_port_chip.dart';
+import 'components/data_widgets/roc_text_row.dart';
+import 'components/input_widgets/roc_dropdown_button.dart';
+import 'components/input_widgets/roc_number_input.dart';
+import 'components/input_widgets/roc_stateful_button.dart';
+import 'components/view_widgets/roc_page_view.dart';
 
 // Sender page class implementation - Page layer.
 class SenderPage extends StatelessWidget {
@@ -37,6 +39,18 @@ class SenderPage extends StatelessWidget {
               _modelRoot.sender.receiverIP, _modelRoot.sender.setReceiverIP),
         ),
         RocTextRow(AppLocalizations.of(context)!.senderChooseSourceStep),
+        Observer(
+          builder: (_) => RocDropdownButton<CaptureSourceType>(
+            availableValues: {
+              CaptureSourceType.currentlyPlayingApplications:
+                  AppLocalizations.of(context)!.currentlyPlayingApplications,
+              CaptureSourceType.microphone:
+                  AppLocalizations.of(context)!.microphone,
+            },
+            changeAction: _modelRoot.sender.setCaptureSource,
+            initialValue: _modelRoot.sender.captureSource,
+          ),
+        ),
         RocTextRow(AppLocalizations.of(context)!.senderStartStep),
       ],
       bottomButton: RocStatefulButton(

@@ -69,14 +69,14 @@ abstract class _Receiver with Store {
         'Collection of available receiver IP addresses changed to: ${_receiverIPs}');
   }
 
-  // Update source port value
+  // Update source port value.
   @action
   void setSourcePort(int value) {
     _sourcePort = value;
     _logger.d('Receiver source port value changed to: ${_sourcePort}');
   }
 
-  // Update repair port value
+  // Update repair port value.
   @action
   void setRepairPort(int value) {
     _repairPort = value;

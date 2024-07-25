@@ -15,6 +15,8 @@ dependencies:
   mobx: ^2.3.3+2
   flutter_mobx: ^2.2.1+1
   darq: ^2.0.0
+  flutter_native_splash: ^2.4.1
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
@@ -27,3 +29,34 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  assets:
+    - assets/splash.png
+    - assets/icon.png
+
+flutter_native_splash:
+  android: true
+  ios: true
+  web: false
+  image: assets/splash.png
+  color: "#FFFFFF"
+  android_12:
+    image: assets/splash.png
+    color: "#FFFFFF"
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/icon.png"
+    background_color: "#hexcode"
+    theme_color: "#hexcode"
+  windows:
+    generate: true
+    image_path: "assets/icon.png"
+    icon_size: 48
+  macos:
+    generate: true
+    image_path: "assets/icon.png"

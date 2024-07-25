@@ -57,5 +57,29 @@
     "@noIPsShortWarning": { "description": "Short chip warning: No IPs" },
 
     "noPortShortWarning": "Warning: No port",
-    "@noPortShortWarning": { "description": "Short chip warning: No port" }
+    "@noPortShortWarning": { "description": "Short chip warning: No port" },
+
+    "currentlyPlayingApplications": "Currently playing applications",
+    "@currentlyPlayingApplications": { "description": "CaptureSourceType enum: Currently playing applications value" },
+
+    "microphone": "Microphone",
+    "@microphone": { "description": "CaptureSourceType enum: Microphone value" },
+
+    "about": "About",
+    "@about": { "description": "Header: About" },
+
+    "sourceCode": "SOURCE CODE",
+    "@sourceCode": { "description": "About page: Source code" },
+
+    "bugTracker": "BUG TRACKER",
+    "@bugTracker": { "description": "About page: Bug tracker" },
+
+    "contributors": "CONTRIBUTORS",
+    "@contributors": { "description": "About page: Contributors" },
+
+    "licenseData": "MOZILLA PUBLIC LICENSE 2.0",
+    "@licenseData": { "description": "About page: License data" },
+
+    "appVersion": "v0.2.1",
+    "@appVersion": { "description": "About page: application version" }
 }

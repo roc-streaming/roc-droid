@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../styles/roc_button_style.dart';
+import '../../styles/roc_button_style.dart';
 
 /// Roc's custom stateful button widget.
 class RocStatefulButton extends StatefulWidget {

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+
 import '../model/model_root.dart';
-import 'components/roc_app_bar.dart';
-import 'components/roc_bottom_navigation_bar.dart';
-import 'components/roc_test_floating_button.dart';
+import 'components/scaffold_widgets/roc_basic_app_bar.dart';
+import 'components/scaffold_widgets/roc_bottom_navigation_bar.dart';
+import 'components/util_widgets/roc_test_floating_button.dart';
 import 'receiver_page.dart';
 import 'sender_page.dart';
 
@@ -51,12 +53,15 @@ class _MainScreenState extends State<MainScreen> {
       initialIndex: 0,
       length: 2,
       child: Scaffold(
-        appBar: RocAppBar(context),
+        appBar: RocBasicAppBar(context, _modelRoot),
         body: Center(child: _pages.elementAt(_selectedPage)),
-        bottomNavigationBar: RocBottomNavigationBar(
-          context: context,
-          selectedPage: _selectedPage,
-          onTabTapped: _onTabTapped,
+        bottomNavigationBar: Observer(
+          builder: (_) => RocBottomNavigationBar(
+            selectedPage: _selectedPage,
+            onTabTapped: _onTabTapped,
+            receiverIsStarted: _modelRoot.receiver.isStarted,
+            senderIsStarted: _modelRoot.sender.isStarted,
+          ),
         ),
         // Test floating action button
         floatingActionButton:

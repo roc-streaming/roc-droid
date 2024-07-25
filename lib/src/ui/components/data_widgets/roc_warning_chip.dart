@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../styles/roc_colors.dart';
+import '../../styles/roc_colors.dart';
 import 'roc_chip.dart';
 
 /// Roc's custom warning chip widget.
