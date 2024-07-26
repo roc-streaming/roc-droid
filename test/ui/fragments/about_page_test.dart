@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:roc_droid/src/model.dart';
 import 'package:roc_droid/src/ui.dart';
-import 'package:roc_droid/src/ui/components/input_widgets/roc_about%20_page_button.dart';
+import 'package:roc_droid/src/ui/components/input_widgets/roc_about_page_button.dart';
 import 'package:roc_droid/src/ui/components/scaffold_widgets/roc_side_pane_app_bar.dart';
 import 'package:roc_droid/src/ui/components/view_widgets/roc_scroll_view.dart';
 import 'package:roc_droid/src/ui/fragments/about_page.dart';

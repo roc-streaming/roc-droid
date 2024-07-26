@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../model/model_root.dart';
-import '../components/input_widgets/roc_about _page_button.dart';
+import '../components/input_widgets/roc_about_page_button.dart';
 import '../components/scaffold_widgets/roc_side_pane_app_bar.dart';
 import '../components/view_widgets/roc_scroll_view.dart';
 
