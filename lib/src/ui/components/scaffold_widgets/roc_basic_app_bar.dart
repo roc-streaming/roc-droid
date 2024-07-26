@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../model/model_root.dart';
-import '../../fragments/side_pane.dart';
+import '../../fragments/about_page.dart';
 import '../../styles/roc_colors.dart';
+import '../../utils/roc_keys.dart';
 
 /// Roc's custom basic application bar.
 class RocBasicAppBar extends AppBar {
@@ -15,10 +16,11 @@ class RocBasicAppBar extends AppBar {
           ),
           actions: [
             IconButton(
+              key: RocKeys.sidePaneKey,
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SidePane(modelRoot)),
+                  MaterialPageRoute(builder: (context) => AboutPage(modelRoot)),
                 );
               },
               icon: Icon(Icons.more_vert),

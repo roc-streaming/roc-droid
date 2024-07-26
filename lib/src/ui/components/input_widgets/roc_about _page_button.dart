@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../styles/roc_colors.dart';
 
-/// Roc's custom side pane text button widget.
-class RocSidePaneButton extends StatelessWidget {
+/// Roc's custom about page text button widget.
+class RocAboutPageButton extends StatelessWidget {
   final Icon _icon;
   final String _text;
   final Function _function;
 
-  RocSidePaneButton({
+  RocAboutPageButton({
     required Icon icon,
     required String text,
     required Function function,
@@ -19,12 +19,13 @@ class RocSidePaneButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 200,
+      width: 260,
       child: TextButton(
         style:
             ButtonStyle(iconColor: WidgetStatePropertyAll(RocColors.mainBlue)),
         onPressed: () => _function(),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _icon,
             Padding(

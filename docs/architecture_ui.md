@@ -78,10 +78,50 @@ Designations:
 
   * Classes:
 
-    * [MessagePopup](/lib/src/ui/fragments/message_popup.dart)
+    * [AboutPage](/lib/src/ui/fragments/about_page.dart)
 
-    * [SettingsPane](/lib/src/ui/fragments/settings_pane.dart)
-    
-    * [SourceSelector](/lib/src/ui/fragments/source_selector.dart)
+* **Gray:** Native Flutter `Widget` class (`Representation Layer`)
 
-* **Gray:** Native Flutter class (`Representation Layer`)
+* **Blue:** Custom Roc `Widget` class (`Representation Layer`)
+
+  * These classes are also divided into the following types:
+
+    * Data widgets:
+  
+      * Location: `/lib/src/ui/components/data_widgets/`
+  
+      * Representing classes that provide certain data to the user.
+
+      * Only widget extensions are allowed for this type.
+  
+    * Input widgets:
+  
+      * Location: `/lib/src/ui/components/input_widgets/`
+
+      * These are classes that provide the user with the ability to enter certain data.
+
+      * Stetless, Statefull and extension widgets are allowed for this type.
+  
+    * Scaffold widgets:
+  
+      * Location: `/lib/src/ui/components/scaffold_widgets/`
+
+      * A set of special widgets that control the appearance of scaffold elements.
+
+      * Only widget extensions are allowed for this type.
+  
+    * Util widgets:
+  
+      * Location: `/lib/src/ui/components/util_widgets/`
+
+      * Help and debugging utility widgets.
+  
+      * Stetless, Statefull and extension widgets are allowed for this type.
+  
+    * View widgets:
+
+      * Location: `/lib/src/ui/components/view_widgets/`
+
+      * Widgets that control specific view representations.
+  
+      * Only stetless widgets are allowed for this type.

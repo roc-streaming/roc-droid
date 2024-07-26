@@ -26,6 +26,10 @@ Architecture:
 
 * **Agent** – [Agent architecture description](/docs/architecture_agent.md)
 
+Automation:
+
+* **doit automation** - [Description of application automation (doit)](/docs/automation.md)
+
 Tests:
 
 * **Unit testing** - [Unit testing description](/docs/unit_tests.md)

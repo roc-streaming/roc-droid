@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'roc_colors.dart';
 
-/// Roc button styles class class
+/// Roc button styles class
 class RocButtonStyles {
   static const ButtonStyle startButton = ButtonStyle(
     backgroundColor: WidgetStatePropertyAll(RocColors.mainBlue),

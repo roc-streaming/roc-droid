@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 /// Roc's custom bottom navigation bar item widget.
 class RocBottomNavigationBarItem extends BottomNavigationBarItem {
   RocBottomNavigationBarItem({
+    required Key key,
     required Icon icon,
     required String label,
     required bool isStarted,
   }) : super(
+          key: key,
           label: label,
           icon: Stack(
             children: [

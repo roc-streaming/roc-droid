@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../model/model_root.dart';
-import '../components/input_widgets/roc_side_pane_button.dart';
+import '../components/input_widgets/roc_about _page_button.dart';
 import '../components/scaffold_widgets/roc_side_pane_app_bar.dart';
 import '../components/view_widgets/roc_scroll_view.dart';
 
-/// Roc's side menu drawer.
-class SidePane extends StatelessWidget {
+/// Roc's about page class widget.
+class AboutPage extends StatelessWidget {
   final ModelRoot _modelRoot;
 
-  const SidePane(ModelRoot modelRoot) : _modelRoot = modelRoot;
+  const AboutPage(ModelRoot modelRoot) : _modelRoot = modelRoot;
 
   @override
   Widget build(BuildContext context) {
-    _modelRoot.logger.d('Side pane build started');
+    _modelRoot.logger.d('About page build started');
 
     return Scaffold(
       appBar: RocSidePaneAppBar(context, _modelRoot),
@@ -44,17 +44,17 @@ class SidePane extends StatelessWidget {
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ),
-              RocSidePaneButton(
+              RocAboutPageButton(
                   icon: Icon(Icons.code),
                   text: AppLocalizations.of(context)!.sourceCode,
                   function: () => _modelRoot.logger
                       .d('The "Source code" command is called.')),
-              RocSidePaneButton(
+              RocAboutPageButton(
                   icon: Icon(Icons.bug_report_outlined),
                   text: AppLocalizations.of(context)!.bugTracker,
                   function: () => _modelRoot.logger
                       .d('The "Bug tracker" command is called.')),
-              RocSidePaneButton(
+              RocAboutPageButton(
                   icon: Icon(Icons.group),
                   text: AppLocalizations.of(context)!.contributors,
                   function: () => _modelRoot.logger
