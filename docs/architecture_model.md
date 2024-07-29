@@ -27,7 +27,7 @@ Description of the model tree:
 
   * Sender implementation: [Sender](/lib/src/model/sender.dart)
 
-    * The Sender has its own automatically generated code for the correct operation of `Mobx`: [sender.g.dart](/lib/src/model/receiver.g.dart)
+    * The Sender has its own automatically generated code for the correct operation of `Mobx`: [sender.g.dart](/lib/src/model/sender.g.dart)
 
 * The `Logger` class is managed by the Flutter `logger` package and is highlighted in yellow.
 
