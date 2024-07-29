@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:roc_droid/src/model.dart';
 import 'package:roc_droid/src/ui.dart';
-import 'package:roc_droid/src/ui/components/scaffold_widgets/roc_basic_app_bar.dart';
-import 'package:roc_droid/src/ui/components/scaffold_widgets/roc_bottom_navigation_bar.dart';
+import 'package:roc_droid/src/ui/components/input_widgets/roc_bottom_navigation_bar.dart';
 import 'package:roc_droid/src/ui/main_screen.dart';
-import 'package:roc_droid/src/ui/receiver_page.dart';
+import 'package:roc_droid/src/ui/pages/receiver_page.dart';
 
 // Main screen class widget tests.
 void main() {

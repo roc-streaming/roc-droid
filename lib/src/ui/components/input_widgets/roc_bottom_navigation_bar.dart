@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../utils/roc_keys.dart';
-import 'roc_bottom_navigation_bar_item.dart';
 
 /// Roc's custom bottom navigation bar.
 class RocBottomNavigationBar extends BottomNavigationBar {
@@ -29,5 +28,40 @@ class RocBottomNavigationBar extends BottomNavigationBar {
           ],
           currentIndex: selectedPage,
           onTap: onTabTapped,
+        );
+}
+
+/// Roc's custom bottom navigation bar item widget.
+class RocBottomNavigationBarItem extends BottomNavigationBarItem {
+  RocBottomNavigationBarItem({
+    required Key key,
+    required Icon icon,
+    required String label,
+    required bool isStarted,
+  }) : super(
+          key: key,
+          label: label,
+          icon: Stack(
+            children: [
+              Align(
+                alignment: Alignment.center,
+                child: icon,
+              ),
+              isStarted
+                  ? Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 70,
+                        height: 21,
+                        alignment: Alignment.bottomLeft,
+                        child: Icon(
+                          Icons.circle,
+                          size: 17,
+                        ),
+                      ),
+                    )
+                  : Container(),
+            ],
+          ),
         );
 }

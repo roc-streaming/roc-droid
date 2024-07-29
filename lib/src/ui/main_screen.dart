@@ -1,12 +1,16 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 import '../model/model_root.dart';
-import 'components/scaffold_widgets/roc_basic_app_bar.dart';
-import 'components/scaffold_widgets/roc_bottom_navigation_bar.dart';
-import 'components/util_widgets/roc_test_floating_button.dart';
-import 'receiver_page.dart';
-import 'sender_page.dart';
+import 'components/input_widgets/roc_bottom_navigation_bar.dart';
+import 'pages/about_page.dart';
+import 'pages/receiver_page.dart';
+import 'pages/sender_page.dart';
+import 'styles/roc_colors.dart';
+import 'utils/roc_keys.dart';
 
 // Main screen class implementation - Screen layer.
 class MainScreen extends StatefulWidget {
@@ -69,6 +73,63 @@ class _MainScreenState extends State<MainScreen> {
             _addTestButton ? RocTestFloatingButton(_modelRoot) : null,
         resizeToAvoidBottomInset: false,
       ),
+    );
+  }
+}
+
+/// Roc's custom basic application bar.
+class RocBasicAppBar extends AppBar {
+  RocBasicAppBar(BuildContext context, ModelRoot modelRoot)
+      : super(
+          title: Text(
+            AppLocalizations.of(context)!.appTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          actions: [
+            IconButton(
+              key: RocKeys.sidePaneKey,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AboutPage(modelRoot)),
+                );
+              },
+              icon: Icon(Icons.more_vert),
+              style: ButtonStyle(
+                  iconColor: WidgetStatePropertyAll(RocColors.white)),
+            ),
+          ],
+        );
+}
+
+/// Roc's custom test floating button widget.
+class RocTestFloatingButton extends StatelessWidget {
+  final ModelRoot _modelRoot;
+
+  RocTestFloatingButton(ModelRoot modelRoot) : _modelRoot = modelRoot;
+
+  String formRandomIP() {
+    return '${Random().nextInt(99)}.${Random().nextInt(99)}.'
+        '${Random().nextInt(99)}.${Random().nextInt(99)}';
+  }
+
+  List<String> formRandomIPs() {
+    return List<String>.generate(
+        Random().nextInt(4), (index) => formRandomIP());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () => {
+        _modelRoot.receiver.setReceiverIPs(formRandomIPs()),
+        _modelRoot.receiver.setSourcePort(Random().nextInt(99999)),
+        _modelRoot.receiver.setRepairPort(Random().nextInt(99999)),
+        _modelRoot.sender.setSourcePort(Random().nextInt(99999)),
+        _modelRoot.sender.setRepairPort(Random().nextInt(99999)),
+      },
+      icon: Icon(Icons.settings),
+      iconSize: 30.0,
     );
   }
 }

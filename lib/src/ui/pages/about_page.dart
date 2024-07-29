@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../model/model_root.dart';
-import '../components/input_widgets/roc_about_page_button.dart';
-import '../components/scaffold_widgets/roc_side_pane_app_bar.dart';
 import '../components/view_widgets/roc_scroll_view.dart';
+import '../styles/roc_colors.dart';
 
 /// Roc's about page class widget.
 class AboutPage extends StatelessWidget {
@@ -17,7 +16,7 @@ class AboutPage extends StatelessWidget {
     _modelRoot.logger.d('About page build started');
 
     return Scaffold(
-      appBar: RocSidePaneAppBar(context, _modelRoot),
+      appBar: RocAboutPageAppBar(context, _modelRoot),
       body: RocScrollView(
         child: Align(
           alignment: Alignment.topCenter,
@@ -69,6 +68,71 @@ class AboutPage extends StatelessWidget {
               )
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Roc's side pane top application bar.
+class RocAboutPageAppBar extends AppBar {
+  RocAboutPageAppBar(BuildContext context, ModelRoot modelRoot)
+      : super(
+          leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+              modelRoot.logger.d('Side pane pop initiated');
+            },
+            icon: Icon(Icons.arrow_back),
+            style:
+                ButtonStyle(iconColor: WidgetStatePropertyAll(RocColors.white)),
+          ),
+          centerTitle: false,
+          titleSpacing: 0.0,
+          title: Container(
+            padding: EdgeInsets.only(left: 25.0),
+            child: Text(
+              AppLocalizations.of(context)!.about,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+        );
+}
+
+/// Roc's custom about page text button widget.
+class RocAboutPageButton extends StatelessWidget {
+  final Icon _icon;
+  final String _text;
+  final Function _function;
+
+  RocAboutPageButton({
+    required Icon icon,
+    required String text,
+    required Function function,
+  })  : _icon = icon,
+        _text = text,
+        _function = function;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 260,
+      child: TextButton(
+        style:
+            ButtonStyle(iconColor: WidgetStatePropertyAll(RocColors.mainBlue)),
+        onPressed: () => _function(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _icon,
+            Padding(
+              padding: EdgeInsets.only(left: 10.0),
+              child: Text(
+                _text,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+            ),
+          ],
         ),
       ),
     );

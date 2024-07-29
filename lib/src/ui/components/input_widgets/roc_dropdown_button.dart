@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../styles/roc_colors.dart';
-import '../data_widgets/roc_dropdown_menu_item.dart';
 
 /// Roc's custom dropdown button widget.
 class RocDropdownButton<T> extends StatefulWidget {
@@ -62,4 +61,19 @@ class _RocDropdownButtonState<T> extends State<RocDropdownButton<T>> {
       ),
     );
   }
+}
+
+/// Roc's custom dropdown menu item.
+class RocDropdownMenuItem<T> extends DropdownMenuItem {
+  RocDropdownMenuItem(
+    BuildContext context,
+    MapEntry<T, String> entry,
+  ) : super(
+          value: entry.key,
+          alignment: Alignment.center,
+          child: Text(
+            entry.value,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        );
 }

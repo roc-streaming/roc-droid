@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
-import '../model/entities/capture_source_type.dart';
-import '../model/model_root.dart';
-import 'components/data_widgets/roc_port_chip.dart';
-import 'components/data_widgets/roc_text_row.dart';
-import 'components/input_widgets/roc_dropdown_button.dart';
-import 'components/input_widgets/roc_number_input.dart';
-import 'components/input_widgets/roc_stateful_button.dart';
-import 'components/view_widgets/roc_page_view.dart';
+import '../../model/entities/capture_source_type.dart';
+import '../../model/model_root.dart';
+import '../components/data_widgets/roc_chips.dart';
+import '../components/data_widgets/roc_text_row.dart';
+import '../components/input_widgets/roc_dropdown_button.dart';
+import '../components/input_widgets/roc_stateful_button.dart';
+import '../components/view_widgets/roc_page_view.dart';
 
 // Sender page class implementation - Page layer.
 class SenderPage extends StatelessWidget {
@@ -59,6 +59,38 @@ class SenderPage extends StatelessWidget {
         activeFunction: _modelRoot.sender.stop,
         inactiveText: AppLocalizations.of(context)!.startSenderButton,
         activeText: AppLocalizations.of(context)!.stopSenderButton,
+      ),
+    );
+  }
+}
+
+/// Roc's custom number input widget.
+class RocNumberInput extends StatelessWidget {
+  final String _initialValue;
+  final Function(String) _function;
+
+  RocNumberInput(String initialValue, Function(String) function)
+      : _initialValue = initialValue,
+        _function = function;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      padding: EdgeInsets.only(bottom: 15.0),
+      child: SizedBox(
+        width: 250.0,
+        height: 42.0,
+        child: TextFormField(
+          textAlign: TextAlign.center,
+          initialValue: _initialValue,
+          keyboardType: TextInputType.number,
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.allow(RegExp(r'[\d\.]')),
+          ],
+          style: Theme.of(context).textTheme.bodyLarge,
+          onChanged: (value) => _function(value),
+        ),
       ),
     );
   }

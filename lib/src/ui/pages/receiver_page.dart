@@ -1,13 +1,14 @@
+import 'package:darq/darq.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:logger/logger.dart';
 
-import '../model/model_root.dart';
-import 'components/data_widgets/roc_port_chip.dart';
-import 'components/data_widgets/roc_text_row.dart';
-import 'components/input_widgets/roc_stateful_button.dart';
-import 'components/view_widgets/roc_chip_view.dart';
-import 'components/view_widgets/roc_page_view.dart';
+import '../../model/model_root.dart';
+import '../components/data_widgets/roc_chips.dart';
+import '../components/data_widgets/roc_text_row.dart';
+import '../components/input_widgets/roc_stateful_button.dart';
+import '../components/view_widgets/roc_page_view.dart';
 
 // Receiver page class implementation - Page layer.
 class ReceiverPage extends StatelessWidget {
@@ -45,6 +46,34 @@ class ReceiverPage extends StatelessWidget {
         inactiveText: AppLocalizations.of(context)!.startReceiverButton,
         activeText: AppLocalizations.of(context)!.stopReceiverButton,
       ),
+    );
+  }
+}
+
+/// Roc's custom chip column view widget.
+class RocChipView extends StatelessWidget {
+  final List<String> _entries;
+  final Logger _logger;
+
+  RocChipView(List<String> entries, Logger logger)
+      : _entries = entries,
+        _logger = logger;
+
+  List<Widget> formChipsList(BuildContext context) {
+    if (_entries.isEmpty) {
+      return List<Widget>.from(
+          [RocWarningChip(AppLocalizations.of(context)!.noIPsShortWarning)]);
+    }
+
+    return _entries
+        .select<Widget>((entry, i) => RocDataChip(entry, _logger))
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: formChipsList(context),
     );
   }
 }

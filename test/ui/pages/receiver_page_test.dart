@@ -1,12 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:roc_droid/src/model.dart';
 import 'package:roc_droid/src/ui.dart';
-import 'package:roc_droid/src/ui/components/data_widgets/roc_port_chip.dart';
+import 'package:roc_droid/src/ui/components/data_widgets/roc_chips.dart';
 import 'package:roc_droid/src/ui/components/data_widgets/roc_text_row.dart';
 import 'package:roc_droid/src/ui/components/input_widgets/roc_stateful_button.dart';
-import 'package:roc_droid/src/ui/components/view_widgets/roc_chip_view.dart';
 import 'package:roc_droid/src/ui/components/view_widgets/roc_page_view.dart';
-import 'package:roc_droid/src/ui/receiver_page.dart';
+import 'package:roc_droid/src/ui/pages/receiver_page.dart';
 
 // Receiver page class widget tests.
 void main() {

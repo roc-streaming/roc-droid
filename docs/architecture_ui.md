@@ -20,9 +20,7 @@ Widgets can be categorized into the following types:
 
     * `Screen`: This widget corresponds to the entire screen.
     
-    * `Page`: This widget represents a page within the screen. Switching between pages is done via the lower tab bar.
-    
-    * `Fragment`: This widget represents a smaller fragment of the UI, such as a separate block or item in a list.
+    * `Page`: This widget represents a page within the screen. Switching between pages is done via the lower tab bar or AppBar.
 
 * **Representation Layer**
 
@@ -34,17 +32,15 @@ Widgets can be categorized into the following types:
     
     * `Flutter Component`: Standard components from the Flutter SDK.
     
-    Fragment vs. Component
+    Page vs. Component
     
-    It's important to understand the difference between a fragment and a component:
+    It's important to understand the difference between a page and a component:
 
-    * `Fragment`: Responsible for communication with specific data (models or defined data). However, it is not responsible for a specific representation; this task is delegated to the components.
+    * `Page`: Responsible for communication with specific data (models or defined data). However, it is not responsible for a specific representation; this task is delegated to the components.
     
     * `Component`: Not tied to specific data—it receives data from above and does not interact with models. It is responsible for implementing a specific representation, such as styles and responses to clicks.
     
     > **Note:** In our code, custom component classes are prefixed with `roc` to distinguish them from standard components. Other types of widgets do not have a special prefix.
-
-    > **Note:** In some frameworks, an entity similar to a fragment is called a `widget`. We use the term `fragment` for clarity (like in Android SDK).
 
 ## Widget tree
 
@@ -70,15 +66,11 @@ Designations:
 
   * roc-droid classes:
 
-    * [ReceiverPage](/lib/src/ui/receiver_page.dart)
+    * [ReceiverPage](/lib/src/ui/pages/receiver_page.dart)
   
-    * [SenderPage](/lib/src/ui/sender_page.dart)
-
-* **Yellow:** Fragment-level widgets (`Content Layer`)
-
-  * Classes:
-
-    * [AboutPage](/lib/src/ui/fragments/about_page.dart)
+    * [SenderPage](/lib/src/ui/pages/sender_page.dart)
+  
+    * [AboutPage](/lib/src/ui/pages/about_page.dart)
 
 * **Gray:** Native Flutter `Widget` class (`Representation Layer`)
 
@@ -100,22 +92,6 @@ Designations:
 
       * These are classes that provide the user with the ability to enter certain data.
 
-      * Stetless, Statefull and extension widgets are allowed for this type.
-  
-    * Scaffold widgets:
-  
-      * Location: `/lib/src/ui/components/scaffold_widgets/`
-
-      * A set of special widgets that control the appearance of scaffold elements.
-
-      * Only widget extensions are allowed for this type.
-  
-    * Util widgets:
-  
-      * Location: `/lib/src/ui/components/util_widgets/`
-
-      * Help and debugging utility widgets.
-  
       * Stetless, Statefull and extension widgets are allowed for this type.
   
     * View widgets:
