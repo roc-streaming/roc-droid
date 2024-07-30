@@ -4,7 +4,7 @@ from doit.tools import title_with_actions
 def task_gen():
     """run flutter build_runner code generation"""
     return {
-        'actions': ['dart run build_runner --delete-conflicting-outputs'],
+        'actions': ['dart run build_runner build --delete-conflicting-outputs'],
         'title': title_with_actions,
         'verbosity': 2,
     }
