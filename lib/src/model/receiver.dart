@@ -1,7 +1,7 @@
+import 'dart:collection';
+
 import 'package:logger/logger.dart';
 import 'package:mobx/mobx.dart';
-
-import 'entities/exceptions.dart';
 
 part 'receiver.g.dart';
 
@@ -20,10 +20,11 @@ abstract class _Receiver with Store {
 
   // Represents a collection of available receiver IP addresses.
   @observable
-  List<String> _receiverIPs = List.empty();
+  ObservableList<String> _receiverIPs = ObservableList();
 
   @computed
-  List<String> get receiverIPs => _receiverIPs;
+  UnmodifiableListView<String> get receiverIPs =>
+      UnmodifiableListView(_receiverIPs);
 
   // Represents the active source port.
   @observable
@@ -42,9 +43,10 @@ abstract class _Receiver with Store {
   _Receiver(Logger logger) : _logger = logger;
 
   // Start current receiver.
+  @action
   void start() {
     if (isStarted) {
-      throw StartActiveReceiverError;
+      return;
     }
 
     _isStarted = !_isStarted;
@@ -52,9 +54,10 @@ abstract class _Receiver with Store {
   }
 
   // Stop current receiver.
+  @action
   void stop() {
     if (!isStarted) {
-      throw StopInactiveReceiverError;
+      return;
     }
 
     _isStarted = !_isStarted;
@@ -63,8 +66,8 @@ abstract class _Receiver with Store {
 
   // Update collection of available receiver IP addresses.
   @action
-  void setReceiverIPs(List<String> addresses) {
-    _receiverIPs = addresses;
+  void setReceiverIPs(Iterable<String> addresses) {
+    _receiverIPs = ObservableList.of(addresses);
     _logger.d(
         'Collection of available receiver IP addresses changed to: ${_receiverIPs}');
   }

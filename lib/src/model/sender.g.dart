@@ -125,6 +125,28 @@ mixin _$Sender on _Sender, Store {
       ActionController(name: '_Sender', context: context);
 
   @override
+  void start() {
+    final _$actionInfo =
+        _$_SenderActionController.startAction(name: '_Sender.start');
+    try {
+      return super.start();
+    } finally {
+      _$_SenderActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void stop() {
+    final _$actionInfo =
+        _$_SenderActionController.startAction(name: '_Sender.stop');
+    try {
+      return super.stop();
+    } finally {
+      _$_SenderActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setSourcePort(int value) {
     final _$actionInfo =
         _$_SenderActionController.startAction(name: '_Sender.setSourcePort');

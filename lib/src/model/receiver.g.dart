@@ -15,13 +15,13 @@ mixin _$Receiver on _Receiver, Store {
   bool get isStarted => (_$isStartedComputed ??=
           Computed<bool>(() => super.isStarted, name: '_Receiver.isStarted'))
       .value;
-  Computed<List<String>>? _$receiverIPsComputed;
+  Computed<UnmodifiableListView<String>>? _$receiverIPsComputed;
 
   @override
-  List<String> get receiverIPs =>
-      (_$receiverIPsComputed ??= Computed<List<String>>(() => super.receiverIPs,
+  UnmodifiableListView<String> get receiverIPs => (_$receiverIPsComputed ??=
+          Computed<UnmodifiableListView<String>>(() => super.receiverIPs,
               name: '_Receiver.receiverIPs'))
-          .value;
+      .value;
   Computed<int>? _$sourcePortComputed;
 
   @override
@@ -55,13 +55,13 @@ mixin _$Receiver on _Receiver, Store {
       Atom(name: '_Receiver._receiverIPs', context: context);
 
   @override
-  List<String> get _receiverIPs {
+  ObservableList<String> get _receiverIPs {
     _$_receiverIPsAtom.reportRead();
     return super._receiverIPs;
   }
 
   @override
-  set _receiverIPs(List<String> value) {
+  set _receiverIPs(ObservableList<String> value) {
     _$_receiverIPsAtom.reportWrite(value, super._receiverIPs, () {
       super._receiverIPs = value;
     });
@@ -103,7 +103,29 @@ mixin _$Receiver on _Receiver, Store {
       ActionController(name: '_Receiver', context: context);
 
   @override
-  void setReceiverIPs(List<String> addresses) {
+  void start() {
+    final _$actionInfo =
+        _$_ReceiverActionController.startAction(name: '_Receiver.start');
+    try {
+      return super.start();
+    } finally {
+      _$_ReceiverActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void stop() {
+    final _$actionInfo =
+        _$_ReceiverActionController.startAction(name: '_Receiver.stop');
+    try {
+      return super.stop();
+    } finally {
+      _$_ReceiverActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setReceiverIPs(Iterable<String> addresses) {
     final _$actionInfo = _$_ReceiverActionController.startAction(
         name: '_Receiver.setReceiverIPs');
     try {

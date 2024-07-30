@@ -8,6 +8,7 @@ class RocStandardThemeBuilder {
     return ThemeData(
       // Standard application colors
       primaryColor: RocColors.mainBlue,
+      scaffoldBackgroundColor: RocColors.white,
       // Standard application AppBar theme
       appBarTheme: AppBarTheme(
         color: RocColors.mainBlue,

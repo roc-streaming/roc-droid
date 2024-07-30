@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../styles/roc_colors.dart';
+import '../styles/roc_colors.dart';
 
 /// Roc's custom dropdown button widget.
 class RocDropdownButton<T> extends StatefulWidget {
@@ -54,7 +54,7 @@ class _RocDropdownButtonState<T> extends State<RocDropdownButton<T>> {
           ),
           value: _dropdownValue,
           items: _availableValues.entries
-              .map(((entry) => RocDropdownMenuItem(context, entry)))
+              .map(((entry) => _MenuItem(context, entry)))
               .toList(),
           onChanged: (value) => _onChanged(value),
         ),
@@ -64,8 +64,8 @@ class _RocDropdownButtonState<T> extends State<RocDropdownButton<T>> {
 }
 
 /// Roc's custom dropdown menu item.
-class RocDropdownMenuItem<T> extends DropdownMenuItem {
-  RocDropdownMenuItem(
+class _MenuItem<T> extends DropdownMenuItem {
+  _MenuItem(
     BuildContext context,
     MapEntry<T, String> entry,
   ) : super(

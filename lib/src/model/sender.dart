@@ -2,7 +2,6 @@ import 'package:logger/logger.dart';
 import 'package:mobx/mobx.dart';
 
 import 'entities/capture_source_type.dart';
-import 'entities/exceptions.dart';
 
 part 'sender.g.dart';
 
@@ -51,9 +50,10 @@ abstract class _Sender with Store {
   _Sender(Logger logger) : _logger = logger;
 
   // Start current sender.
+  @action
   void start() {
     if (isStarted) {
-      throw StartActiveSenderError;
+      return;
     }
 
     _isStarted = !_isStarted;
@@ -61,9 +61,10 @@ abstract class _Sender with Store {
   }
 
   // Stop current sender.
+  @action
   void stop() {
     if (!isStarted) {
-      throw StopInactiveSenderError;
+      return;
     }
 
     _isStarted = !_isStarted;

@@ -1,85 +1,55 @@
 {
     "appTitle": "Roc Droid",
-    "@appTitle": { "description": "Main title of Roc Droid app" },
 
     "receiver": "RECEIVER",
-    "@receiver": { "description": "Receiver page title" },
 
     "sender": "SENDER",
-    "@sender": { "description": "Sender page title" },
 
     "receiverStartSenderStep": "1. Start sender on the remote device",
-    "@receiverStartSenderStep": { "description": "1st usage step described by the application on the receiver page" },
 
     "receiverUseIPStep": "2. Use one of IP addresses of this device as the remote on the sender",
-    "@receiverUseIPStep": { "description": "2nd usage step described by the application on the receiver page" },
 
     "receiverSourceStreamStep": "3. Use this port for source stream",
-    "@receiverSourceStreamStep": { "description": "3rd usage step described by the application on the receiver page" },
 
     "receiverRepairStreamStep": "4. Use this port for repair stream",
-    "@receiverRepairStreamStep": { "description": "4th usage step described by the application on the receiver page" },
 
     "receiverStartStep": "5. Start receiver on this device",
-    "@receiverStartStep": { "description": "5th usage step described by the application on the receiver page" },
 
     "startReceiverButton": "START RECEIVER",
-    "@startReceiverButton": { "description": "Start receiver button text" },
 
     "stopReceiverButton": "STOP RECEIVER",
-    "@stopReceiverButton": { "description": "Stop receiver button text" },
 
     "senderStartReceiverStep": "1. Start receiver on the remote device",
-    "@senderStartReceiverStep": { "description": "1st usage step described by the application on the sender page" },
 
     "senderSourceStreamStep": "2. Use this port for source stream",
-    "@senderSourceStreamStep": { "description": "2nd usage step described by the application on the sender page" },
 
     "senderRepairStreamStep": "3. Use this port for repair stream",
-    "@senderRepairStreamStep": { "description": "3rd usage step described by the application on the sender page" },
 
     "senderPutIPStep": "4. Put IP address of the remote receiver device below",
-    "@senderPutIPStep": { "description": "4th usage step described by the application on the sender page" },
 
     "senderChooseSourceStep": "5. Choose source to capture audio from",
-    "@senderChooseSourceStep": { "description": "5th usage step described by the application on the sender page" },
 
     "senderStartStep": "6. Start sender on this device",
-    "@senderStartStep": { "description": "6th usage step described by the application on the sender page" },
 
     "startSenderButton": "START SENDER",
-    "@startSenderButton": { "description": "Start sender button text" },
 
     "stopSenderButton": "STOP SENDER",
-    "@stopSenderButton": { "description": "Stop sender button text" },
 
-    "noIPsShortWarning": "Warning: No IP addresses",
-    "@noIPsShortWarning": { "description": "Short chip warning: No IPs" },
-
-    "noPortShortWarning": "Warning: No port",
-    "@noPortShortWarning": { "description": "Short chip warning: No port" },
+    "noData": "No data",
 
     "currentlyPlayingApplications": "Currently playing applications",
-    "@currentlyPlayingApplications": { "description": "CaptureSourceType enum: Currently playing applications value" },
 
     "microphone": "Microphone",
-    "@microphone": { "description": "CaptureSourceType enum: Microphone value" },
 
     "about": "About",
-    "@about": { "description": "Header: About" },
 
     "sourceCode": "SOURCE CODE",
-    "@sourceCode": { "description": "About page: Source code" },
 
     "bugTracker": "BUG TRACKER",
-    "@bugTracker": { "description": "About page: Bug tracker" },
 
     "contributors": "CONTRIBUTORS",
-    "@contributors": { "description": "About page: Contributors" },
 
     "licenseData": "MOZILLA PUBLIC LICENSE 2.0",
-    "@licenseData": { "description": "About page: License data" },
 
-    "appVersion": "v0.2.1",
-    "@appVersion": { "description": "About page: application version" }
+    "appVersion": "v0.2.1"
 }

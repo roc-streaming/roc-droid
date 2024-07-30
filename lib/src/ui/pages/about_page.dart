@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../model/model_root.dart';
-import '../components/view_widgets/roc_scroll_view.dart';
+import '../components/roc_scroll_view.dart';
 import '../styles/roc_colors.dart';
 
 /// Roc's about page class widget.
@@ -13,10 +13,8 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _modelRoot.logger.d('About page build started');
-
     return Scaffold(
-      appBar: RocAboutPageAppBar(context, _modelRoot),
+      appBar: _AppBar(context, _modelRoot),
       body: RocScrollView(
         child: Align(
           alignment: Alignment.topCenter,
@@ -43,17 +41,17 @@ class AboutPage extends StatelessWidget {
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ),
-              RocAboutPageButton(
+              _AboutPageButton(
                   icon: Icon(Icons.code),
                   text: AppLocalizations.of(context)!.sourceCode,
                   function: () => _modelRoot.logger
                       .d('The "Source code" command is called.')),
-              RocAboutPageButton(
+              _AboutPageButton(
                   icon: Icon(Icons.bug_report_outlined),
                   text: AppLocalizations.of(context)!.bugTracker,
                   function: () => _modelRoot.logger
                       .d('The "Bug tracker" command is called.')),
-              RocAboutPageButton(
+              _AboutPageButton(
                   icon: Icon(Icons.group),
                   text: AppLocalizations.of(context)!.contributors,
                   function: () => _modelRoot.logger
@@ -75,8 +73,8 @@ class AboutPage extends StatelessWidget {
 }
 
 /// Roc's side pane top application bar.
-class RocAboutPageAppBar extends AppBar {
-  RocAboutPageAppBar(BuildContext context, ModelRoot modelRoot)
+class _AppBar extends AppBar {
+  _AppBar(BuildContext context, ModelRoot modelRoot)
       : super(
           leading: IconButton(
             onPressed: () {
@@ -100,12 +98,12 @@ class RocAboutPageAppBar extends AppBar {
 }
 
 /// Roc's custom about page text button widget.
-class RocAboutPageButton extends StatelessWidget {
+class _AboutPageButton extends StatelessWidget {
   final Icon _icon;
   final String _text;
   final Function _function;
 
-  RocAboutPageButton({
+  _AboutPageButton({
     required Icon icon,
     required String text,
     required Function function,

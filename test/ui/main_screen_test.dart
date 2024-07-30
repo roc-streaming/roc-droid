@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:roc_droid/src/model.dart';
 import 'package:roc_droid/src/ui.dart';
-import 'package:roc_droid/src/ui/components/input_widgets/roc_bottom_navigation_bar.dart';
+import 'package:roc_droid/src/ui/fragments/roc_bottom_navigation_bar.dart';
 import 'package:roc_droid/src/ui/main_screen.dart';
 import 'package:roc_droid/src/ui/pages/receiver_page.dart';
 
@@ -15,14 +15,12 @@ void main() {
     // Find required widgets
     final mainScreen = find.byType(MainScreen);
     final scaffold = find.byType(Scaffold);
-    final appBar = find.byType(RocBasicAppBar);
     final receiverPage = find.byType(ReceiverPage);
     final bottomNavigationBar = find.byType(RocBottomNavigationBar);
 
     // Assertion
     expect(mainScreen, findsOneWidget);
     expect(scaffold, findsOneWidget);
-    expect(appBar, findsOneWidget);
     expect(receiverPage, findsOneWidget);
     expect(bottomNavigationBar, findsOneWidget);
   });

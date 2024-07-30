@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 
-import '../../styles/roc_button_styles.dart';
+import '../styles/roc_button_styles.dart';
 
 /// Roc's custom stateful button widget.
 class RocStatefulButton extends StatefulWidget {
-  final bool _isStarted;
+  final bool _isActive;
   final void Function() _inactiveFunction;
   final void Function() _activeFunction;
   final String _inactiveText;
   final String _activeText;
 
   const RocStatefulButton(
-      {required bool isStarted,
+      {required bool isActive,
       required void Function() inactiveFunction,
       required void Function() activeFunction,
       required String inactiveText,
       required String activeText})
-      : _isStarted = isStarted,
+      : _isActive = isActive,
         _inactiveFunction = inactiveFunction,
         _activeFunction = activeFunction,
         _inactiveText = inactiveText,
@@ -24,7 +24,7 @@ class RocStatefulButton extends StatefulWidget {
 
   @override
   State<RocStatefulButton> createState() => _RocStatefulButtonState(
-        isStarted: _isStarted,
+        isActive: _isActive,
         inactiveFunction: _inactiveFunction,
         activeFunction: _activeFunction,
         inactiveText: _inactiveText,
@@ -33,19 +33,19 @@ class RocStatefulButton extends StatefulWidget {
 }
 
 class _RocStatefulButtonState extends State<RocStatefulButton> {
-  bool _isStarted;
+  bool _isActive;
   final void Function() _inactiveFunction;
   final void Function() _activeFunction;
   final String _inactiveText;
   final String _activeText;
 
   _RocStatefulButtonState(
-      {required bool isStarted,
+      {required bool isActive,
       required void Function() inactiveFunction,
       required void Function() activeFunction,
       required String inactiveText,
       required String activeText})
-      : _isStarted = isStarted,
+      : _isActive = isActive,
         _inactiveFunction = inactiveFunction,
         _activeFunction = activeFunction,
         _inactiveText = inactiveText,
@@ -53,8 +53,8 @@ class _RocStatefulButtonState extends State<RocStatefulButton> {
 
   void _onPressed() {
     setState(() {
-      _isStarted ? _activeFunction() : _inactiveFunction();
-      _isStarted = !_isStarted;
+      _isActive ? _activeFunction() : _inactiveFunction();
+      _isActive = !_isActive;
     });
   }
 
@@ -64,7 +64,7 @@ class _RocStatefulButtonState extends State<RocStatefulButton> {
       style: RocButtonStyles.startButton,
       onPressed: _onPressed,
       child: Text(
-        _isStarted ? _activeText : _inactiveText,
+        _isActive ? _activeText : _inactiveText,
         style: Theme.of(context).textTheme.titleSmall,
       ),
     );

@@ -5,11 +5,11 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 
 import '../../model/entities/capture_source_type.dart';
 import '../../model/model_root.dart';
-import '../components/data_widgets/roc_chips.dart';
-import '../components/data_widgets/roc_text_row.dart';
-import '../components/input_widgets/roc_dropdown_button.dart';
-import '../components/input_widgets/roc_stateful_button.dart';
-import '../components/view_widgets/roc_page_view.dart';
+import '../components/roc_chip.dart';
+import '../components/roc_dropdown_button.dart';
+import '../components/roc_page_view.dart';
+import '../components/roc_stateful_button.dart';
+import '../components/roc_text_row.dart';
 
 // Sender page class implementation - Page layer.
 class SenderPage extends StatelessWidget {
@@ -19,23 +19,22 @@ class SenderPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _modelRoot.logger.d('Sender page build started');
     return RocPageView(
       controllersColumn: [
         RocTextRow(AppLocalizations.of(context)!.senderStartReceiverStep),
         RocTextRow(AppLocalizations.of(context)!.senderSourceStreamStep),
         Observer(
           builder: (_) =>
-              RocPortChip(_modelRoot.sender.sourcePort, _modelRoot.logger),
+              RocChip(_modelRoot.sender.sourcePort, _modelRoot.logger),
         ),
         RocTextRow(AppLocalizations.of(context)!.senderRepairStreamStep),
         Observer(
           builder: (_) =>
-              RocPortChip(_modelRoot.sender.repairPort, _modelRoot.logger),
+              RocChip(_modelRoot.sender.repairPort, _modelRoot.logger),
         ),
         RocTextRow(AppLocalizations.of(context)!.senderPutIPStep),
         Observer(
-          builder: (_) => RocNumberInput(
+          builder: (_) => _NumberInput(
               _modelRoot.sender.receiverIP, _modelRoot.sender.setReceiverIP),
         ),
         RocTextRow(AppLocalizations.of(context)!.senderChooseSourceStep),
@@ -53,23 +52,25 @@ class SenderPage extends StatelessWidget {
         ),
         RocTextRow(AppLocalizations.of(context)!.senderStartStep),
       ],
-      bottomButton: RocStatefulButton(
-        isStarted: _modelRoot.sender.isStarted,
-        inactiveFunction: _modelRoot.sender.start,
-        activeFunction: _modelRoot.sender.stop,
-        inactiveText: AppLocalizations.of(context)!.startSenderButton,
-        activeText: AppLocalizations.of(context)!.stopSenderButton,
+      bottomButton: Observer(
+        builder: (_) => RocStatefulButton(
+          isActive: _modelRoot.sender.isStarted,
+          inactiveFunction: _modelRoot.sender.start,
+          activeFunction: _modelRoot.sender.stop,
+          inactiveText: AppLocalizations.of(context)!.startSenderButton,
+          activeText: AppLocalizations.of(context)!.stopSenderButton,
+        ),
       ),
     );
   }
 }
 
 /// Roc's custom number input widget.
-class RocNumberInput extends StatelessWidget {
+class _NumberInput extends StatelessWidget {
   final String _initialValue;
   final Function(String) _function;
 
-  RocNumberInput(String initialValue, Function(String) function)
+  _NumberInput(String initialValue, Function(String) function)
       : _initialValue = initialValue,
         _function = function;
 

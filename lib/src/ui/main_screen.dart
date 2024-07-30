@@ -5,7 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 import '../model/model_root.dart';
-import 'components/input_widgets/roc_bottom_navigation_bar.dart';
+import 'fragments/roc_bottom_navigation_bar.dart';
 import 'pages/about_page.dart';
 import 'pages/receiver_page.dart';
 import 'pages/sender_page.dart';
@@ -51,13 +51,11 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _modelRoot.logger.d('Main screen build started');
-
     return DefaultTabController(
       initialIndex: 0,
       length: 2,
       child: Scaffold(
-        appBar: RocBasicAppBar(context, _modelRoot),
+        appBar: _AppBar(context, _modelRoot),
         body: Center(child: _pages.elementAt(_selectedPage)),
         bottomNavigationBar: Observer(
           builder: (_) => RocBottomNavigationBar(
@@ -70,7 +68,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
         // Test floating action button
         floatingActionButton:
-            _addTestButton ? RocTestFloatingButton(_modelRoot) : null,
+            _addTestButton ? _TestFloatingButton(_modelRoot) : null,
         resizeToAvoidBottomInset: false,
       ),
     );
@@ -78,8 +76,8 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 /// Roc's custom basic application bar.
-class RocBasicAppBar extends AppBar {
-  RocBasicAppBar(BuildContext context, ModelRoot modelRoot)
+class _AppBar extends AppBar {
+  _AppBar(BuildContext context, ModelRoot modelRoot)
       : super(
           title: Text(
             AppLocalizations.of(context)!.appTitle,
@@ -103,10 +101,10 @@ class RocBasicAppBar extends AppBar {
 }
 
 /// Roc's custom test floating button widget.
-class RocTestFloatingButton extends StatelessWidget {
+class _TestFloatingButton extends StatelessWidget {
   final ModelRoot _modelRoot;
 
-  RocTestFloatingButton(ModelRoot modelRoot) : _modelRoot = modelRoot;
+  _TestFloatingButton(ModelRoot modelRoot) : _modelRoot = modelRoot;
 
   String formRandomIP() {
     return '${Random().nextInt(99)}.${Random().nextInt(99)}.'

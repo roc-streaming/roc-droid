@@ -2,6 +2,15 @@ from doit.tools import title_with_actions
 
 # doit gen
 def task_gen():
+    """run flutter build_runner code generation"""
+    return {
+        'actions': ['dart run build_runner --delete-conflicting-outputs'],
+        'title': title_with_actions,
+        'verbosity': 2,
+    }
+
+# doit gen_watch
+def task_gen_watch():
     """run flutter build_runner code watch generation"""
     return {
         'actions': ['dart run build_runner watch --delete-conflicting-outputs'],

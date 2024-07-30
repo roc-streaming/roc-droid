@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../utils/roc_keys.dart';
+import '../utils/roc_keys.dart';
 
 /// Roc's custom bottom navigation bar.
 class RocBottomNavigationBar extends BottomNavigationBar {
@@ -13,13 +13,13 @@ class RocBottomNavigationBar extends BottomNavigationBar {
     required bool senderIsStarted,
   }) : super(
           items: <BottomNavigationBarItem>[
-            RocBottomNavigationBarItem(
+            _BarItem(
               key: RocKeys.receiverPageKey,
               icon: Icon(Icons.keyboard_tab),
               label: AppLocalizations.of(context)!.receiver,
               isStarted: receiverIsStarted,
             ),
-            RocBottomNavigationBarItem(
+            _BarItem(
               key: RocKeys.senderPageKey,
               icon: Icon(Icons.start),
               label: AppLocalizations.of(context)!.sender,
@@ -32,8 +32,8 @@ class RocBottomNavigationBar extends BottomNavigationBar {
 }
 
 /// Roc's custom bottom navigation bar item widget.
-class RocBottomNavigationBarItem extends BottomNavigationBarItem {
-  RocBottomNavigationBarItem({
+class _BarItem extends BottomNavigationBarItem {
+  _BarItem({
     required Key key,
     required Icon icon,
     required String label,
