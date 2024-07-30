@@ -22,7 +22,7 @@ void main() {
     final senderPage = find.byType(SenderPage);
     final pageView = find.byType(RocPageView);
     final textRows = find.byType(RocTextRow);
-    final chips = find.byType(RocChip);
+    final chips = find.byType(RocChip<int>);
     final dropdownButton = find.byType(RocDropdownButton<CaptureSourceType>);
     final bottomButton = find.byType(RocStatefulButton);
 

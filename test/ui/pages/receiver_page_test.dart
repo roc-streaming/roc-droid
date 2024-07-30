@@ -17,7 +17,7 @@ void main() {
     final receiverPage = find.byType(ReceiverPage);
     final pageView = find.byType(RocPageView);
     final textRows = find.byType(RocTextRow);
-    final chips = find.byType(RocChip);
+    final chips = find.byType(RocChip<int>);
     final bottomButton = find.byType(RocStatefulButton);
 
     // Assertion
