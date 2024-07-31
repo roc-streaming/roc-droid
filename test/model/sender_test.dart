@@ -1,5 +1,5 @@
 import 'package:logger/logger.dart';
-import 'package:roc_droid/src/model/entities/capture_source_type.dart';
+import 'package:roc_droid/src/model/capture_source_type.dart';
 import 'package:roc_droid/src/model/sender.dart';
 import 'package:test/test.dart';
 

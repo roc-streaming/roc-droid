@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
-import '../../model/entities/capture_source_type.dart';
+import '../../model/capture_source_type.dart';
 import '../../model/model_root.dart';
 import '../components/roc_chip.dart';
 import '../components/roc_dropdown_button.dart';

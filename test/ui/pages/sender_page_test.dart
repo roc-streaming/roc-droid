@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:roc_droid/src/model.dart';
-import 'package:roc_droid/src/model/entities/capture_source_type.dart';
+import 'package:roc_droid/src/model/capture_source_type.dart';
 import 'package:roc_droid/src/ui.dart';
 import 'package:roc_droid/src/ui/components/roc_chip.dart';
 import 'package:roc_droid/src/ui/components/roc_dropdown_button.dart';

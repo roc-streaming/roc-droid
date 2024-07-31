@@ -7,6 +7,7 @@ import '../styles/roc_colors.dart';
 
 /// Roc's about page class widget.
 class AboutPage extends StatelessWidget {
+  final double _buttonWidth = 260;
   final ModelRoot _modelRoot;
 
   const AboutPage(ModelRoot modelRoot) : _modelRoot = modelRoot;
@@ -42,28 +43,33 @@ class AboutPage extends StatelessWidget {
                 ),
               ),
               _AboutPageButton(
-                  icon: Icon(Icons.code),
-                  text: AppLocalizations.of(context)!.sourceCode,
-                  function: () => _modelRoot.logger
-                      .d('The "Source code" command is called.')),
+                icon: Icon(Icons.code),
+                text: AppLocalizations.of(context)!.sourceCode,
+                function: () =>
+                    _modelRoot.logger.d('The "Source code" command is called.'),
+                width: _buttonWidth,
+              ),
               _AboutPageButton(
-                  icon: Icon(Icons.bug_report_outlined),
-                  text: AppLocalizations.of(context)!.bugTracker,
-                  function: () => _modelRoot.logger
-                      .d('The "Bug tracker" command is called.')),
+                icon: Icon(Icons.bug_report_outlined),
+                text: AppLocalizations.of(context)!.bugTracker,
+                function: () =>
+                    _modelRoot.logger.d('The "Bug tracker" command is called.'),
+                width: _buttonWidth,
+              ),
               _AboutPageButton(
-                  icon: Icon(Icons.group),
-                  text: AppLocalizations.of(context)!.contributors,
-                  function: () => _modelRoot.logger
-                      .d('The "Contributors" command is called.')),
+                icon: Icon(Icons.group),
+                text: AppLocalizations.of(context)!.contributors,
+                function: () => _modelRoot.logger
+                    .d('The "Contributors" command is called.'),
+                width: _buttonWidth,
+              ),
               Spacer(),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0),
-                child: Text(
-                  AppLocalizations.of(context)!.licenseData,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-              )
+              _AboutPageButton(
+                icon: Icon(Icons.description),
+                text: AppLocalizations.of(context)!.licenseData,
+                function: () =>
+                    _modelRoot.logger.d('The "License" command is called.'),
+              ),
             ],
           ),
         ),
@@ -102,19 +108,22 @@ class _AboutPageButton extends StatelessWidget {
   final Icon _icon;
   final String _text;
   final Function _function;
+  final double? _width;
 
   _AboutPageButton({
     required Icon icon,
     required String text,
     required Function function,
+    double? width = null,
   })  : _icon = icon,
         _text = text,
-        _function = function;
+        _function = function,
+        _width = width;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 260,
+      width: _width,
       child: TextButton(
         style:
             ButtonStyle(iconColor: WidgetStatePropertyAll(RocColors.mainBlue)),

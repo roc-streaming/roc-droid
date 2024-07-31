@@ -1,7 +1,7 @@
 import 'package:logger/logger.dart';
 import 'package:mobx/mobx.dart';
 
-import 'entities/capture_source_type.dart';
+import 'capture_source_type.dart';
 
 part 'sender.g.dart';
 

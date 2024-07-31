@@ -33,4 +33,4 @@ Description of the model tree:
 
 * The `CaptureSourceType` enumerator control the type of capture source and is colored gray.
 
-  * enum implementation: [CaptureSourceType](/lib/src/model/entities/capture_source_type.dart)
+  * enum implementation: [CaptureSourceType](/lib/src/model/capture_source_type.dart)
