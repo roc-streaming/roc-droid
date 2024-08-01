@@ -51,5 +51,7 @@
 
     "licenseData": "MOZILLA PUBLIC LICENSE 2.0",
 
+    "enterIp": "Enter IP address",
+
     "appVersion": "v0.2.1"
 }

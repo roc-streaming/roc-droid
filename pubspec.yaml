@@ -31,6 +31,7 @@ flutter:
   generate: true
   assets:
     - assets/splash.png
+    - assets/splash_big.png
     - assets/icon.png
 
 flutter_native_splash:
@@ -40,7 +41,7 @@ flutter_native_splash:
   image: assets/splash.png
   color: "#FFFFFF"
   android_12:
-    image: assets/splash.png
+    image: assets/splash_big.png
     color: "#FFFFFF"
 
 flutter_launcher_icons:

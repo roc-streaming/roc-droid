@@ -10,6 +10,7 @@ import '../components/roc_dropdown_button.dart';
 import '../components/roc_page_view.dart';
 import '../components/roc_stateful_button.dart';
 import '../components/roc_text_row.dart';
+import '../styles/roc_colors.dart';
 
 // Sender page class implementation - Page layer.
 class SenderPage extends StatelessWidget {
@@ -91,6 +92,13 @@ class _NumberInput extends StatelessWidget {
           ],
           style: Theme.of(context).textTheme.bodyLarge,
           onChanged: (value) => _function(value),
+          decoration: InputDecoration(
+            hintText: AppLocalizations.of(context)!.enterIp,
+            hintStyle: TextStyle(
+              color: RocColors.gray,
+              fontSize: 15.0,
+            ),
+          ),
         ),
       ),
     );
