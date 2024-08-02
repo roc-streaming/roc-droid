@@ -1,11 +1,11 @@
 {
-    "name": "roc_droid",
-    "short_name": "roc_droid",
+    "name": "Roc Droid",
+    "short_name": "Roc Droid",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#hexcode",
-    "theme_color": "#hexcode",
-    "description": "A new Flutter project.",
+    "background_color": "#FFFFFF",
+    "theme_color": "#FFFFFF",
+    "description": "Roc for Android!",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

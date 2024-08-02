@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "roc_droid" "\0"
+            VALUE "CompanyName", "Roc Streaming" "\0"
+            VALUE "FileDescription", "roc-droid" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "roc_droid" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "roc_droid.exe" "\0"
-            VALUE "ProductName", "roc_droid" "\0"
+            VALUE "InternalName", "roc-droid" "\0"
+            VALUE "LegalCopyright", "Copyright (C) Roc Streaming authors" "\0"
+            VALUE "OriginalFilename", "roc-droid.exe" "\0"
+            VALUE "ProductName", "Roc Droid" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
