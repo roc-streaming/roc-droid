@@ -55,6 +55,4 @@ app.*.map.json
 /app
 
 # doit related
-.doit.db.bak
-.doit.db.dat
-.doit.db.dir
+.doit.db*
