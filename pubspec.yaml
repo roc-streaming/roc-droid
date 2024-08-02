@@ -1,7 +1,7 @@
 name: roc_droid
 description: "Roc for Android!"
 publish_to: 'none'
-version: 0.1.0
+version: 0.3.0
 
 environment:
   sdk: '>=3.4.3 <4.0.0'
