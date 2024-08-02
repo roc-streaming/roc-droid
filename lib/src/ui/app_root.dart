@@ -1,25 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
 import '../model.dart';
+import 'main_screen.dart';
+import 'styles/roc_standard_theme_builder.dart';
 
 // Main app root class - App layer.
 class AppRoot extends StatelessWidget {
-  // Observable model field
-  // ignore: unused_field
   final ModelRoot _modelRoot;
+  static const List<LocalizationsDelegate> _localisationDelegates = [
+    AppLocalizations.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ];
+  static const List<Locale> _supportedLocales = [
+    Locale('en', ''), // Supported english language
+  ];
 
-  AppRoot({
-    required ModelRoot modelRoot,
-  }) : _modelRoot = modelRoot;
+  AppRoot(ModelRoot modelRoot) : _modelRoot = modelRoot;
 
-  // Test build implementation
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World from roc-droid!'),
-        ),
+    _modelRoot.logger.i('Application started');
+
+    return MaterialApp(
+      title: 'Roc Droid',
+      theme: RocStandardThemeBuilder.build(),
+      home: MainScreen(
+        modelRoot: _modelRoot,
       ),
+      localizationsDelegates: _localisationDelegates,
+      supportedLocales: _supportedLocales,
     );
   }
 }

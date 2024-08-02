@@ -5,5 +5,5 @@ import 'src/model.dart';
 import 'src/ui.dart';
 
 void main() {
-  runApp(AppRoot(modelRoot: ModelRoot()));
+  runApp(AppRoot(ModelRoot()));
 }

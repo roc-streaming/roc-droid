@@ -53,3 +53,8 @@ app.*.map.json
 
 # Old project
 /app
+
+# doit related
+.doit.db.bak
+.doit.db.dat
+.doit.db.dir

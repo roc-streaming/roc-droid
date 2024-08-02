@@ -20,7 +20,7 @@ Widgets can be categorized into the following types:
 
     * `Screen`: This widget corresponds to the entire screen.
     
-    * `Page`: This widget represents a page within the screen. Switching between pages is done via the lower tab bar.
+    * `Page`: This widget represents a page within the screen. Switching between pages is done via the lower tab bar or AppBar.
     
     * `Fragment`: This widget represents a smaller fragment of the UI, such as a separate block or item in a list.
 
@@ -42,7 +42,7 @@ Widgets can be categorized into the following types:
     
     * `Component`: Not tied to specific data—it receives data from above and does not interact with models. It is responsible for implementing a specific representation, such as styles and responses to clicks.
     
-    > **Note:** In our code, custom component classes are prefixed with `roc` to distinguish them from standard components. Other types of widgets do not have a special prefix.
+    > **Note:** In our code, custom component classes are prefixed with `roc` to distinguish them from standard components or created as private widgets inside of a parent classes starting with `_` and without `roc`. Other types of widgets do not have a special prefix.
 
     > **Note:** In some frameworks, an entity similar to a fragment is called a `widget`. We use the term `fragment` for clarity (like in Android SDK).
 
@@ -70,18 +70,40 @@ Designations:
 
   * roc-droid classes:
 
-    * [ReceiverPage](/lib/src/ui/receiver_page.dart)
+    * [ReceiverPage](/lib/src/ui/pages/receiver_page.dart)
   
-    * [SenderPage](/lib/src/ui/sender_page.dart)
+    * [SenderPage](/lib/src/ui/pages/sender_page.dart)
+  
+    * [AboutPage](/lib/src/ui/pages/about_page.dart)
 
 * **Yellow:** Fragment-level widgets (`Content Layer`)
 
-  * Classes:
+  * roc-droid classes:
 
-    * [MessagePopup](/lib/src/ui/fragments/message_popup.dart)
+    * [RocBottomNavigationBar](/lib/src/ui/fragments/roc_bottom_navigation_bar.dart)
 
-    * [SettingsPane](/lib/src/ui/fragments/settings_pane.dart)
-    
-    * [SourceSelector](/lib/src/ui/fragments/source_selector.dart)
+* **Gray:** Native Flutter `Widget` class (`Representation Layer`)
 
-* **Gray:** Native Flutter class (`Representation Layer`)
+* **Blue:** Custom Roc `Widget` class (`Representation Layer`)
+  
+    * Location: `/lib/src/ui/components`
+  
+    * Functionality:
+
+      * Representing Widgets that provide certain data to the user.
+
+        * [RocChip](/lib/src/ui/components/roc_chip.dart)
+
+        * [RocTextRow](/lib/src/ui/components/roc_text_row.dart)
+  
+      * Representing Widgets that provide the user with the ability to enter certain data.
+
+        * [RocDropdownButton](/lib/src/ui/components/roc_dropdown_button.dart)
+
+        * [RocStatefulButton](/lib/src/ui/components/roc_stateful_button.dart)
+  
+      * Representing Widgets that control specific view representations.
+
+        * [RocPageView](/lib/src/ui/components/roc_page_view.dart)
+
+        * [RocScrollView](/lib/src/ui/components/roc_scroll_view.dart)

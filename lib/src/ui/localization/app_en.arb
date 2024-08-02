@@ -1,0 +1,57 @@
+{
+    "appTitle": "Roc Droid",
+
+    "receiver": "RECEIVER",
+
+    "sender": "SENDER",
+
+    "receiverStartSenderStep": "1. Start sender on the remote device",
+
+    "receiverUseIPStep": "2. Use one of IP addresses of this device as the remote on the sender",
+
+    "receiverSourceStreamStep": "3. Use this port for source stream",
+
+    "receiverRepairStreamStep": "4. Use this port for repair stream",
+
+    "receiverStartStep": "5. Start receiver on this device",
+
+    "startReceiverButton": "START RECEIVER",
+
+    "stopReceiverButton": "STOP RECEIVER",
+
+    "senderStartReceiverStep": "1. Start receiver on the remote device",
+
+    "senderSourceStreamStep": "2. Use this port for source stream",
+
+    "senderRepairStreamStep": "3. Use this port for repair stream",
+
+    "senderPutIPStep": "4. Put IP address of the remote receiver device below",
+
+    "senderChooseSourceStep": "5. Choose source to capture audio from",
+
+    "senderStartStep": "6. Start sender on this device",
+
+    "startSenderButton": "START SENDER",
+
+    "stopSenderButton": "STOP SENDER",
+
+    "noData": "No data",
+
+    "currentlyPlayingApplications": "Currently playing applications",
+
+    "microphone": "Microphone",
+
+    "about": "About",
+
+    "sourceCode": "SOURCE CODE",
+
+    "bugTracker": "BUG TRACKER",
+
+    "contributors": "CONTRIBUTORS",
+
+    "licenseData": "MOZILLA PUBLIC LICENSE 2.0",
+
+    "enterIp": "Enter IP address",
+
+    "appVersion": "v0.2.1"
+}

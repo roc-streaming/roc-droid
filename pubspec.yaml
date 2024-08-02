@@ -9,13 +9,55 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localization: ^0.2.0
+  intl: ^0.19.0
+  logger: ^2.4.0
   mobx: ^2.3.3+2
+  flutter_mobx: ^2.2.1+1
+  darq: ^2.0.0
+  flutter_native_splash: ^2.4.1
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
   test: ^1.25.2
+  build_runner: ^2.4.11
+  mobx_codegen: ^2.6.1
 
 flutter:
   uses-material-design: true
+  generate: true
+  assets:
+    - assets/splash.png
+    - assets/splash_big.png
+    - assets/icon.png
+
+flutter_native_splash:
+  android: true
+  ios: true
+  web: false
+  image: assets/splash.png
+  color: "#FFFFFF"
+  android_12:
+    image: assets/splash_big.png
+    color: "#FFFFFF"
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/icon.png"
+    background_color: "#FFFFFF"
+    theme_color: "#FFFFFF"
+  windows:
+    generate: true
+    image_path: "assets/icon.png"
+    icon_size: 48
+  macos:
+    generate: true
+    image_path: "assets/icon.png"
