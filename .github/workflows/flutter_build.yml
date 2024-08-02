@@ -17,12 +17,14 @@ on:
     - cron: '0 0 * * 1'
 
 jobs:
-  build:
+  desktop:
     strategy:
       matrix:
         os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
+    name: desktop-${{ matrix.os }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,11 +35,39 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Install doit
+        uses: awalsh128/cache-apt-pkgs-action@v1.4.2
+        with:
+          packages: python3-doit
+
       - name: Run analyzer
-        run: flutter analyze
+        run: doit analyze
 
       - name: Run tests
-        run: flutter test
+        run: doit test
 
-      - name: Build Android APK
-        run: flutter build apk
+  android:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+    name: android-${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install doit
+        uses: awalsh128/cache-apt-pkgs-action@v1.4.2
+        with:
+          packages: python3-doit
+
+      - name: Build apk
+        run: doit build_apk
