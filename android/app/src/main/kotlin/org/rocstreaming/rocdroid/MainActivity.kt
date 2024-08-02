@@ -1,4 +1,4 @@
-package com.example.roc_droid
+package org.rocstreaming.rocdroid
 
 import io.flutter.embedding.android.FlutterActivity
 
