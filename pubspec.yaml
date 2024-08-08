@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_localization: ^0.2.0
+  flutter_localization: ^0.2.2
   intl: ^0.19.0
   logger: ^2.4.0
   mobx: ^2.3.3+2
@@ -17,11 +17,12 @@ dependencies:
   darq: ^2.0.0
   flutter_native_splash: ^2.4.1
   flutter_launcher_icons: ^0.13.1
+  pigeon: ^22.3.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
   test: ^1.25.2
   build_runner: ^2.4.11
   mobx_codegen: ^2.6.1

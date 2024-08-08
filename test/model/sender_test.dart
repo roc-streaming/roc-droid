@@ -1,11 +1,12 @@
 import 'package:logger/logger.dart';
+import 'package:roc_droid/src/agent/android_backend.dart';
 import 'package:roc_droid/src/model/capture_source_type.dart';
 import 'package:roc_droid/src/model/sender.dart';
 import 'package:test/test.dart';
 
 // Receiver class unit tests.
 void main() {
-  Sender makeSender() => Sender(Logger());
+  Sender makeSender() => Sender(Logger(), AndroidBackend());
 
   test('Check the senders initial values and getters.', () {
     final sender = makeSender();
