@@ -23,6 +23,10 @@ if (flutterVersionName == null) {
     flutterVersionName = "1.0"
 }
 
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
 android {
     namespace = "org.rocstreaming.rocdroid"
     compileSdk = flutter.compileSdkVersion
@@ -33,6 +37,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
     defaultConfig {
         applicationId = "org.rocstreaming.rocdroid"
         // You can update the following values to match your application needs.
@@ -41,6 +49,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
+        minSdkVersion = 26
     }
 
     applicationVariants.all { variant ->
@@ -60,4 +69,17 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    implementation 'org.roc-streaming.roctoolkit:roc-android:0.2.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.core:core-ktx:1.3.0'
+    implementation 'androidx.activity:activity-ktx:1.2.4'
+    implementation 'androidx.fragment:fragment-ktx:1.3.6'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'androidx.viewpager2:viewpager2:1.0.0'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.25'
 }

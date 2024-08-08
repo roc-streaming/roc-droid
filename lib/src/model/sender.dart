@@ -1,6 +1,7 @@
 import 'package:logger/logger.dart';
 import 'package:mobx/mobx.dart';
 
+import '../agent/backend.g.dart';
 import 'capture_source_type.dart';
 
 part 'sender.g.dart';
@@ -10,6 +11,7 @@ class Sender = _Sender with _$Sender;
 
 abstract class _Sender with Store {
   final Logger _logger;
+  final Backend _backend;
 
   // Determines whether the sender is running or not
   @observable
@@ -47,7 +49,9 @@ abstract class _Sender with Store {
   @computed
   CaptureSourceType get captureSource => _captureSource;
 
-  _Sender(Logger logger) : _logger = logger;
+  _Sender(Logger logger, Backend backend)
+      : _logger = logger,
+        _backend = backend;
 
   // Start current sender.
   @action
@@ -55,6 +59,9 @@ abstract class _Sender with Store {
     if (isStarted) {
       return;
     }
+
+    // Main backend call
+    _backend.startSender(receiverIP);
 
     _isStarted = !_isStarted;
     _logger.i('Sender started');
@@ -66,6 +73,9 @@ abstract class _Sender with Store {
     if (!isStarted) {
       return;
     }
+
+    // Main backend call
+    _backend.stopSender();
 
     _isStarted = !_isStarted;
     _logger.i('Sender stopped');

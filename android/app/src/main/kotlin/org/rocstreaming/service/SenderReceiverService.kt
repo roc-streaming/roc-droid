@@ -1,4 +1,4 @@
-package org.rocstreaming.rocdroid
+package org.rocstreaming.service
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -23,6 +23,8 @@ import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import org.rocstreaming.rocdroid.MainActivity
+import org.rocstreaming.rocdroid.R
 import org.rocstreaming.roctoolkit.ChannelSet
 import org.rocstreaming.roctoolkit.ClockSource
 import org.rocstreaming.roctoolkit.Endpoint

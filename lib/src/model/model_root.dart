@@ -1,5 +1,7 @@
 import 'package:logger/logger.dart';
 
+import '../agent/android_backend.dart';
+import '../agent/backend.g.dart';
 import 'receiver.dart';
 import 'sender.dart';
 
@@ -11,8 +13,12 @@ class ModelRoot {
 
   ModelRoot() {
     var mainLogger = Logger();
-    receiver = Receiver(mainLogger);
-    sender = Sender(mainLogger);
+    // Temporary assignment of Android backend.
+    // In the future we will probably need some mechanism
+    // to decide which type of backend to assign.
+    Backend backend = AndroidBackend();
+    receiver = Receiver(mainLogger, backend);
+    sender = Sender(mainLogger, backend);
     logger = mainLogger;
   }
 }

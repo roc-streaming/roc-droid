@@ -1,6 +1,20 @@
+buildscript {
+    ext.kotlin_version = '1.7.21'
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
 allprojects {
     repositories {
         google()
+        jcenter()
         mavenCentral()
     }
 }
@@ -11,6 +25,14 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(":app")
+}
+
+subprojects {
+    beforeEvaluate { project ->
+        if (project.name == "flutter_localization") {
+            project.buildscript.dependencies.classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlin_version}"
+        }
+    }
 }
 
 tasks.register("clean", Delete) {

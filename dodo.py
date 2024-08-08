@@ -56,17 +56,34 @@ def task_wipe():
 
 # doit gen
 def task_gen():
-    """run flutter build_runner code generation"""
+    """run all flutter code generation"""
+    return {
+        'actions': [get_action(task_gen_model()),
+                    get_action(task_gen_agent())],
+        'title': title_with_actions,
+    }
+
+# doit gen_model
+def task_gen_model():
+    """run flutter build_runner Model code generation"""
     return {
         'actions': ['dart run build_runner build --delete-conflicting-outputs'],
         'title': title_with_actions,
     }
 
-# doit gen_watch
-def task_gen_watch():
-    """run flutter build_runner code watch generation"""
+# doit gen_model_watch
+def task_gen_model_watch():
+    """run flutter build_runner Moddel code watch generation"""
     return {
         'actions': [LongRunning('dart run build_runner watch --delete-conflicting-outputs')],
+        'title': title_with_actions,
+    }
+
+# doit gen_agent
+def task_gen_agent():
+    """run flutter pigeon Agent code generation"""
+    return {
+        'actions': ['dart run pigeon --input lib/src/agent/ibackend.dart'],
         'title': title_with_actions,
     }
 
@@ -85,3 +102,12 @@ def task_splash():
         'actions': ['dart run flutter_native_splash:create '],
         'title': title_with_actions,
     }
+
+# Get first doit method 'actions' value
+def get_action(dic):
+  
+    for key, value in dic.items():
+        if key == 'actions':
+            return value[0]
+
+    return "action doesn't exist"

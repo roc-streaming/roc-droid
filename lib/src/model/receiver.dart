@@ -3,6 +3,8 @@ import 'dart:collection';
 import 'package:logger/logger.dart';
 import 'package:mobx/mobx.dart';
 
+import '../agent/backend.g.dart';
+
 part 'receiver.g.dart';
 
 /// Implementation of the Model Receiver class.
@@ -10,6 +12,7 @@ class Receiver = _Receiver with _$Receiver;
 
 abstract class _Receiver with Store {
   final Logger _logger;
+  final Backend _backend;
 
   // Determines whether the receiver is running or not
   @observable
@@ -40,7 +43,9 @@ abstract class _Receiver with Store {
   @computed
   int get repairPort => _repairPort;
 
-  _Receiver(Logger logger) : _logger = logger;
+  _Receiver(Logger logger, Backend backend)
+      : _logger = logger,
+        _backend = backend;
 
   // Start current receiver.
   @action
@@ -48,6 +53,9 @@ abstract class _Receiver with Store {
     if (isStarted) {
       return;
     }
+
+    // Main backend call
+    _backend.startReceiver();
 
     _isStarted = !_isStarted;
     _logger.i('Receiver started');
@@ -59,6 +67,9 @@ abstract class _Receiver with Store {
     if (!isStarted) {
       return;
     }
+
+    // Main backend call
+    _backend.stopReceiver();
 
     _isStarted = !_isStarted;
     _logger.i('Receiver stopped');

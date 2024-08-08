@@ -1,10 +1,11 @@
 import 'package:logger/logger.dart';
+import 'package:roc_droid/src/agent/android_backend.dart';
 import 'package:roc_droid/src/model/receiver.dart';
 import 'package:test/test.dart';
 
 // Receiver class unit tests.
 void main() {
-  Receiver makeReceiver() => Receiver(Logger());
+  Receiver makeReceiver() => Receiver(Logger(), AndroidBackend());
 
   test('Check the receivers initial values and getters.', () {
     final receiver = makeReceiver();
