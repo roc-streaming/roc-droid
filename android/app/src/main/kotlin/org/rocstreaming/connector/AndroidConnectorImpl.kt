@@ -7,35 +7,35 @@ import org.rocstreaming.service.SenderReceiverService
 private const val LOG_TAG = "[rocdroid.Connector]"
 
 class AndroidConnectorImpl : AndroidConnector {
-    //private var senderReceiverService: SenderReceiverService = SenderReceiverService()
+    companion object {
+        lateinit var senderReceiverService : SenderReceiverService
+    }
 
     override fun startReceiver() {
-        Log.d(LOG_TAG, "Start Receiver")
-        //senderReceiverService.startReceiver()
+        Log.d(LOG_TAG, "Try start Receiver")
+        senderReceiverService.startReceiver()
     }
 
     override fun stopReceiver() {
-        Log.d(LOG_TAG, "Stop Receiver")
-        //senderReceiverService.stopReceiver()
+        Log.d(LOG_TAG, "Try stop Receiver")
+        senderReceiverService.stopReceiver()
     }
 
     override fun isReceiverAlive(): Boolean {
-        //return senderReceiverService.isReceiverAlive()
-        return true
+        return senderReceiverService.isReceiverAlive()
     }
 
     override fun startSender(ip: String) {
-        Log.d(LOG_TAG, "Start Sender")
-        //senderReceiverService.startSender(ip, null)
+        Log.d(LOG_TAG, "Try start Sender")
+        senderReceiverService.startSender(ip, null)
     }
 
     override fun stopSender() {
-        Log.d(LOG_TAG, "Stop Sender")
-        //senderReceiverService.stopSender()
+        Log.d(LOG_TAG, "Try stop Sender")
+        senderReceiverService.stopSender()
     }
 
     override fun isSenderAlive(): Boolean {
-        //return senderReceiverService.isSenderAlive()
-        return true
+        return senderReceiverService.isReceiverAlive()
     }
 }

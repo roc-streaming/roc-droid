@@ -99,30 +99,24 @@ mixin _$Receiver on _Receiver, Store {
     });
   }
 
+  late final _$startAsyncAction =
+      AsyncAction('_Receiver.start', context: context);
+
+  @override
+  Future<bool> start() {
+    return _$startAsyncAction.run(() => super.start());
+  }
+
+  late final _$stopAsyncAction =
+      AsyncAction('_Receiver.stop', context: context);
+
+  @override
+  Future<bool> stop() {
+    return _$stopAsyncAction.run(() => super.stop());
+  }
+
   late final _$_ReceiverActionController =
       ActionController(name: '_Receiver', context: context);
-
-  @override
-  void start() {
-    final _$actionInfo =
-        _$_ReceiverActionController.startAction(name: '_Receiver.start');
-    try {
-      return super.start();
-    } finally {
-      _$_ReceiverActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void stop() {
-    final _$actionInfo =
-        _$_ReceiverActionController.startAction(name: '_Receiver.stop');
-    try {
-      return super.stop();
-    } finally {
-      _$_ReceiverActionController.endAction(_$actionInfo);
-    }
-  }
 
   @override
   void setReceiverIPs(Iterable<String> addresses) {

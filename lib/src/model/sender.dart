@@ -55,30 +55,36 @@ abstract class _Sender with Store {
 
   // Start current sender.
   @action
-  void start() {
+  Future<bool> start() async {
     if (isStarted) {
-      return;
+      _logger.i('Attempt to start an already running sender.');
+      return isStarted;
     }
 
     // Main backend call
-    _backend.startSender(receiverIP);
+    await _backend.startSender(receiverIP);
 
-    _isStarted = !_isStarted;
-    _logger.i('Sender started');
+    var status = await _backend.isSenderAlive();
+    _logger.i('Trying to start the sender. roc service status: $status');
+    _isStarted = status;
+    return _isStarted;
   }
 
   // Stop current sender.
   @action
-  void stop() {
+  Future<bool> stop() async {
     if (!isStarted) {
-      return;
+      _logger.i('Attempt to stop inactive sender.');
+      return isStarted;
     }
 
     // Main backend call
-    _backend.stopSender();
+    await _backend.stopSender();
 
-    _isStarted = !_isStarted;
-    _logger.i('Sender stopped');
+    var status = await _backend.isSenderAlive();
+    _logger.i('Trying to stop the sender. roc service status: $status');
+    _isStarted = status;
+    return _isStarted;
   }
 
   // Update source port value.

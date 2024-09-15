@@ -49,30 +49,36 @@ abstract class _Receiver with Store {
 
   // Start current receiver.
   @action
-  void start() {
+  Future<bool> start() async {
     if (isStarted) {
-      return;
+      _logger.i('Attempt to start an already running receiver.');
+      return _isStarted;
     }
 
     // Main backend call
-    _backend.startReceiver();
+    await _backend.startReceiver();
 
-    _isStarted = !_isStarted;
-    _logger.i('Receiver started');
+    var status = await _backend.isReceiverAlive();
+    _logger.i('Trying to start the receiver. roc service status: $status');
+    _isStarted = status;
+    return _isStarted;
   }
 
   // Stop current receiver.
   @action
-  void stop() {
+  Future<bool> stop() async {
     if (!isStarted) {
-      return;
+      _logger.i('Attempt to stop inactive receiver.');
+      return isStarted;
     }
 
     // Main backend call
-    _backend.stopReceiver();
+    await _backend.stopReceiver();
 
-    _isStarted = !_isStarted;
-    _logger.i('Receiver stopped');
+    var status = await _backend.isReceiverAlive();
+    _logger.i('Trying to stop the receiver. roc service status: $status');
+    _isStarted = status;
+    return _isStarted;
   }
 
   // Update collection of available receiver IP addresses.
