@@ -1,7 +1,7 @@
 import 'package:logger/logger.dart';
 import 'package:mobx/mobx.dart';
 
-import '../agent/backend.g.dart';
+import '../agent/backend.dart';
 import 'capture_source_type.dart';
 
 part 'sender.g.dart';

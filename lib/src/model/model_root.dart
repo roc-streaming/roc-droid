@@ -1,7 +1,7 @@
 import 'package:logger/logger.dart';
 
 import '../agent/android_backend.dart';
-import '../agent/backend.g.dart';
+import '../agent/backend.dart';
 import 'receiver.dart';
 import 'sender.dart';
 
