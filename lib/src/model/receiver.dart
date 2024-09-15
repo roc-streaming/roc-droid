@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:logger/logger.dart';
 import 'package:mobx/mobx.dart';
 
-import '../agent/backend.g.dart';
+import '../agent/backend.dart';
 
 part 'receiver.g.dart';
 

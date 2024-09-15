@@ -83,7 +83,7 @@ def task_gen_model_watch():
 def task_gen_agent():
     """run flutter pigeon Agent code generation"""
     return {
-        'actions': ['dart run pigeon --input lib/src/agent/ibackend.dart'],
+        'actions': ['dart run pigeon --input lib/src/agent/android_connector.dart'],
         'title': title_with_actions,
     }
 
