@@ -15,12 +15,165 @@ PlatformException _createConnectionError(String channelName) {
   );
 }
 
+List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
+  if (empty) {
+    return <Object?>[];
+  }
+  if (error == null) {
+    return <Object?>[result];
+  }
+  return <Object?>[error.code, error.message, error.details];
+}
+
+/// Where sender gets sound.
+enum AndroidCaptureType {
+  /// Capture from locally playing apps.
+  captureApps,
+  /// Capture from local microphone.
+  captureMic,
+}
+
+/// Asynchronous events produces by android service.
+enum AndroidServiceEvent {
+  senderStateChanged,
+  receiverStateChanged,
+}
+
+/// Asynchronous errors produces by android service.
+enum AndroidServiceError {
+  audioRecordFailed,
+  audioTrackFailed,
+  senderConnectFailed,
+  receiverBindFailed,
+}
+
+/// Receiver settings.
+class AndroidReceiverSettings {
+  AndroidReceiverSettings({
+    required this.sourcePort,
+    required this.repairPort,
+  });
+
+  /// Local port to receive source packets.
+  int sourcePort;
+
+  /// Local port to receive repair packets.
+  int repairPort;
+
+  Object encode() {
+    return <Object?>[
+      sourcePort,
+      repairPort,
+    ];
+  }
+
+  static AndroidReceiverSettings decode(Object result) {
+    result as List<Object?>;
+    return AndroidReceiverSettings(
+      sourcePort: result[0]! as int,
+      repairPort: result[1]! as int,
+    );
+  }
+}
+
+/// Sender settings.
+class AndroidSenderSettings {
+  AndroidSenderSettings({
+    required this.captureType,
+    required this.host,
+    required this.sourcePort,
+    required this.repairPort,
+  });
+
+  /// From where to capture stream.
+  AndroidCaptureType captureType;
+
+  /// IP address or hostname where to send packets.
+  String host;
+
+  /// Remote port where to send source packets.
+  int sourcePort;
+
+  /// Remote port where to send repair packets.
+  int repairPort;
+
+  Object encode() {
+    return <Object?>[
+      captureType,
+      host,
+      sourcePort,
+      repairPort,
+    ];
+  }
+
+  static AndroidSenderSettings decode(Object result) {
+    result as List<Object?>;
+    return AndroidSenderSettings(
+      captureType: result[0]! as AndroidCaptureType,
+      host: result[1]! as String,
+      sourcePort: result[2]! as int,
+      repairPort: result[3]! as int,
+    );
+  }
+}
+
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
+  @override
+  void writeValue(WriteBuffer buffer, Object? value) {
+    if (value is int) {
+      buffer.putUint8(4);
+      buffer.putInt64(value);
+    }    else if (value is AndroidCaptureType) {
+      buffer.putUint8(129);
+      writeValue(buffer, value.index);
+    }    else if (value is AndroidServiceEvent) {
+      buffer.putUint8(130);
+      writeValue(buffer, value.index);
+    }    else if (value is AndroidServiceError) {
+      buffer.putUint8(131);
+      writeValue(buffer, value.index);
+    }    else if (value is AndroidReceiverSettings) {
+      buffer.putUint8(132);
+      writeValue(buffer, value.encode());
+    }    else if (value is AndroidSenderSettings) {
+      buffer.putUint8(133);
+      writeValue(buffer, value.encode());
+    } else {
+      super.writeValue(buffer, value);
+    }
+  }
+
+  @override
+  Object? readValueOfType(int type, ReadBuffer buffer) {
+    switch (type) {
+      case 129: 
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : AndroidCaptureType.values[value];
+      case 130: 
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : AndroidServiceEvent.values[value];
+      case 131: 
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : AndroidServiceError.values[value];
+      case 132: 
+        return AndroidReceiverSettings.decode(readValue(buffer)!);
+      case 133: 
+        return AndroidSenderSettings.decode(readValue(buffer)!);
+      default:
+        return super.readValueOfType(type, buffer);
+    }
+  }
 }
 
-/// ???.
+/// Allows to invoke kotlin methods from dart.
+///
+/// This declaration emits 2 classes:
+///  dart:   AndroidConnector implementation class, which methods invoke kotlin
+///          methods under the hood (via platform channels)
+///  kotlin: AndroidConnector interface, which we implement in
+///          AndroidConnectorImpl, where the actual work is done
 class AndroidConnector {
   /// Constructor for [AndroidConnector].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
@@ -34,8 +187,130 @@ class AndroidConnector {
 
   final String pigeonVar_messageChannelSuffix;
 
-  Future<void> startReceiver() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.startReceiver$pigeonVar_messageChannelSuffix';
+  /// Get list of IP addresses of available network interfaces.
+  Future<List<String?>> getLocalAddresses() async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.getLocalAddresses$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(null) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as List<Object?>?)!.cast<String?>();
+    }
+  }
+
+  /// Request permission to post notifications, if no already granted.
+  /// Must be called before acquiring projection first time.
+  /// If returns false, user rejected permission and notifications won't appear.
+  Future<bool> requestNotifications() async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.requestNotifications$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(null) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as bool?)!;
+    }
+  }
+
+  /// Request permission to capture local microphone, if not already granted.
+  /// Must be called before starting sender when using AndroidCaptureType.captureMic.
+  /// If returns false, user rejected permission and sender won't start.
+  Future<bool> requestMicrophone() async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.requestMicrophone$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(null) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as bool?)!;
+    }
+  }
+
+  /// Request access to media projection, if not already granted.
+  /// Must be called before starting sender or receiver.
+  /// If returns false, user rejected access and sender/receiver won't start.
+  /// Throws exception if:
+  ///  - lost connection to foreground service
+  Future<bool> acquireProjection() async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.acquireProjection$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(null) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as bool?)!;
+    }
+  }
+
+  /// Allow service to stop projection when it's not needed.
+  /// Must be called after *starting* sender or receiver.
+  Future<void> releaseProjection() async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.releaseProjection$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -56,6 +331,35 @@ class AndroidConnector {
     }
   }
 
+  /// Start receiver.
+  /// Receiver gets stream from network and plays to local speakers.
+  /// Must be called between acquireProjection() and releaseProjection().
+  /// Throws exception if:
+  ///  - lost connection to foreground service
+  ///  - media projection wasn't acquired
+  Future<void> startReceiver(AndroidReceiverSettings settings) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.startReceiver$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(<Object?>[settings]) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  /// Stop receiver.
   Future<void> stopReceiver() async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.stopReceiver$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -78,6 +382,7 @@ class AndroidConnector {
     }
   }
 
+  /// Check if receiver is running.
   Future<bool> isReceiverAlive() async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.isReceiverAlive$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -105,7 +410,14 @@ class AndroidConnector {
     }
   }
 
-  Future<void> startSender(String ip) async {
+  /// Start sender.
+  /// Sender gets stream from local microphone OR media system apps, and streams to network.
+  /// Must be called between acquireProjection() and releaseProjection().
+  /// Throws exception if:
+  ///  - lost connection to foreground service
+  ///  - media projection not acquired
+  ///  - microphone permission is needed and wasn't granted
+  Future<void> startSender(AndroidSenderSettings settings) async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.startSender$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
@@ -113,7 +425,7 @@ class AndroidConnector {
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(<Object?>[ip]) as List<Object?>?;
+        await pigeonVar_channel.send(<Object?>[settings]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {
@@ -127,6 +439,7 @@ class AndroidConnector {
     }
   }
 
+  /// Stop sender.
   Future<void> stopSender() async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.stopSender$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -149,6 +462,7 @@ class AndroidConnector {
     }
   }
 
+  /// Check if sender is running.
   Future<bool> isSenderAlive() async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.isSenderAlive$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -173,6 +487,80 @@ class AndroidConnector {
       );
     } else {
       return (pigeonVar_replyList[0] as bool?)!;
+    }
+  }
+}
+
+/// Allows to invoke dart methods from kotlin.
+///
+/// This declaration emits 2 classes:
+///  dart:   AndroidListener interface class, which is implemented
+///          by AndroidBackend
+///  kotlin: AndroidListener implementation class, which methods invoke
+///          dart methods under the hood (via platform channels)
+abstract class AndroidListener {
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  /// Invoked when an asynchronous event occurs.
+  /// For example, sender is started or stopped by UI, notification button,
+  /// tile button, or because of failure.
+  void onEvent(AndroidServiceEvent eventCode);
+
+  /// Invoked when an asynchronous error occurs.
+  /// For example, sender encounters network error.
+  void onError(AndroidServiceError errorCode);
+
+  static void setUp(AndroidListener? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.roc_droid.AndroidListener.onEvent$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.roc_droid.AndroidListener.onEvent was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final AndroidServiceEvent? arg_eventCode = (args[0] as AndroidServiceEvent?);
+          assert(arg_eventCode != null,
+              'Argument for dev.flutter.pigeon.roc_droid.AndroidListener.onEvent was null, expected non-null AndroidServiceEvent.');
+          try {
+            api.onEvent(arg_eventCode!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.roc_droid.AndroidListener.onError$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.roc_droid.AndroidListener.onError was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final AndroidServiceError? arg_errorCode = (args[0] as AndroidServiceError?);
+          assert(arg_errorCode != null,
+              'Argument for dev.flutter.pigeon.roc_droid.AndroidListener.onError was null, expected non-null AndroidServiceError.');
+          try {
+            api.onError(arg_errorCode!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
     }
   }
 }

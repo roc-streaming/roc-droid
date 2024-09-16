@@ -1,5 +1,9 @@
-package org.rocstreaming.service
+package org.rocstreaming.rocdroid
 
+import AndroidReceiverSettings
+import AndroidSenderSettings
+import AndroidServiceError
+import AndroidServiceEvent
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -18,11 +22,8 @@ import android.media.AudioTrack
 import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.os.Binder
-import android.os.Build
 import android.os.IBinder
 import android.util.Log
-import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
 import org.rocstreaming.rocdroid.MainActivity
 import org.rocstreaming.rocdroid.R
 import org.rocstreaming.roctoolkit.ChannelSet
@@ -41,31 +42,45 @@ import org.rocstreaming.roctoolkit.Slot
 private const val SAMPLE_RATE = 44100
 private const val BUFFER_SIZE = 100
 
-private const val DEFAULT_RTP_PORT_SOURCE = 10001
-private const val DEFAULT_RTP_PORT_REPAIR = 10002
-
-private const val CHANNEL_ID = "SenderReceiverService"
+private const val NOTIFICATION_CHANNEL_ID = "StreamingService"
 private const val NOTIFICATION_ID = 1
 
-private const val BROADCAST_STOP_SENDER_ACTION =
-    "org.rocstreaming.rocdroid.NotificationSenderStopAction"
-private const val BROADCAST_STOP_RECEIVER_ACTION =
-    "org.rocstreaming.rocdroid.NotificationReceiverStopAction"
+private const val NOTIFICATION_ACTION_DELETE =
+    "org.rocstreaming.rocdroid.NotificationActionDelete"
+private const val NOTIFICATION_ACTION_STOP_SENDER =
+    "org.rocstreaming.rocdroid.NotificationActionStopSender"
+private const val NOTIFICATION_ACTION_STOP_RECEIVER =
+    "org.rocstreaming.rocdroid.NotificationActionStopReceiver"
 
-private const val LOG_TAG = "[rocdroid.SenderReceiverService]"
+private const val LOG_TAG = "rocdroid.StreamingService"
 
-class SenderReceiverService : Service() {
+// Used to report asynchronous events and errors from service.
+interface StreamingEventListener {
+    fun onEvent(event: AndroidServiceEvent)
+    fun onError(error: AndroidServiceError)
+}
+
+// This service runs even when the app is closed.
+// Related docs:
+// https://medium.com/@domen.lanisnik/guide-to-foreground-services-on-android-9d0127dc8f9a
+// https://developer.android.com/reference/android/media/projection/MediaProjectionManager
+class StreamingService : Service() {
     private var receiverThread: Thread? = null
     private var senderThread: Thread? = null
-    private var receiverChanged: ((Boolean) -> Unit)? = null
-    private var senderChanged: ((Boolean) -> Unit)? = null
-    private var isForegroundRunning = false
+    private var receiverStarted = false
+    private var senderStarted = false
+    private var eventListener: StreamingEventListener? = null
+    private var autoDetach: Boolean = true
+    private var currentProjection: MediaProjection? = null
 
-    private val notificationStopActionReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+    private val notificationActionHandler: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            Log.i(LOG_TAG, "Handling notification action: " + intent.action)
+
             when (intent.action) {
-                BROADCAST_STOP_SENDER_ACTION -> stopSender()
-                BROADCAST_STOP_RECEIVER_ACTION -> stopReceiver()
+                NOTIFICATION_ACTION_DELETE -> stopAllNoNotification()
+                NOTIFICATION_ACTION_STOP_SENDER -> stopSender()
+                NOTIFICATION_ACTION_STOP_RECEIVER -> stopReceiver()
             }
         }
     }
@@ -73,244 +88,392 @@ class SenderReceiverService : Service() {
     private val binder = LocalBinder()
 
     inner class LocalBinder : Binder() {
-        fun getService(): SenderReceiverService = this@SenderReceiverService
+        fun getService(): StreamingService = this@StreamingService
     }
 
     override fun onBind(intent: Intent): IBinder {
-        Log.d(LOG_TAG, "Bind Service")
+        Log.i(LOG_TAG, "Binding service")
 
         return binder
     }
 
     override fun onCreate() {
-        Log.d(LOG_TAG, "Creating Sender/Receiver Service")
+        Log.i(LOG_TAG, "Creating service")
 
-        createNotificationChannel()
-        registerReceiver(
-            notificationStopActionReceiver,
-            IntentFilter().apply {
-                addAction(BROADCAST_STOP_SENDER_ACTION)
-                addAction(BROADCAST_STOP_RECEIVER_ACTION)
-            }
-        )
+        super.onCreate()
+
+        initNotifications()
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.i(LOG_TAG, "Starting service")
+
+        startForeground(NOTIFICATION_ID, buildNotification())
+
+        return START_STICKY
     }
 
     override fun onDestroy() {
-        Log.d(LOG_TAG, "Destroying Sender/Receiver Service")
+        Log.i(LOG_TAG, "Destroying service")
+
+        terminate()
+        deinitNotifications()
 
         super.onDestroy()
-        unregisterReceiver(notificationStopActionReceiver)
     }
 
-    private fun createNotificationChannel() {
-        Log.d(LOG_TAG, "Creating Notification Channel")
+    private fun terminate() {
+        Log.d(LOG_TAG, "Stopping threads")
 
-        val channel = NotificationChannel(
-            CHANNEL_ID,
-            getString(R.string.notification_channel_name),
-            NotificationManager.IMPORTANCE_LOW
-        )
-        val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        service.createNotificationChannel(channel)
+        stopSender()
+        stopReceiver()
+
+        Log.d(LOG_TAG, "Waiting threads")
+
+        senderThread?.join()
+        receiverThread?.join()
+
+        Log.d(LOG_TAG, "Stopping media projection")
+
+        currentProjection?.stop()
+        currentProjection = null
+
+        Log.d(LOG_TAG, "Stopping service")
+
+        stopForeground(true)
     }
 
-    private fun buildNotification(sending: Boolean, receiving: Boolean): Notification {
-        Log.d(
-            LOG_TAG,
-            String.format(
-                "Building Notification for %s %s",
-                if (sending) "Sender" else "",
-                if (receiving) "Receiver" else ""
-            )
-        )
-
-        val mainActivityIntent = Intent(this, MainActivity::class.java)
-        val pendingMainActivityIntent = PendingIntent.getActivity(
-            this,
-            0,
-            mainActivityIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        val stopSenderIntent = Intent(BROADCAST_STOP_SENDER_ACTION)
-        val pendingStopSenderIntent = PendingIntent.getBroadcast(
-            this@SenderReceiverService,
-            0,
-            stopSenderIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        val stopReceiverIntent = Intent(BROADCAST_STOP_RECEIVER_ACTION)
-        val pendingStopReceiverIntent = PendingIntent.getBroadcast(
-            this@SenderReceiverService,
-            0,
-            stopReceiverIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        val stopSenderAction = Notification.Action.Builder(
-            Icon.createWithResource(this@SenderReceiverService, R.drawable.ic_stop),
-            getString(R.string.notification_stop_sender_action),
-            pendingStopSenderIntent
-        ).build()
-        val stopReceiverAction = Notification.Action.Builder(
-            Icon.createWithResource(this@SenderReceiverService, R.drawable.ic_stop),
-            getString(R.string.notification_stop_receiver_action),
-            pendingStopReceiverIntent
-        ).build()
-        return Notification.Builder(this, CHANNEL_ID).apply {
-            setContentTitle(getString(R.string.notification_title))
-            setContentText(getContentText(sending, receiving))
-            setSmallIcon(R.drawable.ic_notification)
-            setVisibility(Notification.VISIBILITY_PUBLIC)
-            setContentIntent(pendingMainActivityIntent)
-            if (sending) {
-                addAction(stopSenderAction)
-            }
-            if (receiving) {
-                addAction(stopReceiverAction)
-            }
-        }.build()
+    @Synchronized
+    fun hasProjection(): Boolean {
+        return currentProjection != null
     }
 
-    private fun updateNotification(sending: Boolean, receiving: Boolean) {
-        Log.d(
-            LOG_TAG,
-            String.format(
-                "Updating Notification for %s %s",
-                if (sending) "Sender" else "",
-                if (receiving) "Receiver" else ""
-            )
-        )
+    @Synchronized
+    fun attachProjection(projection: MediaProjection) {
+        Log.i(LOG_TAG, "Attaching media projection")
 
-        if (!isForegroundRunning) {
-            return
-        }
+        currentProjection = projection
+    }
 
-        if (receiving || sending) {
-            val notification = buildNotification(sending, receiving)
-            val notificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.notify(NOTIFICATION_ID, notification)
-        } else {
-            stopForegroundService()
+    @Synchronized
+    fun enableAutoDetach() {
+        autoDetach = true
+        autoDetachProjection()
+    }
+
+    @Synchronized
+    fun disableAutoDetach() {
+        autoDetach = false
+    }
+
+    private fun autoDetachProjection() {
+        if (!senderStarted && !receiverStarted && currentProjection != null && autoDetach) {
+            Log.i(LOG_TAG, "Detaching media projection")
+
+            currentProjection?.stop()
+            currentProjection = null
         }
     }
 
-    private fun getContentText(sending: Boolean, receiving: Boolean): String {
-        Log.d(LOG_TAG, "Getting Notification Content Text")
-
-        if (sending && receiving) {
-            return getString(R.string.notification_sender_and_receiver_running)
-        }
-        if (receiving) {
-            return getString(R.string.notification_receiver_running)
-        }
-        if (sending) {
-            return getString(R.string.notification_sender_running)
-        }
-        return getString(R.string.notification_sender_and_receiver_not_running) // this shouldn't happen
+    @Synchronized
+    fun isSenderAlive(): Boolean {
+        return senderStarted
     }
 
-    fun preStartSender() {
-        Log.d(LOG_TAG, "Prestart Sender")
+    @Synchronized
+    fun startSender(settings: AndroidSenderSettings) {
+        if (senderStarted) return
 
-        if (isForegroundRunning) {
-            updateNotification(true, isReceiverAlive())
-        } else {
-            startForegroundService(true, isReceiverAlive())
+        Log.i(LOG_TAG, "Starting sender")
+
+        val projection = currentProjection
+        if (projection == null) {
+            throw IllegalStateException("Projection not attached")
         }
-    }
 
-    fun startSender(ip: String, projection: MediaProjection?) {
-        Log.d(LOG_TAG, "Starting Sender")
-
-        if (senderThread?.isAlive == true) return
+        val previousThread = senderThread
 
         senderThread = Thread {
-            val record = createAudioRecord(projection)
+            try {
+                if (previousThread != null) {
+                    Log.d(LOG_TAG, "Joining previois sender thread")
+                    previousThread.join()
+                }
 
-            val config = RocSenderConfig.builder()
+                runSenderThread(settings, projection)
+            } finally {
+                val currentThread = Thread.currentThread()
+
+                synchronized(this@StreamingService) {
+                    if (senderThread == currentThread) {
+                        stopSender()
+                    } else {
+                        Log.d(LOG_TAG, "Ignoring dangling sender thread")
+                    }
+                }
+            }
+        }
+
+        senderStarted = true
+        senderThread!!.start()
+
+        updateNotification()
+        reportEvent(AndroidServiceEvent.SENDER_STATE_CHANGED)
+    }
+
+    @Synchronized
+    fun stopSender() {
+        if (!senderStarted) return
+
+        Log.i(LOG_TAG, "Stopping sender")
+
+        senderStarted = false
+        senderThread?.interrupt()
+
+        updateNotification()
+        autoDetachProjection()
+
+        reportEvent(AndroidServiceEvent.SENDER_STATE_CHANGED)
+    }
+
+    @Synchronized
+    fun isReceiverAlive(): Boolean {
+        return receiverStarted
+    }
+
+    @Synchronized
+    fun startReceiver(settings: AndroidReceiverSettings) {
+        if (receiverStarted) return
+
+        Log.i(LOG_TAG, "Starting receiver")
+
+        val projection = currentProjection
+        if (projection == null) {
+            throw IllegalStateException("Projection not attached")
+        }
+
+        val previousThread = receiverThread
+
+        receiverThread = Thread {
+            try {
+                if (previousThread != null) {
+                    Log.d(LOG_TAG, "Joining previois receiver thread")
+                    previousThread.join()
+                }
+
+                runReceiverThread(settings, projection)
+            } finally {
+                val currentThread = Thread.currentThread()
+
+                synchronized(this@StreamingService) {
+                    if (receiverThread == currentThread) {
+                        stopReceiver()
+                    } else {
+                        Log.d(LOG_TAG, "Ignoring dangling receiver thread")
+                    }
+                }
+            }
+        }
+
+        receiverStarted = true
+        receiverThread!!.start()
+
+        updateNotification()
+        reportEvent(AndroidServiceEvent.RECEIVER_STATE_CHANGED)
+    }
+
+    @Synchronized
+    fun stopReceiver() {
+        if (!receiverStarted) return
+
+        Log.i(LOG_TAG, "Stopping receiver")
+
+        receiverStarted = false
+        receiverThread?.interrupt()
+
+        updateNotification()
+        autoDetachProjection()
+
+        reportEvent(AndroidServiceEvent.RECEIVER_STATE_CHANGED)
+    }
+
+    @Synchronized
+    fun stopAllNoNotification() {
+        if (!senderStarted && !receiverStarted) return
+
+        if (senderStarted) {
+            Log.i(LOG_TAG, "Stopping sender")
+
+            senderStarted = false
+            senderThread?.interrupt()
+
+            reportEvent(AndroidServiceEvent.SENDER_STATE_CHANGED)
+        }
+
+        if (receiverStarted) {
+            Log.i(LOG_TAG, "Stopping receiver")
+
+            receiverStarted = false
+            receiverThread?.interrupt()
+
+            reportEvent(AndroidServiceEvent.RECEIVER_STATE_CHANGED)
+        }
+
+        autoDetachProjection()
+    }
+
+    @Synchronized
+    fun setEventListener(listener: StreamingEventListener) {
+        Log.d(LOG_TAG, "Setting event listener")
+
+        eventListener = listener
+    }
+
+    @Synchronized
+    fun removeEventListener() {
+        Log.d(LOG_TAG, "Removing event listener")
+
+        eventListener = null
+    }
+
+    @Synchronized
+    private fun reportEvent(event: AndroidServiceEvent) {
+        Log.d(LOG_TAG, "Reporting event: " + event.toString())
+
+        eventListener?.onEvent(event)
+    }
+
+    @Synchronized
+    private fun reportError(error: AndroidServiceError) {
+        Log.d(LOG_TAG, "Reporting error: " + error.toString())
+
+        eventListener?.onError(error)
+    }
+
+    private fun runSenderThread(settings: AndroidSenderSettings, projection: MediaProjection) {
+        Log.d(LOG_TAG, "Running sender thread")
+
+        var audioRecord: AudioRecord? = null
+
+        try {
+            try {
+                if (settings.captureType == AndroidCaptureType.CAPTURE_APPS) {
+                    audioRecord = createProjectionAudioRecord(projection)
+                } else {
+                    audioRecord = createMicrophoneAudioRecord()
+                }
+            } catch (e: Exception) {
+                Log.e(LOG_TAG, "Failed to create audio record: " + e.toString())
+                reportError(AndroidServiceError.AUDIO_RECORD_FAILED)
+                return
+            }
+
+            if (audioRecord.state != AudioRecord.STATE_INITIALIZED) {
+                Log.e(LOG_TAG, "Failed to initialize audio record: " + audioRecord.state.toString())
+                reportError(AndroidServiceError.AUDIO_RECORD_FAILED)
+                return
+            }
+
+            val senderConfig = RocSenderConfig.builder()
                 .frameSampleRate(44100)
                 .frameChannels(ChannelSet.STEREO)
                 .frameEncoding(FrameEncoding.PCM_FLOAT)
-                .clockSource(ClockSource.INTERNAL)
+                .clockSource(ClockSource.EXTERNAL)
                 .build()
 
             RocContext().use { context ->
-                if (record.state != AudioRecord.STATE_INITIALIZED) return@use
-
-                record.startRecording()
-
-                RocSender(context, config).use useSender@{ sender ->
-
+                RocSender(context, senderConfig).use useSender@{ sender ->
                     try {
                         sender.connect(
                             Slot.DEFAULT,
                             Interface.AUDIO_SOURCE,
-                            Endpoint(Protocol.RTP_RS8M_SOURCE, ip, DEFAULT_RTP_PORT_SOURCE)
+                            Endpoint(Protocol.RTP_RS8M_SOURCE,
+                                     settings.host,
+                                     settings.sourcePort.toInt())
                         )
                         sender.connect(
                             Slot.DEFAULT,
                             Interface.AUDIO_REPAIR,
-                            Endpoint(Protocol.RS8M_REPAIR, ip, DEFAULT_RTP_PORT_REPAIR)
+                            Endpoint(Protocol.RS8M_REPAIR,
+                                     settings.host,
+                                     settings.repairPort.toInt())
                         )
                     } catch (e: Exception) {
-                        AlertDialog.Builder(this@SenderReceiverService).apply {
-                            setTitle(getString(R.string.invalid_ip_title))
-                            setMessage(getString(R.string.invalid_ip_message))
-                            setCancelable(false)
-                            setPositiveButton(R.string.ok) { _, _ -> }
-                        }.show()
+                        Log.e(LOG_TAG, "Failed to connect sender: " + e.toString())
+                        reportError(AndroidServiceError.SENDER_CONNECT_FAILED)
                         return@useSender
                     }
 
-                    senderChanged?.invoke(true)
+                    audioRecord.startRecording()
 
                     val samples = FloatArray(BUFFER_SIZE)
                     while (!Thread.currentThread().isInterrupted) {
-                        record.read(samples, 0, samples.size, AudioRecord.READ_BLOCKING)
+                        audioRecord.read(samples, 0, samples.size, AudioRecord.READ_BLOCKING)
                         sender.write(samples)
                     }
                 }
-
-                record.stop()
-                record.release()
-                senderChanged?.invoke(false)
-                updateNotification(false, isReceiverAlive())
             }
-        }
+        } finally {
+            Log.d(LOG_TAG, "Releasing sender resources")
 
-        senderThread!!.start()
+            audioRecord?.stop()
+            audioRecord?.release()
+
+            Log.d(LOG_TAG, "Exiting sender thread")
+        }
     }
 
-    fun startReceiver() {
-        Log.d(LOG_TAG, "Starting Receiver")
+    private fun runReceiverThread(settings: AndroidReceiverSettings, projection: MediaProjection) {
+        Log.d(LOG_TAG, "Running receiver thread")
 
-        if (receiverThread?.isAlive == true) return
+        var audioTrack: AudioTrack? = null
 
-        receiverThread = Thread {
-            val audioTrack = createAudioTrack()
-            audioTrack.play()
+        try {
+            try {
+                audioTrack = createAudioTrack()
+            } catch (e: Exception) {
+                Log.e(LOG_TAG, "Failed to create audio track: " + e.toString())
+                reportError(AndroidServiceError.AUDIO_TRACK_FAILED)
+                return
+            }
 
-            val config = RocReceiverConfig.builder()
+            if (audioTrack.state != AudioTrack.STATE_INITIALIZED) {
+                Log.e(LOG_TAG, "Failed to initialize audio track: " + audioTrack.state.toString())
+                reportError(AndroidServiceError.AUDIO_TRACK_FAILED)
+                return
+            }
+
+            val receiverConfig = RocReceiverConfig.builder()
                 .frameSampleRate(44100)
                 .frameChannels(ChannelSet.STEREO)
                 .frameEncoding(FrameEncoding.PCM_FLOAT)
-                .clockSource(ClockSource.INTERNAL)
+                .clockSource(ClockSource.EXTERNAL)
                 .build()
 
             RocContext().use { context ->
-                RocReceiver(context, config).use { receiver ->
-                    receiver.bind(
-                        Slot.DEFAULT,
-                        Interface.AUDIO_SOURCE,
-                        Endpoint(Protocol.RTP_RS8M_SOURCE, "0.0.0.0", DEFAULT_RTP_PORT_SOURCE)
-                    )
-                    receiver.bind(
-                        Slot.DEFAULT,
-                        Interface.AUDIO_REPAIR,
-                        Endpoint(Protocol.RS8M_REPAIR, "0.0.0.0", DEFAULT_RTP_PORT_REPAIR)
-                    )
+                RocReceiver(context, receiverConfig).use useReceiver@{ receiver ->
+                    try {
+                        receiver.bind(
+                            Slot.DEFAULT,
+                            Interface.AUDIO_SOURCE,
+                            Endpoint(Protocol.RTP_RS8M_SOURCE,
+                                     "0.0.0.0",
+                                     settings.sourcePort.toInt())
+                        )
+                        receiver.bind(
+                            Slot.DEFAULT,
+                            Interface.AUDIO_REPAIR,
+                            Endpoint(Protocol.RS8M_REPAIR,
+                                     "0.0.0.0",
+                                     settings.repairPort.toInt())
+                        )
+                    } catch (e: Exception) {
+                        Log.e(LOG_TAG, "Failed to bind receiver: " + e.toString())
+                        reportError(AndroidServiceError.RECEIVER_BIND_FAILED)
+                        return@useReceiver
+                    }
 
-                    receiverChanged?.invoke(true)
+                    audioTrack.play()
 
                     val samples = FloatArray(BUFFER_SIZE)
                     while (!Thread.currentThread().isInterrupted) {
@@ -320,67 +483,18 @@ class SenderReceiverService : Service() {
                 }
             }
 
-            audioTrack.release()
-            receiverChanged?.invoke(false)
-            updateNotification(isSenderAlive(), false)
+        } finally {
+            Log.d(LOG_TAG, "Releasing receiver resources")
+
+            audioTrack?.stop()
+            audioTrack?.release()
+
+            Log.d(LOG_TAG, "Exiting receiver thread")
         }
-
-        receiverThread!!.start()
-
-        if (isForegroundRunning) {
-            updateNotification(isSenderAlive(), true)
-        } else {
-            startForegroundService(isSenderAlive(), true)
-        }
-    }
-
-    fun stopSender() {
-        Log.d(LOG_TAG, "Stopping Sender")
-
-        senderThread?.interrupt()
-    }
-
-    fun stopReceiver() {
-        Log.d(LOG_TAG, "Stopping Receiver")
-
-        receiverThread?.interrupt()
-    }
-
-    fun isReceiverAlive(): Boolean {
-        Log.d(LOG_TAG, "Checking If Receiver Alive")
-
-        return receiverThread?.isAlive == true
-    }
-
-    fun isSenderAlive(): Boolean {
-        Log.d(LOG_TAG, "Checking If Sender Alive")
-
-        return senderThread?.isAlive == true
-    }
-
-    private fun startForegroundService(sending: Boolean, receiving: Boolean) {
-        Log.d(
-            LOG_TAG,
-            String.format(
-                "Starting Foreground Service for %s %s",
-                if (sending) "Sender" else "",
-                if (receiving) "Receiver" else ""
-            )
-        )
-
-        isForegroundRunning = true
-        startForeground(NOTIFICATION_ID, buildNotification(sending, receiving))
-    }
-
-    private fun stopForegroundService() {
-        Log.d(LOG_TAG, "Stopping Foreground Service")
-
-        isForegroundRunning = false
-        stopForeground(true)
     }
 
     private fun createAudioTrack(): AudioTrack {
-        Log.d(LOG_TAG, "Creating Audio Track")
+        Log.d(LOG_TAG, "Creating audio track")
 
         val audioAttributes = AudioAttributes.Builder().apply {
             setUsage(AudioAttributes.USAGE_MEDIA)
@@ -405,8 +519,8 @@ class SenderReceiverService : Service() {
         }.build()
     }
 
-    private fun createAudioRecord(projection: MediaProjection?): AudioRecord {
-        Log.d(LOG_TAG, "Creating Audio Record")
+    private fun createMicrophoneAudioRecord(): AudioRecord {
+        Log.d(LOG_TAG, "Creating microphone audio record")
 
         val format = AudioFormat.Builder().apply {
             setSampleRate(SAMPLE_RATE)
@@ -418,32 +532,31 @@ class SenderReceiverService : Service() {
             AudioFormat.CHANNEL_IN_STEREO,
             AudioFormat.ENCODING_PCM_FLOAT
         )
-
-        return if (projection != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            createPaybackRecord(projection, format, bufferSize)
-        } else {
-            AudioRecord.Builder().apply {
-                setAudioSource(MediaRecorder.AudioSource.DEFAULT)
-                setAudioFormat(format)
-                setBufferSizeInBytes(bufferSize)
-            }.build()
-        }
+        return AudioRecord.Builder().apply {
+            setAudioSource(MediaRecorder.AudioSource.DEFAULT)
+            setAudioFormat(format)
+            setBufferSizeInBytes(bufferSize)
+        }.build()
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private fun createPaybackRecord(
-        projection: MediaProjection,
-        format: AudioFormat,
-        bufferSize: Int
-    ): AudioRecord {
-        Log.d(LOG_TAG, "Creating Playback Record")
+    private fun createProjectionAudioRecord(projection: MediaProjection): AudioRecord {
+        Log.d(LOG_TAG, "Creating projection audio record")
 
+        val format = AudioFormat.Builder().apply {
+            setSampleRate(SAMPLE_RATE)
+            setChannelMask(AudioFormat.CHANNEL_IN_STEREO)
+            setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
+        }.build()
+        val bufferSize = AudioRecord.getMinBufferSize(
+            SAMPLE_RATE,
+            AudioFormat.CHANNEL_IN_STEREO,
+            AudioFormat.ENCODING_PCM_FLOAT
+        )
         val config = AudioPlaybackCaptureConfiguration.Builder(projection).apply {
             addMatchingUsage(AudioAttributes.USAGE_MEDIA)
             addMatchingUsage(AudioAttributes.USAGE_UNKNOWN)
             addMatchingUsage(AudioAttributes.USAGE_GAME)
         }.build()
-
         return AudioRecord.Builder().apply {
             setAudioPlaybackCaptureConfig(config)
             setAudioFormat(format)
@@ -451,26 +564,137 @@ class SenderReceiverService : Service() {
         }.build()
     }
 
-    fun setSenderStateChangedListeners(
-        senderChanged: (Boolean) -> Unit
-    ) {
-        Log.d(LOG_TAG, "Setting Sender State Changed Listener")
+    private fun initNotifications() {
+        Log.d(LOG_TAG, "Initializing notifications")
 
-        this.senderChanged = senderChanged
+        val channel = NotificationChannel(
+            NOTIFICATION_CHANNEL_ID,
+            getString(R.string.notification_channel_name),
+            NotificationManager.IMPORTANCE_LOW
+        )
+
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        notificationManager.createNotificationChannel(channel)
+
+        registerReceiver(
+            notificationActionHandler,
+            IntentFilter().apply {
+                addAction(NOTIFICATION_ACTION_DELETE)
+                addAction(NOTIFICATION_ACTION_STOP_SENDER)
+                addAction(NOTIFICATION_ACTION_STOP_RECEIVER)
+            },
+            RECEIVER_EXPORTED
+        )
     }
 
-    fun setReceiverStateChangedListeners(
-        receiverChanged: (Boolean) -> Unit
-    ) {
-        Log.d(LOG_TAG, "Setting Receiver State Changed Listener")
+    private fun deinitNotifications() {
+        Log.d(LOG_TAG, "Deinitializing notifications")
 
-        this.receiverChanged = receiverChanged
+        unregisterReceiver(notificationActionHandler)
     }
 
-    fun removeListeners() {
-        Log.d(LOG_TAG, "Removing State Changed Listeners")
+    private fun buildNotification(): Notification {
+        Log.d(LOG_TAG, "Building notification: actions=" + getNotificationDesc())
 
-        this.receiverChanged = null
-        this.senderChanged = null
+        // invoked when notification is tapped
+        // we want to open main activity
+        val contentIntent = Intent(this, MainActivity::class.java)
+        val pendingContentIntent = PendingIntent.getActivity(
+            this,
+            0,
+            contentIntent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // invoked when notification is dismissed (swiped away)
+        // we want to stop sender & receiver
+        val deleteIntent = Intent(NOTIFICATION_ACTION_DELETE)
+        val pendingDeleteIntent = PendingIntent.getBroadcast(
+            this,
+            0,
+            deleteIntent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // invoked when "stop sender" notification button is pressed
+        val stopSenderIntent = Intent(NOTIFICATION_ACTION_STOP_SENDER)
+        val pendingStopSenderIntent = PendingIntent.getBroadcast(
+            this,
+            0,
+            stopSenderIntent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        val stopSenderAction = Notification.Action.Builder(
+            Icon.createWithResource(this@StreamingService, R.drawable.ic_stop),
+            getString(R.string.notification_stop_sender_action),
+            pendingStopSenderIntent
+        ).build()
+
+        // invoked when "stop receiver" notification button is pressed
+        val stopReceiverIntent = Intent(NOTIFICATION_ACTION_STOP_RECEIVER)
+        val pendingStopReceiverIntent = PendingIntent.getBroadcast(
+            this,
+            0,
+            stopReceiverIntent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        val stopReceiverAction = Notification.Action.Builder(
+            Icon.createWithResource(this@StreamingService, R.drawable.ic_stop),
+            getString(R.string.notification_stop_receiver_action),
+            pendingStopReceiverIntent
+        ).build()
+
+        return Notification.Builder(this, NOTIFICATION_CHANNEL_ID).apply {
+            // appearance
+            setSmallIcon(R.drawable.ic_notification)
+            setContentTitle(getString(R.string.notification_title))
+            setContentText(getNotificationText())
+            // when notification is tapped
+            setContentIntent(pendingContentIntent)
+            // when notification is swiped away
+            setDeleteIntent(pendingDeleteIntent);
+            // don't allow to dimiss notification on lock screen
+            setOngoing(true)
+            // show on lock screen
+            setVisibility(Notification.VISIBILITY_PUBLIC)
+            // notification buttons
+            if (senderStarted) {
+                addAction(stopSenderAction)
+            }
+            if (receiverStarted) {
+                addAction(stopReceiverAction)
+            }
+        }.build()
+    }
+
+    private fun updateNotification() {
+        Log.d(LOG_TAG, "Updating notification: actions=" + getNotificationDesc())
+
+        val notification = buildNotification()
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
+    private fun getNotificationText(): String {
+        return when {
+            senderStarted && receiverStarted ->
+                getString(R.string.notification_sender_and_receiver_running)
+            senderStarted -> getString(R.string.notification_sender_running)
+            receiverStarted -> getString(R.string.notification_receiver_running)
+            else -> getString(R.string.notification_sender_and_receiver_not_running)
+        }
+    }
+
+    private fun getNotificationDesc(): String {
+        return when {
+            senderStarted && receiverStarted -> "[sender, receiver]"
+            senderStarted -> "[sender]"
+            receiverStarted -> "[receiver]"
+            else -> "[]"
+        }
     }
 }

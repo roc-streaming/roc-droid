@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:logger/logger.dart';
 import 'package:mobx/mobx.dart';
 
-import '../agent/backend.dart';
+import '../agent.dart';
 
 part 'receiver.g.dart';
 
@@ -56,7 +56,10 @@ abstract class _Receiver with Store {
     }
 
     // Main backend call
-    await _backend.startReceiver();
+    await _backend.startReceiver(AndroidReceiverSettings(
+      sourcePort: 10001,
+      repairPort: 10002,
+    ));
 
     var status = await _backend.isReceiverAlive();
     _logger.i('Trying to start the receiver. roc service status: $status');
