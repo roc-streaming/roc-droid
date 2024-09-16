@@ -1,17 +1,29 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.rocstreaming.rocdroid"
-    android:versionCode="2002"
-    android:versionName="0.2.2">
+    android:versionCode="3000"
+    android:versionName="0.3.0">
 
+    <!-- For sreaming -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- To get list of local network interfaces -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- For sender, when capturing sound from microphone -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- To continue working when app is closed -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- For sender, when capturing sound from other apps -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <!-- To create notification from sender -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/> 
 
     <application
         android:label="Roc Droid"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
+        <service
+            android:name=".StreamingService"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -43,7 +55,6 @@
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
          https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
-
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
         <intent>

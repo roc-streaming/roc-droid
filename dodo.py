@@ -1,17 +1,18 @@
-from doit.tools import title_with_actions, LongRunning, Interactive
 from doit import get_var
+from doit.tools import title_with_actions, LongRunning, Interactive
 import atexit
 import glob
 import os
 import platform
 import shutil
 import signal
+import subprocess
 import sys
 
 atexit.register(
     lambda: shutil.rmtree('__pycache__', ignore_errors=True))
 if os.name == 'posix':
-    signal.signal(signal.SIGINT, lambda s, f: os._exit(0))
+    signal.signal(signal.SIGINT, lambda s, f: exit(1))
 
 DOIT_CONFIG = {
     'default_tasks': ['analyze', 'test'],
@@ -51,8 +52,17 @@ def task_test():
 # doit launch [variant=debug|release]
 def task_launch():
     """deploy and run on device"""
+    def do_cleanup():
+        subprocess.call(
+            'adb shell am force-stop org.rocstreaming.rocdroid',
+            shell=True)
+    def register_cleanup():
+        atexit.register(do_cleanup)
     return {
-        'actions': [Interactive(f'flutter run --{VARIANT}')],
+        'actions': [
+            register_cleanup,
+            Interactive(f'flutter run --{VARIANT}'),
+        ],
         'title': title_with_actions,
     }
 
@@ -112,7 +122,7 @@ def task_gen_agent():
     """run flutter pigeon Agent code generation"""
     return {
         'basename': 'gen:agent',
-        'actions': ['dart run pigeon --input lib/src/agent/android_connector.dart'],
+        'actions': ['dart run pigeon --input lib/src/agent/android_bridge.decl.dart'],
         'title': title_with_actions,
     }
 

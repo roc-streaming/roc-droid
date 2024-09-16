@@ -31,6 +31,9 @@ private fun wrapError(exception: Throwable): List<Any?> {
   }
 }
 
+private fun createConnectionError(channelName: String): FlutterError {
+  return FlutterError("channel-error",  "Unable to establish connection on channel: '$channelName'.", "")}
+
 /**
  * Error class for passing custom error details to Flutter via a thrown PlatformException.
  * @property code The error code.
@@ -42,43 +45,336 @@ class FlutterError (
   override val message: String? = null,
   val details: Any? = null
 ) : Throwable()
-private open class AndroidConnectorPigeonCodec : StandardMessageCodec() {
-  override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
-    return     super.readValueOfType(type, buffer)
+
+/** Where sender gets sound. */
+enum class AndroidCaptureType(val raw: Int) {
+  /** Capture from locally playing apps. */
+  CAPTURE_APPS(0),
+  /** Capture from local microphone. */
+  CAPTURE_MIC(1);
+
+  companion object {
+    fun ofRaw(raw: Int): AndroidCaptureType? {
+      return values().firstOrNull { it.raw == raw }
+    }
   }
-  override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
-    super.writeValue(stream, value)
+}
+
+/** Asynchronous events produces by android service. */
+enum class AndroidServiceEvent(val raw: Int) {
+  SENDER_STATE_CHANGED(0),
+  RECEIVER_STATE_CHANGED(1);
+
+  companion object {
+    fun ofRaw(raw: Int): AndroidServiceEvent? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+/** Asynchronous errors produces by android service. */
+enum class AndroidServiceError(val raw: Int) {
+  AUDIO_RECORD_FAILED(0),
+  AUDIO_TRACK_FAILED(1),
+  SENDER_CONNECT_FAILED(2),
+  RECEIVER_BIND_FAILED(3);
+
+  companion object {
+    fun ofRaw(raw: Int): AndroidServiceError? {
+      return values().firstOrNull { it.raw == raw }
+    }
   }
 }
 
 /**
- * ???.
+ * Receiver settings.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class AndroidReceiverSettings (
+  /** Local port to receive source packets. */
+  val sourcePort: Long,
+  /** Local port to receive repair packets. */
+  val repairPort: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): AndroidReceiverSettings {
+      val sourcePort = pigeonVar_list[0] as Long
+      val repairPort = pigeonVar_list[1] as Long
+      return AndroidReceiverSettings(sourcePort, repairPort)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      sourcePort,
+      repairPort,
+    )
+  }
+}
+
+/**
+ * Sender settings.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class AndroidSenderSettings (
+  /** From where to capture stream. */
+  val captureType: AndroidCaptureType,
+  /** IP address or hostname where to send packets. */
+  val host: String,
+  /** Remote port where to send source packets. */
+  val sourcePort: Long,
+  /** Remote port where to send repair packets. */
+  val repairPort: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): AndroidSenderSettings {
+      val captureType = pigeonVar_list[0] as AndroidCaptureType
+      val host = pigeonVar_list[1] as String
+      val sourcePort = pigeonVar_list[2] as Long
+      val repairPort = pigeonVar_list[3] as Long
+      return AndroidSenderSettings(captureType, host, sourcePort, repairPort)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      captureType,
+      host,
+      sourcePort,
+      repairPort,
+    )
+  }
+}
+private open class AndroidBridgePigeonCodec : StandardMessageCodec() {
+  override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
+    return when (type) {
+      129.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          AndroidCaptureType.ofRaw(it.toInt())
+        }
+      }
+      130.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          AndroidServiceEvent.ofRaw(it.toInt())
+        }
+      }
+      131.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          AndroidServiceError.ofRaw(it.toInt())
+        }
+      }
+      132.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          AndroidReceiverSettings.fromList(it)
+        }
+      }
+      133.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          AndroidSenderSettings.fromList(it)
+        }
+      }
+      else -> super.readValueOfType(type, buffer)
+    }
+  }
+  override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
+    when (value) {
+      is AndroidCaptureType -> {
+        stream.write(129)
+        writeValue(stream, value.raw)
+      }
+      is AndroidServiceEvent -> {
+        stream.write(130)
+        writeValue(stream, value.raw)
+      }
+      is AndroidServiceError -> {
+        stream.write(131)
+        writeValue(stream, value.raw)
+      }
+      is AndroidReceiverSettings -> {
+        stream.write(132)
+        writeValue(stream, value.toList())
+      }
+      is AndroidSenderSettings -> {
+        stream.write(133)
+        writeValue(stream, value.toList())
+      }
+      else -> super.writeValue(stream, value)
+    }
+  }
+}
+
+
+/**
+ * Allows to invoke kotlin methods from dart.
+ *
+ * This declaration emits 2 classes:
+ *  dart:   AndroidConnector implementation class, which methods invoke kotlin
+ *          methods under the hood (via platform channels)
+ *  kotlin: AndroidConnector interface, which we implement in
+ *          AndroidConnectorImpl, where the actual work is done
  *
  * Generated interface from Pigeon that represents a handler of messages from Flutter.
  */
 interface AndroidConnector {
-  fun startReceiver()
+  /** Get list of IP addresses of available network interfaces. */
+  fun getLocalAddresses(): List<String>
+  /**
+   * Request permission to post notifications, if no already granted.
+   * Must be called before acquiring projection first time.
+   * If returns false, user rejected permission and notifications won't appear.
+   */
+  fun requestNotifications(callback: (Result<Boolean>) -> Unit)
+  /**
+   * Request permission to capture local microphone, if not already granted.
+   * Must be called before starting sender when using AndroidCaptureType.captureMic.
+   * If returns false, user rejected permission and sender won't start.
+   */
+  fun requestMicrophone(callback: (Result<Boolean>) -> Unit)
+  /**
+   * Request access to media projection, if not already granted.
+   * Must be called before starting sender or receiver.
+   * If returns false, user rejected access and sender/receiver won't start.
+   * Throws exception if:
+   *  - lost connection to foreground service
+   */
+  fun acquireProjection(callback: (Result<Boolean>) -> Unit)
+  /**
+   * Allow service to stop projection when it's not needed.
+   * Must be called after *starting* sender or receiver.
+   */
+  fun releaseProjection()
+  /**
+   * Start receiver.
+   * Receiver gets stream from network and plays to local speakers.
+   * Must be called between acquireProjection() and releaseProjection().
+   * Throws exception if:
+   *  - lost connection to foreground service
+   *  - media projection wasn't acquired
+   */
+  fun startReceiver(settings: AndroidReceiverSettings)
+  /** Stop receiver. */
   fun stopReceiver()
+  /** Check if receiver is running. */
   fun isReceiverAlive(): Boolean
-  fun startSender(ip: String)
+  /**
+   * Start sender.
+   * Sender gets stream from local microphone OR media system apps, and streams to network.
+   * Must be called between acquireProjection() and releaseProjection().
+   * Throws exception if:
+   *  - lost connection to foreground service
+   *  - media projection not acquired
+   *  - microphone permission is needed and wasn't granted
+   */
+  fun startSender(settings: AndroidSenderSettings)
+  /** Stop sender. */
   fun stopSender()
+  /** Check if sender is running. */
   fun isSenderAlive(): Boolean
 
   companion object {
     /** The codec used by AndroidConnector. */
     val codec: MessageCodec<Any?> by lazy {
-      AndroidConnectorPigeonCodec()
+      AndroidBridgePigeonCodec()
     }
     /** Sets up an instance of `AndroidConnector` to handle messages through the `binaryMessenger`. */
     @JvmOverloads
     fun setUp(binaryMessenger: BinaryMessenger, api: AndroidConnector?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.startReceiver$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.getLocalAddresses$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
-              api.startReceiver()
+              listOf(api.getLocalAddresses())
+            } catch (exception: Throwable) {
+              wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.requestNotifications$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.requestNotifications{ result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.requestMicrophone$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.requestMicrophone{ result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.acquireProjection$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.acquireProjection{ result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.releaseProjection$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.releaseProjection()
+              listOf(null)
+            } catch (exception: Throwable) {
+              wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.startReceiver$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val settingsArg = args[0] as AndroidReceiverSettings
+            val wrapped: List<Any?> = try {
+              api.startReceiver(settingsArg)
               listOf(null)
             } catch (exception: Throwable) {
               wrapError(exception)
@@ -125,9 +421,9 @@ interface AndroidConnector {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val ipArg = args[0] as String
+            val settingsArg = args[0] as AndroidSenderSettings
             val wrapped: List<Any?> = try {
-              api.startSender(ipArg)
+              api.startSender(settingsArg)
               listOf(null)
             } catch (exception: Throwable) {
               wrapError(exception)
@@ -169,6 +465,68 @@ interface AndroidConnector {
           channel.setMessageHandler(null)
         }
       }
+    }
+  }
+}
+/**
+ * Allows to invoke dart methods from kotlin.
+ *
+ * This declaration emits 2 classes:
+ *  dart:   AndroidListener interface class, which is implemented
+ *          by AndroidBackend
+ *  kotlin: AndroidListener implementation class, which methods invoke
+ *          dart methods under the hood (via platform channels)
+ *
+ * Generated class from Pigeon that represents Flutter messages that can be called from Kotlin.
+ */
+class AndroidListener(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
+  companion object {
+    /** The codec used by AndroidListener. */
+    val codec: MessageCodec<Any?> by lazy {
+      AndroidBridgePigeonCodec()
+    }
+  }
+  /**
+   * Invoked when an asynchronous event occurs.
+   * For example, sender is started or stopped by UI, notification button,
+   * tile button, or because of failure.
+   */
+  fun onEvent(eventCodeArg: AndroidServiceEvent, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.roc_droid.AndroidListener.onEvent$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(eventCodeArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(createConnectionError(channelName)))
+      } 
+    }
+  }
+  /**
+   * Invoked when an asynchronous error occurs.
+   * For example, sender encounters network error.
+   */
+  fun onError(errorCodeArg: AndroidServiceError, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.roc_droid.AndroidListener.onError$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(errorCodeArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(createConnectionError(channelName)))
+      } 
     }
   }
 }

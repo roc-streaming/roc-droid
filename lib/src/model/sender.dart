@@ -1,7 +1,7 @@
 import 'package:logger/logger.dart';
 import 'package:mobx/mobx.dart';
 
-import '../agent/backend.dart';
+import '../agent.dart';
 import 'capture_source_type.dart';
 
 part 'sender.g.dart';
@@ -62,7 +62,12 @@ abstract class _Sender with Store {
     }
 
     // Main backend call
-    await _backend.startSender(receiverIP);
+    await _backend.startSender(AndroidSenderSettings(
+      captureType: AndroidCaptureType.captureApps,
+      host: receiverIP,
+      sourcePort: 10001,
+      repairPort: 10002,
+    ));
 
     var status = await _backend.isSenderAlive();
     _logger.i('Trying to start the sender. roc service status: $status');
@@ -91,27 +96,23 @@ abstract class _Sender with Store {
   @action
   void setSourcePort(int value) {
     _sourcePort = value;
-    _logger.d('Sender source port value changed to: ${_sourcePort}');
   }
 
   // Update repair port value.
   @action
   void setRepairPort(int value) {
     _repairPort = value;
-    _logger.d('Sender repair port value changed to: ${_repairPort}');
   }
 
   // Update the active source port.
   @action
   void setReceiverIP(String value) {
     _receiverIP = value;
-    _logger.d('Sender active source port value changed to: ${_receiverIP}');
   }
 
   // Update the active the user-selected capture source enum.
   @action
   void setCaptureSource(CaptureSourceType value) {
     _captureSource = value;
-    _logger.d('Capture source enum value changed to: ${_captureSource}');
   }
 }
