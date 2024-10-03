@@ -70,4 +70,4 @@ jobs:
           packages: python3-doit
 
       - name: Build apk
-        run: doit build_apk
+        run: doit build:apk
