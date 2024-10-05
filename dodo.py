@@ -45,7 +45,7 @@ def task_analyze():
 def task_test():
     """run tests"""
     return {
-        'actions': ['flutter test -j1 -r github'],
+        'actions': ['flutter test -j1 -r expanded'],
         'title': title_with_actions,
     }
 

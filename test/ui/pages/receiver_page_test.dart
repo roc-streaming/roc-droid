@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:logger/logger.dart';
+import 'package:roc_droid/src/agent.dart';
 import 'package:roc_droid/src/model.dart';
 import 'package:roc_droid/src/ui.dart';
 import 'package:roc_droid/src/ui/components/roc_chip.dart';
@@ -11,7 +13,7 @@ import 'package:roc_droid/src/ui/pages/receiver_page.dart';
 void main() {
   testWidgets('The ReceiverPage widget is built correctly.', (tester) async {
     // Action
-    await tester.pumpWidget(AppRoot(ModelRoot()));
+    await tester.pumpWidget(AppRoot(ModelRoot(Logger(), NoopBackend())));
 
     // Find required widgets
     final receiverPage = find.byType(ReceiverPage);

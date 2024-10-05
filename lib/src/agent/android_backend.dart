@@ -13,7 +13,7 @@ class AndroidBackend implements Backend, AndroidListener {
   final Logger _logger;
   final AndroidConnector _connector;
 
-  AndroidBackend({required Logger logger})
+  AndroidBackend(Logger logger)
       : _logger = logger,
         _connector = AndroidConnector() {
     // Tell kotlin that we implement AndroidListener interface, so
