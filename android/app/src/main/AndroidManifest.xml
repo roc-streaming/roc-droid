@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.rocstreaming.rocdroid"
-    android:versionCode="3000"
-    android:versionName="0.3.0">
+    android:versionCode="4000"
+    android:versionName="0.4.0">
 
     <!-- For sreaming -->
     <uses-permission android:name="android.permission.INTERNET" />
