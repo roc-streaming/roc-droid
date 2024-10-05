@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#! /usr/bin/env python3
+
 import argparse
 import os
 import re
@@ -18,27 +19,25 @@ def check_tag_exists(tag):
         return False
 
 def write_version(version):
-    print(f'--- Updating version in app/src/main/AndroidManifest.xml to {version}')
-    major, minor, patch = map(int, version.split('.'))
-    version_code = 1000000*major + 1000*minor + patch
-    version_name_line = re.compile(r'\bandroid:versionName=".*"')
-    version_code_line = re.compile(r'\bandroid:versionCode=".*"')
-    with fileinput.FileInput('app/src/main/AndroidManifest.xml', inplace=True) as f:
-        for line in f:
-            line = version_name_line.sub(f'android:versionName="{version}"', line)
-            print(version_code_line.sub(f'android:versionCode="{version_code}"', line), end='')
-
+    print(f'--- Updating version to {version}')
+    subprocess.check_call([sys.executable, 'script/update_version.py', version])
 
 def run_command(args):
     print(f'--- Running command: {" ".join(args)}')
     subprocess.check_call(args)
 
 def check_version_to_commit():
-    cmd = ['git', 'diff', '--cached', 'app/src/main/AndroidManifest.xml']
+    cmd = ['git',
+           'diff', '--cached',
+           'pubspec.yml',
+           'android/app/src/main/AndroidManifest.xml']
     return subprocess.check_output(cmd) != b''
 
 def commit_change(version):
-    run_command(['git', 'add', 'app/src/main/AndroidManifest.xml'])
+    run_command(['git',
+                 'add',
+                 'pubspec.yml',
+                 'android/app/src/main/AndroidManifest.xml'])
     if not check_version_to_commit():
         print('--- Version did not change, nothing to commit')
         return
