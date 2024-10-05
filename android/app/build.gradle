@@ -1,3 +1,5 @@
+import org.yaml.snakeyaml.Yaml
+
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -23,14 +25,56 @@ if (flutterVersionName == null) {
     flutterVersionName = "1.0"
 }
 
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+def readPubspecVersion = { ->
+    def pubspec = new Yaml().load(file("../../pubspec.yaml").text)
+    return pubspec.version
+}
+
+def readManifestVersion = { ->
+    def manifest = new XmlSlurper().parse(file("src/main/AndroidManifest.xml"))
+    return manifest.@"android:versionName".text()
+}
+
+def readManifestVersionCode = { ->
+    def manifest = new XmlSlurper().parse(file("src/main/AndroidManifest.xml"))
+    return manifest.@"android:versionCode".text().toInteger()
+}
+
+def validateVersion = { ->
+    def pubspecVersion = readPubspecVersion()
+    def manifestVersion = readManifestVersion()
+
+    project.logger.lifecycle("Checking version name and code...")
+    project.logger.lifecycle("pubspecVersion = $pubspecVersion")
+    project.logger.lifecycle("manifestVersion = $manifestVersion")
+
+    if (pubspecVersion != manifestVersion) {
+        throw new GradleException(
+            "Mismatched versions in pubspec.yaml and AndroidManifest.xml:"+
+                "\n  pubspecVersion = $pubspecVersion"+
+                "\n  manifestVersion = $manifestVersion")
+    }
+}
+
+apply plugin: "com.android.application"
+apply plugin: "kotlin-android"
+apply plugin: "kotlin-android-extensions"
 
 android {
     namespace = "org.rocstreaming.rocdroid"
-    compileSdk = flutter.compileSdkVersion
+
+    compileSdk = project.compileSdkVersion.toInteger()
     ndkVersion = flutter.ndkVersion
+
+    defaultConfig {
+        applicationId = "org.rocstreaming.rocdroid"
+
+        targetSdkVersion = project.targetSdkVersion.toInteger()
+        minSdkVersion = project.minSdkVersion.toInteger()
+
+        versionName readManifestVersion()
+        versionCode readManifestVersionCode()
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -38,41 +82,40 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = "1.8"
     }
 
-    defaultConfig {
-        applicationId = "org.rocstreaming.rocdroid"
-        // You can update the following values to match your application needs.
-        // For more information, see:
-        // https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutterVersionCode.toInteger()
-        versionName = flutterVersionName
-        minSdkVersion = 26
+    lintOptions {
+        abortOnError false
     }
 
-    applicationVariants.all { variant ->
-        variant.outputs.all {
-            outputFileName = "roc-droid.apk"
+    signingConfigs {
+        release {
+            if (System.getenv("SIGNING_STORE_FILE") != null) {
+                storeFile file(System.getenv("SIGNING_STORE_FILE"))
+                storePassword System.getenv("SIGNING_STORE_PASSWORD")
+                keyAlias System.getenv("SIGNING_KEY_ALIAS")
+                keyPassword System.getenv("SIGNING_KEY_PASSWORD")
+            }
         }
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt")
+
+            if (System.getenv("SIGNING_STORE_FILE") != null) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
     // https://android.izzysoft.de/articles/named/iod-scan-apkchecks#blobs
     // https://gist.github.com/obfusk/31c332b884464cd8aa06ce1ba1583c05
     dependenciesInfo {
-        // Disables dependency metadata when building APKs.
         includeInApk = false
-        // Disables dependency metadata when building Android App Bundles.
         includeInBundle = false
     }
 }
@@ -82,14 +125,24 @@ flutter {
 }
 
 dependencies {
-    implementation 'org.roc-streaming.roctoolkit:roc-android:0.2.1'
+    implementation "org.roc-streaming.roctoolkit:roc-android:0.2.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.core:core-ktx:1.3.0'
-    implementation 'androidx.activity:activity-ktx:1.9.2'
-    implementation 'androidx.fragment:fragment-ktx:1.3.6'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'com.google.android.material:material:1.3.0'
-    implementation 'androidx.viewpager2:viewpager2:1.0.0'
-    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.25'
+    implementation "androidx.appcompat:appcompat:1.1.0"
+    implementation "androidx.core:core-ktx:1.3.0"
+    implementation "androidx.activity:activity-ktx:1.9.2"
+    implementation "androidx.fragment:fragment-ktx:1.3.6"
+    implementation "androidx.constraintlayout:constraintlayout:1.1.3"
+    implementation "com.google.android.material:material:1.3.0"
+    implementation "androidx.viewpager2:viewpager2:1.0.0"
+    implementation "pl.droidsonroids.gif:android-gif-drawable:1.2.25"
+}
+
+task validateVersionTask {
+    doLast {
+        validateVersion()
+    }
+}
+
+tasks.matching { it.name.startsWith("assemble") }.configureEach {
+    dependsOn validateVersionTask
 }

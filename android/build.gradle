@@ -1,14 +1,19 @@
 buildscript {
-    ext.kotlin_version = '1.7.21'
+    ext.kotlin_version = "1.7.21"
 
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath "com.android.tools.build:gradle:7.4.2"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.yaml:snakeyaml:2.2"
     }
+}
+
+plugins {
+    id "com.diffplug.spotless" version "6.12.0"
 }
 
 allprojects {
@@ -30,11 +35,29 @@ subprojects {
 subprojects {
     beforeEvaluate { project ->
         if (project.name == "flutter_localization") {
-            project.buildscript.dependencies.classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlin_version}"
+            project.buildscript.dependencies.classpath \
+                "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlin_version}"
         }
     }
 }
 
-tasks.register("clean", Delete) {
-    delete rootProject.buildDir
+spotless {
+    format "misc", {
+        // define the files to apply `misc` to
+        target "**/*.gradle", "**/*.md", "**/.gitignore"
+
+        // define the steps to apply to those files
+        indentWithSpaces()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+
+    kotlin {
+        target "**/*.kt"
+        targetExclude "**/*.g.kt"
+        ktlint()
+        trimTrailingWhitespace()
+        indentWithSpaces()
+        endWithNewline()
+    }
 }

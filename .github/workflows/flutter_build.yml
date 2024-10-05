@@ -40,8 +40,8 @@ jobs:
         with:
           packages: python3-doit
 
-      - name: Run analyzer
-        run: doit analyze
+      - name: Run dart analyzer
+        run: doit lint:dart
 
       - name: Run tests
         run: doit test
@@ -68,6 +68,12 @@ jobs:
         uses: awalsh128/cache-apt-pkgs-action@v1.4.2
         with:
           packages: python3-doit
+
+      - name: Run dart analyzer
+        run: doit lint:dart
+
+      - name: Run spotless linter
+        run: doit lint:kotlin
 
       - name: Build apk
         run: doit build:apk
