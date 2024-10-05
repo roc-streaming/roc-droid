@@ -24,8 +24,6 @@ import android.media.projection.MediaProjection
 import android.os.Binder
 import android.os.IBinder
 import android.util.Log
-import org.rocstreaming.rocdroid.MainActivity
-import org.rocstreaming.rocdroid.R
 import org.rocstreaming.roctoolkit.ChannelSet
 import org.rocstreaming.roctoolkit.ClockSource
 import org.rocstreaming.roctoolkit.Endpoint
@@ -387,16 +385,20 @@ class StreamingService : Service() {
                         sender.connect(
                             Slot.DEFAULT,
                             Interface.AUDIO_SOURCE,
-                            Endpoint(Protocol.RTP_RS8M_SOURCE,
-                                     settings.host,
-                                     settings.sourcePort.toInt())
+                            Endpoint(
+                                Protocol.RTP_RS8M_SOURCE,
+                                settings.host,
+                                settings.sourcePort.toInt()
+                            )
                         )
                         sender.connect(
                             Slot.DEFAULT,
                             Interface.AUDIO_REPAIR,
-                            Endpoint(Protocol.RS8M_REPAIR,
-                                     settings.host,
-                                     settings.repairPort.toInt())
+                            Endpoint(
+                                Protocol.RS8M_REPAIR,
+                                settings.host,
+                                settings.repairPort.toInt()
+                            )
                         )
                     } catch (e: Exception) {
                         Log.e(LOG_TAG, "Failed to connect sender: " + e.toString())
@@ -456,16 +458,20 @@ class StreamingService : Service() {
                         receiver.bind(
                             Slot.DEFAULT,
                             Interface.AUDIO_SOURCE,
-                            Endpoint(Protocol.RTP_RS8M_SOURCE,
-                                     "0.0.0.0",
-                                     settings.sourcePort.toInt())
+                            Endpoint(
+                                Protocol.RTP_RS8M_SOURCE,
+                                "0.0.0.0",
+                                settings.sourcePort.toInt()
+                            )
                         )
                         receiver.bind(
                             Slot.DEFAULT,
                             Interface.AUDIO_REPAIR,
-                            Endpoint(Protocol.RS8M_REPAIR,
-                                     "0.0.0.0",
-                                     settings.repairPort.toInt())
+                            Endpoint(
+                                Protocol.RS8M_REPAIR,
+                                "0.0.0.0",
+                                settings.repairPort.toInt()
+                            )
                         )
                     } catch (e: Exception) {
                         Log.e(LOG_TAG, "Failed to bind receiver: " + e.toString())
@@ -482,7 +488,6 @@ class StreamingService : Service() {
                     }
                 }
             }
-
         } finally {
             Log.d(LOG_TAG, "Releasing receiver resources")
 
@@ -654,7 +659,7 @@ class StreamingService : Service() {
             // when notification is tapped
             setContentIntent(pendingContentIntent)
             // when notification is swiped away
-            setDeleteIntent(pendingDeleteIntent);
+            setDeleteIntent(pendingDeleteIntent)
             // don't allow to dimiss notification on lock screen
             setOngoing(true)
             // show on lock screen
