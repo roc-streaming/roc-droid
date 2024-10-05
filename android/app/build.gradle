@@ -84,6 +84,10 @@ android {
         jvmTarget = "1.8"
     }
 
+    composeOptions {
+        kotlinCompilerExtensionVersion "1.4.0"
+    }
+
     lintOptions {
         abortOnError false
     }
@@ -124,16 +128,20 @@ flutter {
 }
 
 dependencies {
-    implementation "org.roc-streaming.roctoolkit:roc-android:0.2.1"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation "androidx.appcompat:appcompat:1.1.0"
-    implementation "androidx.core:core-ktx:1.3.0"
+    // kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    // androidx
+    implementation "androidx.core:core-ktx:1.9.0"
     implementation "androidx.activity:activity-ktx:1.9.2"
-    implementation "androidx.fragment:fragment-ktx:1.3.6"
-    implementation "androidx.constraintlayout:constraintlayout:1.1.3"
+    implementation "androidx.fragment:fragment-ktx:1.8.4"
+    implementation "androidx.appcompat:appcompat:1.1.0"
+    implementation "androidx.constraintlayout:constraintlayout:2.1.4"
+    implementation "androidx.viewpager2:viewpager2:1.1.0"
+    // flutter
     implementation "com.google.android.material:material:1.3.0"
-    implementation "androidx.viewpager2:viewpager2:1.0.0"
     implementation "pl.droidsonroids.gif:android-gif-drawable:1.2.25"
+    // roc
+    implementation "org.roc-streaming.roctoolkit:roc-android:0.2.1"
 }
 
 task validateVersionTask {
