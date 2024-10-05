@@ -1,12 +1,31 @@
 buildscript {
-    ext.kotlin_version = "1.7.21"
+    ext {
+        // Compatibility tables:
+        //   https://docs.gradle.org/current/userguide/compatibility.html
+        //   https://developer.android.com/build/releases/gradle-plugin
+        //   https://kotlinlang.org/docs/gradle-configure-project.html
+        //
+        // Related packages (must be updated together):
+        //   org.jetbrains.kotlin:kotlin-gradle-plugin (build.gradle)
+        //   com.android.tools.build:gradle (build.gradle)
+        //   com.android.application (settings.gradle)
+        //   org.jetbrains.kotlin.android (settings.gradle)
+        //   kotlinCompilerExtensionVersion (app/build.gradle)
+        //   org.jetbrains.kotlin:kotlin-stdlib (app/build.gradle)
+        //   androidx.*-ktx (app/build.gradle)
+        //
+        // Gradle version is defined here:
+        //   gradle/wrapper/gradle-wrapper.properties => distributionUrl
+        kotlin_version = "1.8.0"
+    }
 
     repositories {
         google()
         mavenCentral()
     }
+
     dependencies {
-        classpath "com.android.tools.build:gradle:7.4.2"
+        classpath "com.android.tools.build:gradle:8.0.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.yaml:snakeyaml:2.2"
     }
@@ -19,7 +38,6 @@ plugins {
 allprojects {
     repositories {
         google()
-        jcenter()
         mavenCentral()
     }
 }
@@ -31,7 +49,6 @@ subprojects {
 subprojects {
     project.evaluationDependsOn(":app")
 }
-
 subprojects {
     beforeEvaluate { project ->
         if (project.name == "flutter_localization") {
@@ -43,15 +60,11 @@ subprojects {
 
 spotless {
     format "misc", {
-        // define the files to apply `misc` to
-        target "**/*.gradle", "**/*.md", "**/.gitignore"
-
-        // define the steps to apply to those files
+        target "**/*.gradle", "**/*.xml"
         indentWithSpaces()
         trimTrailingWhitespace()
         endWithNewline()
     }
-
     kotlin {
         target "**/*.kt"
         targetExclude "**/*.g.kt"
