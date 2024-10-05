@@ -29,11 +29,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Flutter
+      - name: Install flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
+
+      - name: Configure flutter
+        run: flutter config --no-cli-animations --no-analytics >/dev/null
 
       - name: Install doit
         uses: awalsh128/cache-apt-pkgs-action@v1.4.2
@@ -58,11 +61,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Flutter
+      - name: Install JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Install flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
+
+      - name: Configure flutter
+        run: flutter config --no-cli-animations --no-analytics >/dev/null
 
       - name: Install doit
         uses: awalsh128/cache-apt-pkgs-action@v1.4.2
