@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:logger/logger.dart';
+import 'package:roc_droid/src/agent.dart';
 import 'package:roc_droid/src/model.dart';
 import 'package:roc_droid/src/ui.dart';
 import 'package:roc_droid/src/ui/main_screen.dart';
@@ -7,7 +9,7 @@ import 'package:roc_droid/src/ui/main_screen.dart';
 void main() {
   testWidgets('The AppRoot widget is built correctly.', (tester) async {
     // Action
-    await tester.pumpWidget(AppRoot(ModelRoot()));
+    await tester.pumpWidget(AppRoot(ModelRoot(Logger(), NoopBackend())));
 
     // Find required widgets
     final mainScreenWidget = find.byType(MainScreen);
