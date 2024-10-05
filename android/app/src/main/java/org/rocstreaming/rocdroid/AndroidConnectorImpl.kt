@@ -8,8 +8,6 @@ import android.Manifest
 import android.media.projection.MediaProjection
 import android.util.Log
 import java.net.NetworkInterface
-import org.rocstreaming.rocdroid.MainActivity
-import org.rocstreaming.rocdroid.StreamingService
 
 private const val BAD_SEQUENCE_CODE = "rocdroid.BAD_SEQUENCE"
 private const val BAD_SEQUENCE_TEXT = "Invalid method invocation sequence"
@@ -30,7 +28,7 @@ private const val LOG_TAG = "rocdroid.AndroidConnectorImpl"
 class AndroidConnectorImpl : AndroidConnector {
     private var projectionAcquired: Boolean = false
 
-    fun getActivity() : MainActivity {
+    fun getActivity(): MainActivity {
         return MainActivity.instance
     }
 
@@ -62,7 +60,8 @@ class AndroidConnectorImpl : AndroidConnector {
 
                 Log.d(LOG_TAG, "Permission request succeeded")
                 callback(Result.success(true))
-            })
+            }
+        )
     }
 
     override fun requestMicrophone(callback: (Result<Boolean>) -> Unit) {
@@ -81,7 +80,8 @@ class AndroidConnectorImpl : AndroidConnector {
 
                 Log.d(LOG_TAG, "Permission request succeeded")
                 callback(Result.success(true))
-            })
+            }
+        )
     }
 
     override fun acquireProjection(callback: (Result<Boolean>) -> Unit) {
@@ -122,7 +122,7 @@ class AndroidConnectorImpl : AndroidConnector {
     }
 
     override fun releaseProjection() {
-       Log.i(LOG_TAG, "Releasing media projection")
+        Log.i(LOG_TAG, "Releasing media projection")
 
         if (!projectionAcquired) {
             Log.e(LOG_TAG, "Unpaired acquireProjection/releaseProjection calls")
@@ -203,7 +203,8 @@ class AndroidConnectorImpl : AndroidConnector {
         }
 
         if (settings.captureType == AndroidCaptureType.CAPTURE_MIC &&
-              !getActivity().hasPermission(Manifest.permission.RECORD_AUDIO)) {
+            !getActivity().hasPermission(Manifest.permission.RECORD_AUDIO)
+        ) {
             Log.e(LOG_TAG, "Microphone permission must be granted when using CAPTURE_MIC")
             throw FlutterError(NO_PERMISSION_CODE, NO_PERMISSION_TEXT)
         }
