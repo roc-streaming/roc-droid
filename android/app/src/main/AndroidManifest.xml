@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="org.rocstreaming.rocdroid"
-          android:versionCode="4000"
-          android:versionName="0.4.0">
-  <!-- Numbers above are updated automatically by update_version.py and make_tag.py.
+          android:versionCode="3000"
+          android:versionName="0.3.0">
+  <!-- Numbers above are updated automatically by version_ctl.py.
        Version here should match version from pubspec.yaml, otherwise build fails. -->
 
     <!-- For sreaming -->

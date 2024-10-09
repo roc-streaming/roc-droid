@@ -12,7 +12,6 @@ import signal
 import subprocess
 import sys
 import xml.etree.ElementTree
-import yaml
 
 atexit.register(
     lambda: shutil.rmtree('__pycache__', ignore_errors=True))
@@ -29,8 +28,8 @@ WATCH = get_var('watch', 'false')
 
 def _pubspec_version():
     with open('pubspec.yaml') as fp:
-        spec = yaml.safe_load(fp)
-        return spec['version']
+        m = re.search(r'^version:\s*(\S+)\s*$', fp.read(), re.MULTILINE)
+        return m.group(1)
 
 def _android_version():
     with open('android/app/src/main/AndroidManifest.xml') as fp:
@@ -41,7 +40,7 @@ def _gradlew():
     if platform.system() == 'Windows':
         return 'gradlew.bat'
     else:
-        return 'gradlew'
+        return './gradlew'
 
 def _copy_file(src, dst):
     def task():
@@ -83,7 +82,7 @@ def task_lint_kotlin():
     """run spotless linter"""
     return {
         'basename': 'lint:kotlin',
-        'actions': [f'cd android && ./{_gradlew()} spotlessCheck'],
+        'actions': [f'cd android && {_gradlew()} spotlessCheck'],
     }
 
 # doit test
@@ -229,5 +228,5 @@ def task_fmt_kotlin():
     """run spotless formatter"""
     return {
         'basename': 'fmt:kotlin',
-        'actions': [f'cd android && ./{_gradlew()} spotlessApply'],
+        'actions': [f'cd android && {_gradlew()} spotlessApply'],
     }
