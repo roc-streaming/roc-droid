@@ -1,4 +1,4 @@
-# Agent architecture description
+# Agent architecture
 
 **Table of contents:**
 

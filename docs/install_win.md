@@ -1,8 +1,8 @@
-# Windows Flutter setup:
+# Flutter setup on Windows
 
 **Table of contents:**
 
-- [Windows Flutter setup:](#windows-flutter-setup)
+- [Flutter setup on Windows:](#flutter-setup-on-windows)
   - [Choco installation (optional, but recommended)](#choco-installation-optional-but-recommended)
   - [Flutter installation](#flutter-installation)
   - [Android Studio installation](#android-studio-installation)

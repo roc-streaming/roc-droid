@@ -1,4 +1,4 @@
-# Application architecture description
+# Application architecture
 
 **Table of contents:**
 
