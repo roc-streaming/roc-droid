@@ -1,60 +1,112 @@
-# Description of application automation (doit)
+# Automation
 
-> **Note:** All commands are called from the root directory (using terminal).
+## Prerequisites
 
-**Table of contents:**
+Commands below need Python3 and [doit](https://pydoit.org/) automation tool.
 
-- [Description of application automation (doit)](#description-of-application-automation-doit)
-  - [Starting dart models code generation](#starting-dart-models-code-generation)
-  - [Starting application icons generation](#starting-application-icons-generation)
-  - [Starting application splash screen generation](#starting-application-splash-screen-generation)
+All commands are called from the root directory (using terminal).
 
-## Starting dart models code generation
+## Run linters
 
-Code generation is based on the Flutter `build_runner` package.
+Run all code checks (dart analyzer, kotlin linter, etc):
 
-Code generation is initiated by the following command:
+```
+doit lint
+```
+
+Run individual checks:
+
+```
+doit lint:dart
+doit lint:kotlin
+```
+
+## Run tests
+
+Run tests on desktop:
+
+```
+doit test
+```
+
+## Build and clean
+
+Build for all platforms:
+
+```
+doit build [variant=debug|release]
+```
+
+Build Android APK:
+
+```
+doit build:apk [variant=debug|release]
+```
+
+Clean build artifacts:
+
+```
+doit wipe
+```
+
+## Launch app
+
+Build and launch application:
+
+```
+doit launch [variant=debug|release]
+```
+
+## Generate code
+
+Code generation is based on `build_runner` package.
+
+Run all code generators:
 
 ```
 doit gen
 ```
 
-The code is generated into special `Store` files with the extension `.g.dart` and is used by the `Mobx` package.
-
-Code generated files (avoid any manual manipulation!):
-
-* Receiver generated code: [receiver.g.dart](/lib/src/model/receiver.g.dart)
-
-* Sender generated code: [sender.g.dart](/lib/src/model/sender.g.dart)
-
-## Starting application icons generation
-
-Icons generation is based on the Flutter `flutter_launcher_icons` package.
-
-Icons generation is initiated by the following command:
+Run individual steps:
 
 ```
-doit icons
+doit gen:model [watch=true|false]
+doit gen:agent
 ```
 
-Icon generation settings are configured in the `pubspec.yaml` file in the `flutter_launcher_icons` section.
+`watch` parameter runs code generator in watch mode, when it monitors source files updates and automatically regenerates code when needed.
 
-The assets for generating icons are defined in the `pubspec.yaml` file in the `assets` section.
+Generated files have `*.g.dart` or `.g.kt` extension and must no be modified by hand.
 
-All assets are located in the corresponding `assets` folder in the root directory.
+`model` package uses `mobx_codegen` to generate reactive model classes. `agent` package uses `pigeon` to generate android platform channels bridge.
 
-## Starting application splash screen generation
+## Generate assets
 
-Splash screen generation is based on the Flutter `flutter_native_splash` package.
+Icons and splash screen are generated using `flutter_launcher_icons` and `flutter_native_splash` packages. You can find configuration in `pubspec.yaml` and source assets in `assets` directory.
 
-Splash screen generation is initiated by the following command:
+Regenerate icons:
 
 ```
-doit splash
+doit gen:icons
 ```
 
-Splash screen generation settings are configured in the `pubspec.yaml` file in the `flutter_native_splash` section.
+Regenerate splash screen:
 
-The assets for generating splash screen are defined in the `pubspec.yaml` file in the `assets` section.
+```
+doit gen:splash
+```
 
-All assets are located in the corresponding `assets` folder in the root directory.
+## Format code
+
+Run all code formatters:
+
+```
+doit fmt
+```
+
+Run individual steps:
+
+```
+doit fmt:dart
+doit fmt:kotlin
+```

@@ -1,4 +1,4 @@
-# Model architecture description
+# Model architecture
 
 **Table of contents:**
 

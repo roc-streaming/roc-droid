@@ -1,4 +1,4 @@
-# User interface architecture description
+# User interface architecture
 
 **Table of contents:**
 
