@@ -3,7 +3,7 @@ import org.yaml.snakeyaml.Yaml
 plugins {
     id "com.android.application"
     id "kotlin-android"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    // flutter gradle plugin must be applied after android and kotlin plugins
     id "dev.flutter.flutter-gradle-plugin"
 }
 
@@ -44,10 +44,6 @@ def validateVersion = { ->
     def pubspecVersion = readPubspecVersion()
     def manifestVersion = readManifestVersion()
 
-    project.logger.lifecycle("Checking version name and code...")
-    project.logger.lifecycle("pubspecVersion = $pubspecVersion")
-    project.logger.lifecycle("manifestVersion = $manifestVersion")
-
     if (pubspecVersion != manifestVersion) {
         throw new GradleException(
             "Mismatched versions in pubspec.yaml and AndroidManifest.xml:"+
@@ -63,7 +59,7 @@ android {
     namespace = "org.rocstreaming.rocdroid"
 
     compileSdk = project.compileSdkVersion.toInteger()
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = project.ndkVersion
 
     defaultConfig {
         applicationId = "org.rocstreaming.rocdroid"
@@ -107,10 +103,14 @@ android {
         release {
             shrinkResources true
             minifyEnabled true
-            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt")
+
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+                'proguard-rules.pro'
 
             if (System.getenv("SIGNING_STORE_FILE") != null) {
                 signingConfig signingConfigs.release
+            } else {
+                signingConfig = signingConfigs.debug
             }
         }
     }
@@ -152,4 +152,23 @@ task validateVersionTask {
 
 tasks.matching { it.name.startsWith("assemble") }.configureEach {
     dependsOn validateVersionTask
+}
+
+// copy apk into dist/android/<variant>/roc-droid-<version>.apk
+android.applicationVariants.all { variant ->
+    variant.outputs.all { output ->
+        def buildDir = project.layout.buildDirectory.get().asFile.absolutePath
+        def apk = output.outputFile
+        if (apk.name == "app-${variant.name}.apk") {
+            def task = tasks.register("copy${variant.name.capitalize()}Apk", Copy) {
+                from apk.parent
+                into "$buildDir/../../dist/android/${variant.name}"
+                include apk.name
+                rename { "roc-droid-${readManifestVersion()}.apk" }
+            }
+            variant.assembleProvider.configure {
+                finalizedBy(task)
+            }
+        }
+    }
 }

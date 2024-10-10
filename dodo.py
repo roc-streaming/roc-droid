@@ -126,13 +126,7 @@ def task_build_apk():
     """build android apk"""
     return {
         'basename': 'build:apk',
-        'actions': [
-            f'flutter build apk --{VARIANT}',
-            _copy_file(
-                f'build/app/outputs/flutter-apk/app-{VARIANT}.apk',
-                f'dist/android/{VARIANT}/roc-droid-{_android_version()}.apk'
-            ),
-        ],
+        'actions': [f'flutter build apk --{VARIANT}'],
         'title': title_with_actions,
     }
 
@@ -145,6 +139,7 @@ def task_wipe():
             'flutter clean',
             _delete_files('android/.gradle'),
             _delete_files('android/build'),
+            _delete_files('dist'),
         ],
         'title': title_with_actions,
     }
