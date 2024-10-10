@@ -57,3 +57,6 @@ app.*.map.json
 # doit related
 .doit.db*
 /dist
+
+# mkdocs
+/site

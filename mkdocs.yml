@@ -1,0 +1,32 @@
+site_name: Roc Droid documentation
+copyright: Copyright (c) Roc Streaming authors.
+
+repo_url: https://github.com/roc-streaming/roc-droid
+edit_uri: https://github.com/roc-streaming/roc-droid/edit/main/docs/
+
+theme:
+  name: readthedocs
+
+markdown_extensions:
+  - admonition
+
+nav:
+  - Home: index.md
+  - Architecture:
+    - Overview: architecture/overview.md
+    - User interface: architecture/ui.md
+    - Model: architecture/model.md
+    - Agent: architecture/agent.md
+  - Building:
+    - Build project: building/build_project.md
+    - Windows setup: building/windows_setup.md
+    - macOS and Linux setup: building/macos_linux_setup.md
+  - Development:
+    - Automation: development/automation.md
+    - Testing: development/testing.md
+    - Release management: development/release_management.md
+    - Android notes: development/android_notes.md
+
+exclude_docs: |
+  /screenshots
+  *.drawio

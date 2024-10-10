@@ -6,11 +6,9 @@ To release a new version of the app, use `version_ctl.py` script.
 
 1. Update manifests, create git tag, and push it to GitHub:
 
-   ```
-   python3 ./script/version_ctl.py make_release --push origin 1.2.3
-   ```
+        python3 ./script/version_ctl.py make_release --push origin 1.2.3
 
-   (You also can omit `--push` to limit script to local changes only, and then push manually).
+     (You also can omit `--push` to limit script to local changes only, and then push manually).
 
 2. Wait until "release" job on GitHub CI completes and creates GitHub release draft.
 
