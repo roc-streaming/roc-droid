@@ -25,6 +25,7 @@ dev_dependencies:
   test: ^1.25.2
   build_runner: ^2.4.11
   mobx_codegen: ^2.6.1
+  flutter_oss_licenses: ^3.0.2
 
 flutter:
   uses-material-design: true

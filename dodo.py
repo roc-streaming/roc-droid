@@ -180,6 +180,24 @@ def task_gen_agent():
         'title': title_with_actions,
     }
 
+# doit gen:deps
+def task_gen_deps():
+    """collect dependencies and their licenses"""
+    return {
+        'basename': 'gen:deps',
+        'actions': [
+            # generate build/android_licenses.json
+            f'cd android && {_gradlew()} generateLicenseReport',
+            # generate build/flutter_licenses.json
+            'flutter pub get',
+            'flutter pub run flutter_oss_licenses:generate.dart '+
+                '--json -o build/flutter_licenses.json',
+            # generate metadata/dependencies.json
+            f'{sys.executable} script/generate_dependencies.py',
+        ],
+        'title': title_with_actions,
+    }
+
 # doit gen:icons
 def task_gen_icons():
     """run flutter icons generation (flutter_launcher_icons)"""
@@ -194,7 +212,7 @@ def task_gen_splash():
     """run flutter splash screens generation (flutter_native_splash)"""
     return {
         'basename': 'gen:splash',
-        'actions': ['dart run flutter_native_splash:create '],
+        'actions': ['dart run flutter_native_splash:create'],
         'title': title_with_actions,
     }
 

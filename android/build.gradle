@@ -1,21 +1,7 @@
+import com.github.jk1.license.render.*
+
 buildscript {
     ext {
-        // Compatibility tables:
-        //   https://docs.gradle.org/current/userguide/compatibility.html
-        //   https://developer.android.com/build/releases/gradle-plugin
-        //   https://kotlinlang.org/docs/gradle-configure-project.html
-        //
-        // Related packages (must be updated together):
-        //   org.jetbrains.kotlin:kotlin-gradle-plugin (build.gradle)
-        //   com.android.tools.build:gradle (build.gradle)
-        //   com.android.application (settings.gradle)
-        //   org.jetbrains.kotlin.android (settings.gradle)
-        //   kotlinCompilerExtensionVersion (app/build.gradle)
-        //   org.jetbrains.kotlin:kotlin-stdlib (app/build.gradle)
-        //   androidx.*-ktx (app/build.gradle)
-        //
-        // Gradle version is defined here:
-        //   gradle/wrapper/gradle-wrapper.properties => distributionUrl
         kotlin_version = "1.8.0"
     }
 
@@ -33,6 +19,7 @@ buildscript {
 
 plugins {
     id "com.diffplug.spotless" version "6.12.0"
+    id "com.github.jk1.dependency-license-report" version "2.9"
 }
 
 allprojects {
@@ -73,4 +60,10 @@ spotless {
         indentWithSpaces()
         endWithNewline()
     }
+}
+
+licenseReport {
+    configurations = ["releaseRuntimeClasspath"]
+    outputDir = project.layout.buildDirectory.get().asFile.path
+    renderers = [new ExtendedJsonReportRenderer("android_licenses.json")]
 }
