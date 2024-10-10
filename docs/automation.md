@@ -80,7 +80,7 @@ Generated files have `*.g.dart` or `.g.kt` extension and must no be modified by 
 
 `model` package uses `mobx_codegen` to generate reactive model classes. `agent` package uses `pigeon` to generate android platform channels bridge.
 
-## Generate assets
+## Generate resources
 
 Icons and splash screen are generated using `flutter_launcher_icons` and `flutter_native_splash` packages. You can find configuration in `pubspec.yaml` and source assets in `assets` directory.
 
@@ -94,6 +94,14 @@ Regenerate splash screen:
 
 ```
 doit gen:splash
+```
+
+The list of transitive dependencies and their licenses is generated using `flutter_oss_licenses` package and [Gradle-License-Report](https://github.com/jk1/Gradle-License-Report) plugin, and then composed into a single json file `metadata/dependencies.json` using `script/generate_dependencies.py` script.
+
+Regenerate dependencies:
+
+```
+doit gen:deps
 ```
 
 ## Format code
