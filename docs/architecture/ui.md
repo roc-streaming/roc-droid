@@ -1,14 +1,8 @@
-# User interface architecture
-
-**Table of contents:**
-
-- [User interface architecture description](#user-interface-architecture-description)
-  - [Widget types](#widget-types)
-  - [Widget tree](#widget-tree)
+# User interface
 
 ## Widget types
 
-![](/docs/images/widget_types.png)
+![](../diagrams/widget_types.png)
 
 Widgets can be categorized into the following types:
 
@@ -48,7 +42,7 @@ Widgets can be categorized into the following types:
 
 ## Widget tree
 
-![](/docs/images/widget_tree.png)
+![](../diagrams/widget_tree.png)
 
 The UI diagram of the Rock Droid application client illustrates a tree of widgets that form the visual presentation for the user.
 
@@ -58,29 +52,29 @@ Designations:
 
   * roc-droid classes:
 
-    * [AppRoot](/lib/src/ui/app_root.dart)
+    * [AppRoot](https://github.com/roc-streaming/roc-droid/tree/main/lib/src/ui/app_root.dart)
 
 * **Red:** Screen-level widgets (`Content Layer`)
 
   * roc-droid classes:
 
-    * [MainScreen](/lib/src/ui/main_screen.dart)
+    * [MainScreen](https://github.com/roc-streaming/roc-droid/tree/main/lib/src/ui/main_screen.dart)
 
 * **Orange:** Page-level widgets (`Content Layer`)
 
   * roc-droid classes:
 
-    * [ReceiverPage](/lib/src/ui/pages/receiver_page.dart)
+    * [ReceiverPage](https://github.com/roc-streaming/roc-droid/tree/main/lib/src/ui/pages/receiver_page.dart)
   
-    * [SenderPage](/lib/src/ui/pages/sender_page.dart)
+    * [SenderPage](https://github.com/roc-streaming/roc-droid/tree/main/lib/src/ui/pages/sender_page.dart)
   
-    * [AboutPage](/lib/src/ui/pages/about_page.dart)
+    * [AboutPage](https://github.com/roc-streaming/roc-droid/tree/main/lib/src/ui/pages/about_page.dart)
 
 * **Yellow:** Fragment-level widgets (`Content Layer`)
 
   * roc-droid classes:
 
-    * [RocBottomNavigationBar](/lib/src/ui/fragments/roc_bottom_navigation_bar.dart)
+    * [RocBottomNavigationBar](https://github.com/roc-streaming/roc-droid/tree/main/lib/src/ui/fragments/roc_bottom_navigation_bar.dart)
 
 * **Gray:** Native Flutter `Widget` class (`Representation Layer`)
 
@@ -92,18 +86,18 @@ Designations:
 
       * Representing Widgets that provide certain data to the user.
 
-        * [RocChip](/lib/src/ui/components/roc_chip.dart)
+        * [RocChip](https://github.com/roc-streaming/roc-droid/tree/main/lib/src/ui/components/roc_chip.dart)
 
-        * [RocTextRow](/lib/src/ui/components/roc_text_row.dart)
+        * [RocTextRow](https://github.com/roc-streaming/roc-droid/tree/main/lib/src/ui/components/roc_text_row.dart)
   
       * Representing Widgets that provide the user with the ability to enter certain data.
 
-        * [RocDropdownButton](/lib/src/ui/components/roc_dropdown_button.dart)
+        * [RocDropdownButton](https://github.com/roc-streaming/roc-droid/tree/main/lib/src/ui/components/roc_dropdown_button.dart)
 
-        * [RocStatefulButton](/lib/src/ui/components/roc_stateful_button.dart)
+        * [RocStatefulButton](https://github.com/roc-streaming/roc-droid/tree/main/lib/src/ui/components/roc_stateful_button.dart)
   
       * Representing Widgets that control specific view representations.
 
-        * [RocPageView](/lib/src/ui/components/roc_page_view.dart)
+        * [RocPageView](https://github.com/roc-streaming/roc-droid/tree/main/lib/src/ui/components/roc_page_view.dart)
 
-        * [RocScrollView](/lib/src/ui/components/roc_scroll_view.dart)
+        * [RocScrollView](https://github.com/roc-streaming/roc-droid/tree/main/lib/src/ui/components/roc_scroll_view.dart)

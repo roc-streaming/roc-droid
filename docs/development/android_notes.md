@@ -1,4 +1,4 @@
-# Development
+# Android notes
 
 ## Kotlin and gradle versions
 
@@ -22,7 +22,7 @@ Related packages that must be compatible with each other and updated together:
 | `org.jetbrains.kotlin:kotlin-stdlib`        | `android/app/build.gradle` |
 | `androidx.*-ktx`                            | `android/app/build.gradle` |
 
-## Capture android logs
+## Capturing device logs
 
 This script is a wrapper for `adb logcat`:
 
