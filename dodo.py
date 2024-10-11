@@ -140,6 +140,7 @@ def task_wipe():
             _delete_files('android/.gradle'),
             _delete_files('android/build'),
             _delete_files('dist'),
+            _delete_files('site'),
         ],
         'title': title_with_actions,
     }

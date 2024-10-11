@@ -7,17 +7,20 @@ import subprocess
 os.chdir(os.path.join(
     os.path.dirname(os.path.abspath(__file__)), '..'))
 
-docker = [
+docker_run = [
     'docker', 'run',
     '--rm', '-t',
-    '-v', f'{os.getcwd()}:/docs',
+    '-v', f'{os.getcwd()}:{os.getcwd()}',
+    '-w', os.getcwd(),
 ]
 
 if platform.system() != 'Windows':
-    docker += [
+    docker_run += [
         '-u', f'{os.getuid()}:{os.getgid()}',
     ]
 
-subprocess.check_call(
-    docker +
-    ['squidfunk/mkdocs-material', 'build'])
+subprocess.check_call([
+    *docker_run,
+    'rocstreaming/env-sphinx',
+    'mkdocs', 'build',
+])
