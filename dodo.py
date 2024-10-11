@@ -6,12 +6,10 @@ import glob
 import os
 import pathlib
 import platform
-import platform
 import shutil
 import signal
 import subprocess
 import sys
-import xml.etree.ElementTree
 
 atexit.register(
     lambda: shutil.rmtree('__pycache__', ignore_errors=True))
@@ -25,16 +23,6 @@ DOIT_CONFIG = {
 
 VARIANT = get_var('variant', 'release')
 WATCH = get_var('watch', 'false')
-
-def _pubspec_version():
-    with open('pubspec.yaml') as fp:
-        m = re.search(r'^version:\s*(\S+)\s*$', fp.read(), re.MULTILINE)
-        return m.group(1)
-
-def _android_version():
-    with open('android/app/src/main/AndroidManifest.xml') as fp:
-        root = xml.etree.ElementTree.fromstring(fp.read())
-        return root.attrib['{http://schemas.android.com/apk/res/android}versionName']
 
 def _gradlew():
     if platform.system() == 'Windows':
