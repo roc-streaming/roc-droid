@@ -47,6 +47,10 @@ Official documentation: <https://chocolatey.org/install>
 
     * Check the box: `Android SDK Command Line Tools` and click `Apply` to install.
 
+## Setup Java and Android emulator
+
+* Use the following documentation: [Windows Java and Android emulator setup](./windows_java_emulator.md)
+
 ## Setup Flutter
 
 * Run in `PowerShell` with administrator rights: `flutter config --android-studio-dir="C:\Program Files\Android\Android Studio"` (specify directory)
