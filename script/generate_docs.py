@@ -9,7 +9,7 @@ os.chdir(os.path.join(
 
 docker = [
     'docker', 'run',
-    '--rm', '-it',
+    '--rm', '-t',
     '-v', f'{os.getcwd()}:/docs',
 ]
 
