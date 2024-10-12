@@ -47,14 +47,36 @@ Official documentation: <https://chocolatey.org/install>
 
     * Check the box: `Android SDK Command Line Tools` and click `Apply` to install.
 
-## Setup Java and Android emulator
+## Setup Java
 
-* Use the following documentation: [Windows Java and Android emulator setup](./windows_java_emulator.md)
+* Typically, Android Studio installs the required version of Java, which is needed for the correct operation of Flutter and the studio itself. But as an additional condition for the correct operation of the application, a certain version of JDK (Java development kit) is required.
+  
+  * The currently required JDK version is: **17**
 
-## Setup Flutter
+  * This JDK should be installed in addition to the JDK that is used by Android Studio and Flutter in cases where the two JDK versions differ.
+
+* Download and install JDK from this link: [Oracle - Java Downloads](https://www.oracle.com/java/technologies/downloads/#java17)
+
+## General Flutter setup
 
 * Run in `PowerShell` with administrator rights: `flutter config --android-studio-dir="C:\Program Files\Android\Android Studio"` (specify directory)
 
 * Run in `PowerShell` with administrator rights: `flutter doctor --android-licenses` (we agree to all license terms)
 
 * Run in `PowerShell` with administrator rights: `flutter doctor` - and make sure that all tests pass successfully (status: No issues found!)
+
+## Setting up the Flutter Java environment
+
+* The Flutter project detects the JDK version to use via Android studio settings. This means that in most cases the version automatically detected by Flutter will be incorrect. To solve this problem, explicitly specify the JDK version.
+
+* To specify JDK version call in the project directory: `flutter config --jdk-dir "<Current Java JDK folder>"`
+
+    * Example: `flutter config --jdk-dir "C:\Program Files\Java\jdk-17"`
+
+    * Example of a successful result: `Setting "jdk-dir" value to "C:\Program Files\Java\jdk-17". You may need to restart any open editors for them to read new settings.`
+
+* For more detailed information, please refer to the following `stackoverflow` discussions:
+  
+  * [stackoverflow - Android Studio no option to change Gradle JDK path](https://stackoverflow.com/questions/75671906/android-studio-no-option-to-change-gradle-jdk-path)
+  
+  * [stackoverflow - Android Gradle plugin requires Java 11 to run. You are currently using Java 1.8, but i'm using java 11](https://stackoverflow.com/questions/71532385/android-gradle-plugin-requires-java-11-to-run-you-are-currently-using-java-1-8/72903843#72903843)
