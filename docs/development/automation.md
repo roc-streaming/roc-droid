@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-Commands below need Python3 and [doit](https://pydoit.org/) automation tool.
+Commands below need Python3 and [doit](https://pydoit.org/) automation tool. Targets are defined in `dodo.py` file.
 
 All commands are called from the root directory (using terminal).
 

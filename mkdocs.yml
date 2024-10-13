@@ -24,8 +24,8 @@ nav:
   - Development:
     - Automation: development/automation.md
     - Testing: development/testing.md
+    - Android development: development/android_development.md
     - Release management: development/release_management.md
-    - Android notes: development/android_notes.md
 
 exclude_docs: |
   /screenshots
