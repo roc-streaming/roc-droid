@@ -1,34 +1,19 @@
 # Testing
 
-## General information about testing
+## Running tests
 
-* It is important to test the application on real devices, but for convenience, emulators are widely used for development and testing purposes. Here you can find documentation on how to set up such emulators:
+To run tests, see [Automation](./automation.md).
 
-  * [Emulator Setup Documentation](./emulator.md)
+To setup Android emulator and capture its logs, see [Android development](./android_development.md).
 
-## UI tests
+## Widget tests
 
-* If possible, all classes of roc-droid `UI` should be tested
+* When possible, UI classes (`lib/src/ui`) should be tested using Flutter widget testing (`testWidgets()` function).
 
-* The type of testing used for the `UI` is defined by `Flutter` as widget testing.
+* Documentation: <https://docs.flutter.dev/cookbook/testing/widget/introduction>
 
-* The `UI` should be tested based on the `Flutter` `testWidgets()` functionality.
+## Unit tests
 
-* Widget testing is described in the `Flutter` documentation here: <https://docs.flutter.dev/cookbook/testing/widget/introduction>
+* When possible, non-UI classes (`lib/src/model`, `lib/src/agent`) should be covered with unit tests (`test()` function)
 
-## Model tests
-
-* If possible, all classes of roc-droid `Model` should be tested
-
-* The type of testing used for the `Model` is defined by `Flutter` as unit testing.
-
-* The `Model` should be tested based on the `Dart` `test()` functionality.
-
-* Unit testing is described in the `Flutter` documentation here: <https://docs.flutter.dev/cookbook/testing/unit/introduction>
-
-## Agent tests
-
-* If possible, all classes of roc-droid `Agent` should be tested
-
-TODO - add Agent unit testing description
-
+* Documentation: <https://docs.flutter.dev/cookbook/testing/unit/introduction>

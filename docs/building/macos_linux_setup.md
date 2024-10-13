@@ -18,7 +18,17 @@
 
 ## Install Android Studio
 
-* Installing Android studio: <https://developer.android.com/studio#downloads>
+* Installing Android Studio using `brew` (macOS or Linux):
+
+    * `brew install --cask android-studio`
+
+* Installing Android Studio using `snap` (Ubuntu):
+
+    * `sudo snap install android-studio --classic`
+
+* Installing Android Studio manually:
+
+    * <https://developer.android.com/studio#downloads>
 
 * Installing Android SDK Command Line Tools from Android SDK Manager ([adopted from Stack Overflow](https://stackoverflow.com/questions/64708446/)):
 
@@ -36,9 +46,9 @@
 
     * Check the box: `Android SDK Command Line Tools` and click `Apply` to install.
 
-## Install Android SDK without Android Studio
+## Install Android SDK (without Android Studio)
 
-If you don't need Android Studio, you can install Android SDK without using GUI.
+If you don't use Android Studio, you can install Android SDK standalone.
 
 * Installing Android SDK using `brew` (macOS or Linux):
 
@@ -48,9 +58,37 @@ If you don't need Android Studio, you can install Android SDK without using GUI.
 
     * `sudo snap install androidsdk`
 
-* Installing Android SDK manually: https://thanhtunguet.info/posts/how-to-install-android-sdk-android-cmdline-tools-without-android-studio/
+* Installing manually: <https://thanhtunguet.info/posts/how-to-install-android-sdk-android-cmdline-tools-without-android-studio/>
+
+## Install JDK
+
+For Android build, we require **JDK 17** or later.
+
+* Installing OpenJDK using `brew` (macOS or Linux):
+
+    * `brew install openjdk@17`
+
+* Installing OpenJDK using `apt` (Ubuntu):
+
+    * `sudo apt install openjdk-17-jdk`
+
+* Installing OpenJDK manually:
+
+    * Documentation: <https://openjdk.org/install/>
 
 ## Setup Flutter
+
+* Configure Android Studio path (if you've installed it):
+
+    * `flutter config --android-studio-dir="/opt/android-studio"` (specify correct directory)
+
+* Configure Android SDK path (if you've installed standalone sdk):
+
+    * `flutter config --android-sdk="/opt/android-studio"` (specify correct directory)
+
+* Configure JDK path:
+
+    * `flutter config --jdk-dir "/usr/lib/jvm/java-17-openjdk-amd64"` (specify correct directory)
 
 * Run: `flutter doctor --android-licenses` (we agree to all license terms)
 
