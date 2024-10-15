@@ -16,14 +16,21 @@ on:
   schedule:
     - cron: '0 0 * * 1'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  # native build on desktop
   desktop:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        include:
+          - host: linux
+            image: ubuntu-latest
 
-    runs-on: ${{ matrix.os }}
-    name: desktop/${{ matrix.os }}
+    runs-on: ${{ matrix.image }}
+    name: desktop/${{ matrix.host }}
 
     steps:
       - name: Checkout
@@ -35,10 +42,14 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install doit
-        uses: awalsh128/cache-apt-pkgs-action@v1.4.2
+      - name: Install python
+        uses: actions/setup-python@v5
         with:
-          packages: python3-doit
+          python-version: 3.11
+
+      - name: Install doit
+        run: |
+          pip install doit
 
       - name: Run dart analyzer
         run: |
@@ -48,13 +59,22 @@ jobs:
         run: |
           doit test
 
+  # build for android on different hosts
   android:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - host: linux
+            image: ubuntu-latest
 
-    runs-on: ${{ matrix.os }}
-    name: android/${{ matrix.os }}
+          - host: macos
+            image: macos-latest
+
+          - host: windows
+            image: windows-latest
+
+    runs-on: ${{ matrix.image }}
+    name: android/${{ matrix.host }}
 
     steps:
       - name: Checkout
@@ -97,9 +117,36 @@ jobs:
         run: |
           doit build:apk variant=release
 
+  # build for different targets on different hosts using docker
+  docker:
+    strategy:
+      matrix:
+        include:
+          - host: linux
+            target: android
+            image: ubuntu-latest
+
+    runs-on: ${{ matrix.image }}
+    name: docker/${{ matrix.target }}-${{ matrix.host }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        if: runner.os != 'Windows'
+        run: |
+          ./script/docker_build.py
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          .\script\docker_build.bat
+
+  # build and publish github release
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [desktop, android]
+    needs: [desktop, android, docker]
 
     runs-on: ubuntu-latest
     steps:

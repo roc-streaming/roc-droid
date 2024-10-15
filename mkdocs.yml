@@ -19,8 +19,8 @@ nav:
     - Agent: architecture/agent.md
   - Building:
     - Build project: building/build_project.md
-    - Windows setup: building/windows_setup.md
     - macOS and Linux setup: building/macos_linux_setup.md
+    - Windows setup: building/windows_setup.md
   - Development:
     - Automation: development/automation.md
     - Testing: development/testing.md
