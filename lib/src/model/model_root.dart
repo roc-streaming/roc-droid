@@ -12,7 +12,9 @@ class ModelRoot {
 
   ModelRoot(Logger logger, Backend backend) {
     this.receiver = Receiver(logger, backend);
+    this.receiver.setDefultValues(backend);
     this.sender = Sender(logger, backend);
+    this.sender.setDefultValues();
     this.logger = logger;
   }
 }

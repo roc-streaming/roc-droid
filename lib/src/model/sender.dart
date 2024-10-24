@@ -61,14 +61,15 @@ abstract class _Sender with Store {
       return isStarted;
     }
 
+    // Add receiver IP check
+
     // Main backend call
     await _backend.startSender(AndroidSenderSettings(
       captureType: AndroidCaptureType.captureApps,
       host: receiverIP,
-      sourcePort: 10001,
-      repairPort: 10002,
+      sourcePort: _sourcePort,
+      repairPort: _repairPort,
     ));
-
     var status = await _backend.isSenderAlive();
     _logger.i('Trying to start the sender. roc service status: $status');
     _isStarted = status;
@@ -114,5 +115,12 @@ abstract class _Sender with Store {
   @action
   void setCaptureSource(CaptureSourceType value) {
     _captureSource = value;
+  }
+
+  // Update all sender controls using "hardcoded" and default values.
+  @action
+  void setDefultValues() {
+    setSourcePort(10001);
+    setRepairPort(10002);
   }
 }

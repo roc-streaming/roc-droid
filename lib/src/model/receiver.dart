@@ -54,11 +54,10 @@ abstract class _Receiver with Store {
       _logger.i('Attempt to start an already running receiver.');
       return _isStarted;
     }
-
     // Main backend call
     await _backend.startReceiver(AndroidReceiverSettings(
-      sourcePort: 10001,
-      repairPort: 10002,
+      sourcePort: _sourcePort,
+      repairPort: _repairPort,
     ));
 
     var status = await _backend.isReceiverAlive();
@@ -104,5 +103,13 @@ abstract class _Receiver with Store {
   void setRepairPort(int value) {
     _repairPort = value;
     _logger.d('Receiver repair port value changed to: ${_repairPort}');
+  }
+
+  // Update all sender controls using "hardcoded" and default values.
+  @action
+  Future<void> setDefultValues(Backend backend) async {
+    setReceiverIPs(await backend.getLocalAddresses());
+    setSourcePort(10001);
+    setRepairPort(10002);
   }
 }

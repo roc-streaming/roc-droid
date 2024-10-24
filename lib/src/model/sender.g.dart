@@ -184,6 +184,17 @@ mixin _$Sender on _Sender, Store {
   }
 
   @override
+  void setDefultValues() {
+    final _$actionInfo =
+        _$_SenderActionController.startAction(name: '_Sender.setDefultValues');
+    try {
+      return super.setDefultValues();
+    } finally {
+      _$_SenderActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 isStarted: ${isStarted},

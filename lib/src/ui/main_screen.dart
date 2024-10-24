@@ -15,7 +15,7 @@ import 'utils/roc_keys.dart';
 // Main screen class implementation - Screen layer.
 class MainScreen extends StatefulWidget {
   // Controls the appearance of the floating test button
-  final bool _addTestButton = true;
+  final bool _addTestButton = false;
   final ModelRoot _modelRoot;
 
   const MainScreen({required ModelRoot modelRoot}) : _modelRoot = modelRoot;

@@ -115,6 +115,15 @@ mixin _$Receiver on _Receiver, Store {
     return _$stopAsyncAction.run(() => super.stop());
   }
 
+  late final _$setDefultValuesAsyncAction =
+      AsyncAction('_Receiver.setDefultValues', context: context);
+
+  @override
+  Future<void> setDefultValues(Backend backend) {
+    return _$setDefultValuesAsyncAction
+        .run(() => super.setDefultValues(backend));
+  }
+
   late final _$_ReceiverActionController =
       ActionController(name: '_Receiver', context: context);
 
