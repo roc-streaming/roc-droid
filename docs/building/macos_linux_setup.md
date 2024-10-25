@@ -2,7 +2,7 @@
 
 ## Install Flutter
 
-* Installing Flutter using `brew` (macOS or Linux):
+* Installing Flutter using `brew` (macOS):
 
     * `brew install --cask flutter`
 
@@ -18,7 +18,7 @@
 
 ## Install Android Studio
 
-* Installing Android Studio using `brew` (macOS or Linux):
+* Installing Android Studio using `brew` (macOS):
 
     * `brew install --cask android-studio`
 
@@ -50,13 +50,10 @@
 
 If you don't use Android Studio, you can install Android SDK standalone.
 
-* Installing Android SDK using `brew` (macOS or Linux):
-
-    * `brew install --cask android-sdk`
-
 * Installing Android SDK using `snap` (Ubuntu):
 
     * `sudo snap install androidsdk`
+    * `androidsdk --install "cmdline-tools;latest"`
 
 * Installing manually: <https://thanhtunguet.info/posts/how-to-install-android-sdk-android-cmdline-tools-without-android-studio/>
 
@@ -80,15 +77,21 @@ For Android build, we require **JDK 17** or later.
 
 * Configure Android Studio path (if you've installed it):
 
-    * `flutter config --android-studio-dir="/opt/android-studio"` (specify correct directory)
+    * `flutter config --android-studio-dir="/path/to/android/studio"`
 
-* Configure Android SDK path (if you've installed standalone sdk):
+        (specify correct directory, e.g. `/Applications/Android Studio.app`, `/opt/android-studio`, `/snap/android-studio/current/android-studio`)
 
-    * `flutter config --android-sdk="/opt/android-studio"` (specify correct directory)
+* Configure Android SDK path (if you use standalone sdk):
+
+    * `flutter config --android-sdk="/path/to/android/sdk"`
+
+        (specify correct directory, e.g. `$HOME/Library/Android`, `$HOME/AndroidSDK`)
 
 * Configure JDK path:
 
-    * `flutter config --jdk-dir "/usr/lib/jvm/java-17-openjdk-amd64"` (specify correct directory)
+    * `flutter config --jdk-dir "/path/to/jdk"`
+
+        (specify correct directory, e.g. `/opt/homebrew/opt/openjdk@17/`, `/usr/lib/jvm/java-17-openjdk-amd64`)
 
 * Run: `flutter doctor --android-licenses` (we agree to all license terms)
 
