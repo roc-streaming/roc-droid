@@ -4,10 +4,10 @@ import 'package:roc_droid/src/agent.dart';
 import 'package:roc_droid/src/model.dart';
 import 'package:roc_droid/src/model/capture_source_type.dart';
 import 'package:roc_droid/src/ui.dart';
+import 'package:roc_droid/src/ui/components/roc_button.dart';
 import 'package:roc_droid/src/ui/components/roc_chip.dart';
 import 'package:roc_droid/src/ui/components/roc_dropdown_button.dart';
 import 'package:roc_droid/src/ui/components/roc_page_view.dart';
-import 'package:roc_droid/src/ui/components/roc_stateful_button.dart';
 import 'package:roc_droid/src/ui/components/roc_text_row.dart';
 import 'package:roc_droid/src/ui/pages/sender_page.dart';
 import 'package:roc_droid/src/ui/utils/roc_keys.dart';
@@ -26,7 +26,7 @@ void main() {
     final textRows = find.byType(RocTextRow);
     final chips = find.byType(RocChip<int>);
     final dropdownButton = find.byType(RocDropdownButton<CaptureSourceType>);
-    final bottomButton = find.byType(RocStatefulButton);
+    final bottomButton = find.byType(RocButton);
 
     // Assertion
     expect(senderPage, findsOneWidget);
