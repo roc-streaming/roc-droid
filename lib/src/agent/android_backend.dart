@@ -29,10 +29,10 @@ class AndroidBackend implements Backend, AndroidListener {
   bool senderIsAlive = false;
 
   @override
-  final Event stateChangeEvent = Event("stateChangeEvent");
+  final Event<Value<String>> stateChangeEvent = Event("stateChangeEvent");
 
   @override
-  final Event failureEvent = Event("failureEvent");
+  final Event<Value<String>> failureEvent = Event("failureEvent");
 
   /// Inherited from Backend interface.
   /// Invoked from model.
@@ -149,19 +149,22 @@ class AndroidBackend implements Backend, AndroidListener {
   /// Invoked from kotlin.
   @override
   void onEvent(AndroidServiceEvent eventCode) async {
-    receiverIsAlive = await _connector.isReceiverAlive();
-    senderIsAlive = await _connector.isSenderAlive();
-    stateChangeEvent.broadcast();
-    _logger.d("Got async event: $eventCode");
+    await onAnyEvent(eventCode.name);
+    stateChangeEvent.broadcast(Value(eventCode.name));
   }
 
   /// Inherited from AndroidListener interface.
   /// Invoked from kotlin.
   @override
   void onError(AndroidServiceError errorCode) async {
+    await onAnyEvent(errorCode.name);
+    failureEvent.broadcast(Value(errorCode.name));
+  }
+
+  /// Async method used in all Android service event types.
+  Future<void> onAnyEvent(String eventCode) async {
     receiverIsAlive = await _connector.isReceiverAlive();
     senderIsAlive = await _connector.isSenderAlive();
-    failureEvent.broadcast();
-    _logger.d("Got async error: $errorCode");
+    _logger.d("Registered event: $eventCode");
   }
 }

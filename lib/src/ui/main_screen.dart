@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 import '../model/model_root.dart';
+import 'components/roc_snackbar.dart';
 import 'fragments/roc_bottom_navigation_bar.dart';
 import 'pages/about_page.dart';
 import 'pages/receiver_page.dart';
@@ -41,7 +42,13 @@ class _MainScreenState extends State<MainScreen> {
         _pages = [
           ReceiverPage(modelRoot),
           SenderPage(modelRoot),
-        ];
+        ] {
+    _modelRoot.failureEvent.subscribe((args) {
+      var message = args.value;
+      RocSnackbar.showMessage(context: context, message: 'Error: $message');
+      _modelRoot.logger.d('Error message: $message');
+    });
+  }
 
   void _onTabTapped(int index) {
     setState(() {

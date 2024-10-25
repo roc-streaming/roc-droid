@@ -5,10 +5,10 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 
 import '../../model/capture_source_type.dart';
 import '../../model/model_root.dart';
+import '../components/roc_button.dart';
 import '../components/roc_chip.dart';
 import '../components/roc_dropdown_button.dart';
 import '../components/roc_page_view.dart';
-import '../components/roc_stateful_button.dart';
 import '../components/roc_text_row.dart';
 import '../styles/roc_colors.dart';
 
@@ -54,7 +54,7 @@ class SenderPage extends StatelessWidget {
         RocTextRow(AppLocalizations.of(context)!.senderStartStep),
       ],
       bottomButton: Observer(
-        builder: (_) => RocStatefulButton(
+        builder: (_) => RocButton(
           isActive: _modelRoot.sender.isStarted,
           inactiveFunction: _modelRoot.sender.requestAsyncStart,
           activeFunction: _modelRoot.sender.requestAsyncStop,

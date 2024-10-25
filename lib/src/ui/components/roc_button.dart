@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../styles/roc_button_styles.dart';
 
-/// Roc's custom main button widget.
+/// Roc's custom start/stop button widget.
 class RocButton extends StatelessWidget {
   final bool _isActive;
   final Future<void> Function() _inactiveFunction;

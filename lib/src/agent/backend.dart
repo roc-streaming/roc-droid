@@ -24,8 +24,8 @@ import 'android_bridge.g.dart';
 abstract class Backend {
   abstract bool receiverIsAlive;
   abstract bool senderIsAlive;
-  abstract final Event stateChangeEvent;
-  abstract final Event failureEvent;
+  abstract final Event<Value<String>> stateChangeEvent;
+  abstract final Event<Value<String>> failureEvent;
 
   Future<List<String>> getLocalAddresses();
 

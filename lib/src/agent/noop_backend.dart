@@ -11,10 +11,10 @@ class NoopBackend implements Backend {
   bool senderIsAlive = false;
 
   @override
-  final Event stateChangeEvent = Event("stateChangeEvent");
+  final Event<Value<String>> stateChangeEvent = Event("stateChangeEvent");
 
   @override
-  final Event failureEvent = Event("failureEvent");
+  final Event<Value<String>> failureEvent = Event("failureEvent");
 
   @override
   Future<List<String>> getLocalAddresses() async {
