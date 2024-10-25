@@ -35,9 +35,7 @@ if ($LASTEXITCODE -ne 0) {
     Exit 1
 }
 
-Set-Location -Path (
-    Split-Path -Parent (Split-Path -Parent (Resolve-Path $PSScriptRoot)))
-
+Set-Location -Path (Split-Path -Parent (Resolve-Path $PSScriptRoot))
 $cwd = Get-Location
 
 if ($Target -eq "android") {
