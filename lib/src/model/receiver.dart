@@ -45,42 +45,27 @@ abstract class _Receiver with Store {
 
   _Receiver(Logger logger, Backend backend)
       : _logger = logger,
-        _backend = backend;
+        _backend = backend {
+    _backend.stateChangeEvent.subscribe(
+      (args) async {
+        _isStarted = await backend.receiverIsAlive;
+      },
+    );
+  }
 
   // Start current receiver.
   @action
-  Future<bool> start() async {
-    if (isStarted) {
-      _logger.i('Attempt to start an already running receiver.');
-      return _isStarted;
-    }
-    // Main backend call
+  Future<void> requestAsyncStart() async {
     await _backend.startReceiver(AndroidReceiverSettings(
       sourcePort: _sourcePort,
       repairPort: _repairPort,
     ));
-
-    var status = await _backend.isReceiverAlive();
-    _logger.i('Trying to start the receiver. roc service status: $status');
-    _isStarted = status;
-    return _isStarted;
   }
 
   // Stop current receiver.
   @action
-  Future<bool> stop() async {
-    if (!isStarted) {
-      _logger.i('Attempt to stop inactive receiver.');
-      return isStarted;
-    }
-
-    // Main backend call
+  Future<void> requestAsyncStop() async {
     await _backend.stopReceiver();
-
-    var status = await _backend.isReceiverAlive();
-    _logger.i('Trying to stop the receiver. roc service status: $status');
-    _isStarted = status;
-    return _isStarted;
   }
 
   // Update collection of available receiver IP addresses.
@@ -107,8 +92,8 @@ abstract class _Receiver with Store {
 
   // Update all sender controls using "hardcoded" and default values.
   @action
-  Future<void> setDefultValues(Backend backend) async {
-    setReceiverIPs(await backend.getLocalAddresses());
+  Future<void> setDefultValues() async {
+    setReceiverIPs(await _backend.getLocalAddresses());
     setSourcePort(10001);
     setRepairPort(10002);
   }

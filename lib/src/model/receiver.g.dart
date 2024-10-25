@@ -99,29 +99,28 @@ mixin _$Receiver on _Receiver, Store {
     });
   }
 
-  late final _$startAsyncAction =
-      AsyncAction('_Receiver.start', context: context);
+  late final _$requestAsyncStartAsyncAction =
+      AsyncAction('_Receiver.requestAsyncStart', context: context);
 
   @override
-  Future<bool> start() {
-    return _$startAsyncAction.run(() => super.start());
+  Future<void> requestAsyncStart() {
+    return _$requestAsyncStartAsyncAction.run(() => super.requestAsyncStart());
   }
 
-  late final _$stopAsyncAction =
-      AsyncAction('_Receiver.stop', context: context);
+  late final _$requestAsyncStopAsyncAction =
+      AsyncAction('_Receiver.requestAsyncStop', context: context);
 
   @override
-  Future<bool> stop() {
-    return _$stopAsyncAction.run(() => super.stop());
+  Future<void> requestAsyncStop() {
+    return _$requestAsyncStopAsyncAction.run(() => super.requestAsyncStop());
   }
 
   late final _$setDefultValuesAsyncAction =
       AsyncAction('_Receiver.setDefultValues', context: context);
 
   @override
-  Future<void> setDefultValues(Backend backend) {
-    return _$setDefultValuesAsyncAction
-        .run(() => super.setDefultValues(backend));
+  Future<void> setDefultValues() {
+    return _$setDefultValuesAsyncAction.run(() => super.setDefultValues());
   }
 
   late final _$_ReceiverActionController =

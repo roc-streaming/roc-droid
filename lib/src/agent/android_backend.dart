@@ -1,3 +1,4 @@
+import 'package:event/event.dart';
 import 'package:logger/logger.dart';
 
 import 'android_bridge.g.dart';
@@ -20,6 +21,18 @@ class AndroidBackend implements Backend, AndroidListener {
     // that it would invoke our methods.
     AndroidListener.setUp(this);
   }
+
+  @override
+  bool receiverIsAlive = false;
+
+  @override
+  bool senderIsAlive = false;
+
+  @override
+  final Event stateChangeEvent = Event("stateChangeEvent");
+
+  @override
+  final Event failureEvent = Event("failureEvent");
 
   /// Inherited from Backend interface.
   /// Invoked from model.
@@ -81,13 +94,6 @@ class AndroidBackend implements Backend, AndroidListener {
   /// Inherited from Backend interface.
   /// Invoked from model.
   @override
-  Future<bool> isReceiverAlive() async {
-    return await _connector.isReceiverAlive();
-  }
-
-  /// Inherited from Backend interface.
-  /// Invoked from model.
-  @override
   Future<void> startSender(AndroidSenderSettings settings) async {
     if (await _connector.isSenderAlive()) {
       _logger.d("Sender already started");
@@ -139,26 +145,23 @@ class AndroidBackend implements Backend, AndroidListener {
     await _connector.stopSender();
   }
 
-  /// Inherited from Backend interface.
-  /// Invoked from model.
-  @override
-  Future<bool> isSenderAlive() async {
-    return await _connector.isSenderAlive();
-  }
-
   /// Inherited from AndroidListener interface.
   /// Invoked from kotlin.
   @override
   void onEvent(AndroidServiceEvent eventCode) async {
-    // TODO: notify model about state change
+    receiverIsAlive = await _connector.isReceiverAlive();
+    senderIsAlive = await _connector.isSenderAlive();
+    stateChangeEvent.broadcast();
     _logger.d("Got async event: $eventCode");
   }
 
   /// Inherited from AndroidListener interface.
   /// Invoked from kotlin.
   @override
-  void onError(AndroidServiceError errorCode) {
-    // TODO: display error to user (e.g. using toast)
+  void onError(AndroidServiceError errorCode) async {
+    receiverIsAlive = await _connector.isReceiverAlive();
+    senderIsAlive = await _connector.isSenderAlive();
+    failureEvent.broadcast();
     _logger.d("Got async error: $errorCode");
   }
 }

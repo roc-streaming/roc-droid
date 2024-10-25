@@ -2,44 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../styles/roc_button_styles.dart';
 
-/// Roc's custom stateful button widget.
-class RocStatefulButton extends StatefulWidget {
+/// Roc's custom main button widget.
+class RocButton extends StatelessWidget {
   final bool _isActive;
   final Future<void> Function() _inactiveFunction;
   final Future<void> Function() _activeFunction;
   final String _inactiveText;
   final String _activeText;
 
-  const RocStatefulButton(
-      {required bool isActive,
-      required Future<void> Function() inactiveFunction,
-      required Future<void> Function() activeFunction,
-      required String inactiveText,
-      required String activeText})
-      : _isActive = isActive,
-        _inactiveFunction = inactiveFunction,
-        _activeFunction = activeFunction,
-        _inactiveText = inactiveText,
-        _activeText = activeText;
-
-  @override
-  State<RocStatefulButton> createState() => _RocStatefulButtonState(
-        isActive: _isActive,
-        inactiveFunction: _inactiveFunction,
-        activeFunction: _activeFunction,
-        inactiveText: _inactiveText,
-        activeText: _activeText,
-      );
-}
-
-class _RocStatefulButtonState extends State<RocStatefulButton> {
-  bool _isActive;
-  final Future<void> Function() _inactiveFunction;
-  final Future<void> Function() _activeFunction;
-  final String _inactiveText;
-  final String _activeText;
-
-  _RocStatefulButtonState(
+  const RocButton(
       {required bool isActive,
       required Future<void> Function() inactiveFunction,
       required Future<void> Function() activeFunction,

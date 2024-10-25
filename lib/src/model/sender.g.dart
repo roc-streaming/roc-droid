@@ -121,19 +121,20 @@ mixin _$Sender on _Sender, Store {
     });
   }
 
-  late final _$startAsyncAction =
-      AsyncAction('_Sender.start', context: context);
+  late final _$requestAsyncStartAsyncAction =
+      AsyncAction('_Sender.requestAsyncStart', context: context);
 
   @override
-  Future<bool> start() {
-    return _$startAsyncAction.run(() => super.start());
+  Future<void> requestAsyncStart() {
+    return _$requestAsyncStartAsyncAction.run(() => super.requestAsyncStart());
   }
 
-  late final _$stopAsyncAction = AsyncAction('_Sender.stop', context: context);
+  late final _$requestAsyncStopAsyncAction =
+      AsyncAction('_Sender.requestAsyncStop', context: context);
 
   @override
-  Future<bool> stop() {
-    return _$stopAsyncAction.run(() => super.stop());
+  Future<void> requestAsyncStop() {
+    return _$requestAsyncStopAsyncAction.run(() => super.requestAsyncStop());
   }
 
   late final _$_SenderActionController =
