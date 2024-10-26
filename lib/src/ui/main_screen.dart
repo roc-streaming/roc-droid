@@ -43,10 +43,10 @@ class _MainScreenState extends State<MainScreen> {
           ReceiverPage(modelRoot),
           SenderPage(modelRoot),
         ] {
+    // Subscribe to model failure event (coming from backend failure event).
     _modelRoot.failureEvent.subscribe((args) {
       var message = args.value;
       RocSnackbar.showMessage(context: context, message: 'Error: $message');
-      _modelRoot.logger.d('Error message: $message');
     });
   }
 

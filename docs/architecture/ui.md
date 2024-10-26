@@ -89,6 +89,8 @@ Designations:
         * [RocChip](https://github.com/roc-streaming/roc-droid/tree/main/lib/src/ui/components/roc_chip.dart)
 
         * [RocTextRow](https://github.com/roc-streaming/roc-droid/tree/main/lib/src/ui/components/roc_text_row.dart)
+
+        * [RocSnackbar](https://github.com/roc-streaming/roc-droid/tree/main/lib/src/ui/components/roc_snackbar.dart)
   
       * Representing Widgets that provide the user with the ability to enter certain data.
 

@@ -11,6 +11,7 @@ class ModelRoot {
   late final Sender sender;
   late final Logger logger;
 
+  /// Used to notify if the backend service has registered an error event.
   final Event<Value<String>> failureEvent = Event("failureEvent");
 
   ModelRoot(Logger logger, Backend backend) {
@@ -23,7 +24,6 @@ class ModelRoot {
     // Broadcast failure event only on backend failure events
     backend.failureEvent.subscribe((args) {
       failureEvent.broadcast(args);
-      logger.d('From model event');
     });
   }
 }

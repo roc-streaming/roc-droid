@@ -46,6 +46,7 @@ abstract class _Receiver with Store {
   _Receiver(Logger logger, Backend backend)
       : _logger = logger,
         _backend = backend {
+    // Subscribe to backend state change event.
     _backend.stateChangeEvent.subscribe(
       (args) async {
         _isStarted = await backend.receiverIsAlive;
