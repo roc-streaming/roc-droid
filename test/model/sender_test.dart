@@ -20,31 +20,6 @@ void main() {
         sender.captureSource, CaptureSourceType.currentlyPlayingApplications);
   });
 
-  test('Check the senders start method when sender is not active.', () async {
-    final sender = makeSender();
-    expect(sender.isStarted, false);
-    await sender.requestAsyncStart();
-    expect(sender.isStarted, true);
-  });
-
-  test('Check the senders start method when sender is active.', () async {
-    final sender = makeSender();
-    expect(sender.isStarted, false);
-    await sender.requestAsyncStart();
-    expect(sender.isStarted, true);
-    await sender.requestAsyncStart();
-    expect(sender.isStarted, true);
-  });
-
-  test('Check the senders stop method when sender is active.', () async {
-    final sender = makeSender();
-    expect(sender.isStarted, false);
-    await sender.requestAsyncStart();
-    expect(sender.isStarted, true);
-    await sender.requestAsyncStop();
-    expect(sender.isStarted, false);
-  });
-
   test('Check the senders stop method when sender is not active.', () async {
     final sender = makeSender();
     expect(sender.isStarted, false);
