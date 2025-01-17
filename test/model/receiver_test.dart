@@ -17,13 +17,6 @@ void main() {
     expect(receiver.repairPort, -1);
   });
 
-  test('Check the receivers IPs setter method.', () async {
-    final receiver = makeReceiver();
-    final testIPs = List<String>.from(['1', '2', '3']);
-    receiver.setReceiverIPs(testIPs);
-    expect(receiver.receiverIPs, testIPs);
-  });
-
   test('Check the source port setter method.', () async {
     final receiver = makeReceiver();
     final testValue = 123;

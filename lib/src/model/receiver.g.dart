@@ -115,27 +115,16 @@ mixin _$Receiver on _Receiver, Store {
     return _$requestAsyncStopAsyncAction.run(() => super.requestAsyncStop());
   }
 
-  late final _$setDefultValuesAsyncAction =
-      AsyncAction('_Receiver.setDefultValues', context: context);
+  late final _$_setDefultValuesAsyncAction =
+      AsyncAction('_Receiver._setDefultValues', context: context);
 
   @override
-  Future<void> setDefultValues() {
-    return _$setDefultValuesAsyncAction.run(() => super.setDefultValues());
+  Future<void> _setDefultValues() {
+    return _$_setDefultValuesAsyncAction.run(() => super._setDefultValues());
   }
 
   late final _$_ReceiverActionController =
       ActionController(name: '_Receiver', context: context);
-
-  @override
-  void setReceiverIPs(Iterable<String> addresses) {
-    final _$actionInfo = _$_ReceiverActionController.startAction(
-        name: '_Receiver.setReceiverIPs');
-    try {
-      return super.setReceiverIPs(addresses);
-    } finally {
-      _$_ReceiverActionController.endAction(_$actionInfo);
-    }
-  }
 
   @override
   void setSourcePort(int value) {

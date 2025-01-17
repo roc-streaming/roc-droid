@@ -127,7 +127,6 @@ class _TestFloatingButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: () => {
-        _modelRoot.receiver.setReceiverIPs(formRandomIPs()),
         _modelRoot.receiver.setSourcePort(Random().nextInt(99999)),
         _modelRoot.receiver.setRepairPort(Random().nextInt(99999)),
         _modelRoot.sender.setSourcePort(Random().nextInt(99999)),

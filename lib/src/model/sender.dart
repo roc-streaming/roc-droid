@@ -58,6 +58,7 @@ abstract class _Sender with Store {
         _isStarted = await backend.senderIsAlive;
       },
     );
+    _setDefultValues();
   }
 
   // Start current sender.
@@ -106,7 +107,8 @@ abstract class _Sender with Store {
 
   // Update all sender controls using "hardcoded" and default values.
   @action
-  void setDefultValues() {
+  void _setDefultValues() {
+    _isStarted = _backend.senderIsAlive;
     setSourcePort(10001);
     setRepairPort(10002);
   }

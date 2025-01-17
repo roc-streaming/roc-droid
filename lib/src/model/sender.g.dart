@@ -185,11 +185,11 @@ mixin _$Sender on _Sender, Store {
   }
 
   @override
-  void setDefultValues() {
+  void _setDefultValues() {
     final _$actionInfo =
-        _$_SenderActionController.startAction(name: '_Sender.setDefultValues');
+        _$_SenderActionController.startAction(name: '_Sender._setDefultValues');
     try {
-      return super.setDefultValues();
+      return super._setDefultValues();
     } finally {
       _$_SenderActionController.endAction(_$actionInfo);
     }

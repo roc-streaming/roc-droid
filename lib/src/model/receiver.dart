@@ -52,6 +52,7 @@ abstract class _Receiver with Store {
         _isStarted = await backend.receiverIsAlive;
       },
     );
+    _setDefultValues();
   }
 
   // Start current receiver.
@@ -67,14 +68,6 @@ abstract class _Receiver with Store {
   @action
   Future<void> requestAsyncStop() async {
     await _backend.stopReceiver();
-  }
-
-  // Update collection of available receiver IP addresses.
-  @action
-  void setReceiverIPs(Iterable<String> addresses) {
-    _receiverIPs = ObservableList.of(addresses);
-    _logger.d(
-        'Collection of available receiver IP addresses changed to: ${_receiverIPs}');
   }
 
   // Update source port value.
@@ -93,8 +86,9 @@ abstract class _Receiver with Store {
 
   // Update all sender controls using "hardcoded" and default values.
   @action
-  Future<void> setDefultValues() async {
-    setReceiverIPs(await _backend.getLocalAddresses());
+  Future<void> _setDefultValues() async {
+    _isStarted = _backend.receiverIsAlive;
+    _receiverIPs = ObservableList.of(await _backend.getLocalAddresses());
     setSourcePort(10001);
     setRepairPort(10002);
   }

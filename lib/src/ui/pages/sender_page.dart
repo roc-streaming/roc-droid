@@ -56,10 +56,10 @@ class SenderPage extends StatelessWidget {
       bottomButton: Observer(
         builder: (_) => RocButton(
           isActive: _modelRoot.sender.isStarted,
-          inactiveFunction: _modelRoot.sender.requestAsyncStart,
-          activeFunction: _modelRoot.sender.requestAsyncStop,
-          inactiveText: AppLocalizations.of(context)!.startSenderButton,
-          activeText: AppLocalizations.of(context)!.stopSenderButton,
+          deactivatedFunction: _modelRoot.sender.requestAsyncStart,
+          activatedFunction: _modelRoot.sender.requestAsyncStop,
+          deactivatedText: AppLocalizations.of(context)!.startSenderButton,
+          activatedText: AppLocalizations.of(context)!.stopSenderButton,
         ),
       ),
     );

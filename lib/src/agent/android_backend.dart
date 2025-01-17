@@ -3,6 +3,7 @@ import 'package:logger/logger.dart';
 
 import 'android_bridge.g.dart';
 import 'backend.dart';
+import 'backend_event.dart';
 
 /// Android-specific implementation of Backend interface.
 ///
@@ -29,10 +30,12 @@ class AndroidBackend implements Backend, AndroidListener {
   bool senderIsAlive = false;
 
   @override
-  final Event<Value<String>> stateChangeEvent = Event("stateChangeEvent");
+  final Event<Value<String>> stateChangeEvent =
+      Event(BackendEvent.stateChangeEvent.name);
 
   @override
-  final Event<Value<String>> failureEvent = Event("failureEvent");
+  final Event<Value<String>> failureEvent =
+      Event(BackendEvent.failureEvent.name);
 
   /// Inherited from Backend interface.
   /// Invoked from model.
@@ -49,31 +52,38 @@ class AndroidBackend implements Backend, AndroidListener {
   /// Invoked from model.
   @override
   Future<void> startReceiver(AndroidReceiverSettings settings) async {
-    if (await _connector.isReceiverAlive()) {
-      _logger.d("Receiver already started");
-      return;
-    }
-
-    _logger.i("Starting receiver");
-
-    // Ensure service can post notifications.
-    if (!await _connector.requestNotifications()) {
-      return;
-    }
-
     try {
-      // First request media projection if not granted yet and acquire it
-      // while we're starting receiver.
-      if (!await _connector.acquireProjection()) {
+      if (await _connector.isReceiverAlive()) {
+        _logger.d("Receiver already started");
         return;
       }
 
-      // Then start receiver.
-      await _connector.startReceiver(settings);
+      _logger.i("Starting receiver");
+
+      // Ensure service can post notifications.
+      if (!await _connector.requestNotifications()) {
+        return;
+      }
+
+      try {
+        // First request media projection if not granted yet and acquire it
+        // while we're starting receiver.
+        if (!await _connector.acquireProjection()) {
+          return;
+        }
+
+        // Then start receiver.
+        await _connector.startReceiver(settings);
+      } finally {
+        // Then release projection, i.e. allow service to stop it when it's
+        // not needed anymore.
+        await _connector.releaseProjection();
+      }
     } finally {
-      // Then release projection, i.e. allow service to stop it when it's
-      // not needed anymore.
-      await _connector.releaseProjection();
+      // This call is necessary for security purposes -
+      // to ensure that the service is in the correct state at any time
+      // while the application is running.
+      await refreshState(BackendEvent.statusCheckEvent.name);
     }
   }
 
@@ -81,53 +91,67 @@ class AndroidBackend implements Backend, AndroidListener {
   /// Invoked from model.
   @override
   Future<void> stopReceiver() async {
-    if (!await _connector.isReceiverAlive()) {
-      _logger.d("Receiver already stopped");
-      return;
+    try {
+      if (!await _connector.isReceiverAlive()) {
+        _logger.d("Receiver already stopped");
+        return;
+      }
+
+      _logger.i("Stopping receiver");
+
+      await _connector.stopReceiver();
+    } finally {
+      // This call is necessary for security purposes -
+      // to ensure that the service is in the correct state at any time
+      // while the application is running.
+      await refreshState(BackendEvent.statusCheckEvent.name);
     }
-
-    _logger.i("Stopping receiver");
-
-    await _connector.stopReceiver();
   }
 
   /// Inherited from Backend interface.
   /// Invoked from model.
   @override
   Future<void> startSender(AndroidSenderSettings settings) async {
-    if (await _connector.isSenderAlive()) {
-      _logger.d("Sender already started");
-      return;
-    }
-
-    _logger.i("Starting sender");
-
-    // Ensure service can post notifications.
-    if (!await _connector.requestNotifications()) {
-      return;
-    }
-
-    // If user want's to capture from microphone, we need to request
-    // permission before starting the sender.
-    if (settings.captureType == AndroidCaptureType.captureMic) {
-      if (!await _connector.requestMicrophone()) {
-        return;
-      }
-    }
-
     try {
-      // First request media projection if not granted yet and acquire it
-      // while we're starting sender.
-      if (!await _connector.acquireProjection()) {
+      if (await _connector.isSenderAlive()) {
+        _logger.d("Sender already started");
         return;
       }
 
-      // Then start sender.
-      await _connector.startSender(settings);
+      _logger.i("Starting sender");
+
+      // Ensure service can post notifications.
+      if (!await _connector.requestNotifications()) {
+        return;
+      }
+
+      // If user want's to capture from microphone, we need to request
+      // permission before starting the sender.
+      if (settings.captureType == AndroidCaptureType.captureMic) {
+        if (!await _connector.requestMicrophone()) {
+          return;
+        }
+      }
+
+      try {
+        // First request media projection if not granted yet and acquire it
+        // while we're starting sender.
+        if (!await _connector.acquireProjection()) {
+          return;
+        }
+
+        // Then start sender.
+        await _connector.startSender(settings);
+      } finally {
+        // Then release projection, i.e. allow service to stop it when it's
+        // not needed anymore.
+        await _connector.releaseProjection();
+      }
     } finally {
-      // Then release projection, i.e. allow service to stop it when it's
-      // not needed anymore.
-      await _connector.releaseProjection();
+      // This call is necessary for security purposes -
+      // to ensure that the service is in the correct state at any time
+      // while the application is running.
+      await refreshState(BackendEvent.statusCheckEvent.name);
     }
   }
 
@@ -135,21 +159,28 @@ class AndroidBackend implements Backend, AndroidListener {
   /// Invoked from model.
   @override
   Future<void> stopSender() async {
-    if (!await _connector.isSenderAlive()) {
-      _logger.d("Sender already stopped");
-      return;
+    try {
+      if (!await _connector.isSenderAlive()) {
+        _logger.d("Sender already stopped");
+        return;
+      }
+
+      _logger.i("Stopping sender");
+
+      await _connector.stopSender();
+    } finally {
+      // This call is necessary for security purposes -
+      // to ensure that the service is in the correct state at any time
+      // while the application is running.
+      await refreshState(BackendEvent.statusCheckEvent.name);
     }
-
-    _logger.i("Stopping sender");
-
-    await _connector.stopSender();
   }
 
   /// Inherited from AndroidListener interface.
   /// Invoked from kotlin.
   @override
   void onEvent(AndroidServiceEvent eventCode) async {
-    await onAnyEvent(eventCode.name);
+    await refreshState(eventCode.name);
     stateChangeEvent.broadcast(Value(eventCode.name));
   }
 
@@ -157,12 +188,12 @@ class AndroidBackend implements Backend, AndroidListener {
   /// Invoked from kotlin.
   @override
   void onError(AndroidServiceError errorCode) async {
-    await onAnyEvent(errorCode.name);
+    await refreshState(errorCode.name);
     failureEvent.broadcast(Value(errorCode.name));
   }
 
   /// Async method used in all Android service event types.
-  Future<void> onAnyEvent(String eventCode) async {
+  Future<void> refreshState(String eventCode) async {
     receiverIsAlive = await _connector.isReceiverAlive();
     senderIsAlive = await _connector.isSenderAlive();
     _logger.d("Registered event: $eventCode");

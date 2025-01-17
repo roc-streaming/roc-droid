@@ -5,25 +5,25 @@ import '../styles/roc_button_styles.dart';
 /// Roc's custom start/stop button widget.
 class RocButton extends StatelessWidget {
   final bool _isActive;
-  final Future<void> Function() _inactiveFunction;
-  final Future<void> Function() _activeFunction;
-  final String _inactiveText;
-  final String _activeText;
+  final Future<void> Function() _deactivatedFunction;
+  final Future<void> Function() _activatedFunction;
+  final String _deactivatedText;
+  final String _activatedText;
 
   const RocButton(
       {required bool isActive,
-      required Future<void> Function() inactiveFunction,
-      required Future<void> Function() activeFunction,
-      required String inactiveText,
-      required String activeText})
+      required Future<void> Function() deactivatedFunction,
+      required Future<void> Function() activatedFunction,
+      required String deactivatedText,
+      required String activatedText})
       : _isActive = isActive,
-        _inactiveFunction = inactiveFunction,
-        _activeFunction = activeFunction,
-        _inactiveText = inactiveText,
-        _activeText = activeText;
+        _deactivatedFunction = deactivatedFunction,
+        _activatedFunction = activatedFunction,
+        _deactivatedText = deactivatedText,
+        _activatedText = activatedText;
 
   void _onPressed() async {
-    _isActive ? await _activeFunction() : await _inactiveFunction();
+    _isActive ? await _activatedFunction() : await _deactivatedFunction();
   }
 
   @override
@@ -32,7 +32,7 @@ class RocButton extends StatelessWidget {
       style: RocButtonStyles.startButton,
       onPressed: _onPressed,
       child: Text(
-        _isActive ? _activeText : _inactiveText,
+        _isActive ? _activatedText : _deactivatedText,
         style: Theme.of(context).textTheme.titleSmall,
       ),
     );
