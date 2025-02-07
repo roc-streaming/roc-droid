@@ -60,3 +60,6 @@ app.*.map.json
 
 # mkdocs
 /site
+
+# Personal
+/TODO.org
