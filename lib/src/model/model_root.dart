@@ -12,7 +12,7 @@ class ModelRoot {
   late final Logger logger;
 
   /// Used to notify if the backend service has registered an error event.
-  final Event<Value<String>> failureEvent = Event("failureEvent");
+  final Event<Value<FailureEvent>> failureEvent = Event("failureEvent");
 
   ModelRoot(Logger logger, Backend backend) {
     this.receiver = Receiver(logger, backend);

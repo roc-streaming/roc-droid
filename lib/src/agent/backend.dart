@@ -1,6 +1,8 @@
 import 'package:event/event.dart';
 
 import 'android_bridge.g.dart';
+import 'failure_event.dart';
+import 'state_event.dart';
 
 // This is intended to be platform-independent interface for streaming backend,
 // implemented differently on mobile and desktop.
@@ -24,8 +26,12 @@ import 'android_bridge.g.dart';
 abstract class Backend {
   abstract bool receiverIsAlive;
   abstract bool senderIsAlive;
-  abstract final Event<Value<String>> stateChangeEvent;
-  abstract final Event<Value<String>> failureEvent;
+
+  /// Emitted when receiverIsAlive or senderIsAlive changes its value.
+  abstract final Event<Value<StateEvent>> stateChangeEvent;
+
+  /// Emitted when sender or receiver fails in background.
+  abstract final Event<Value<FailureEvent>> failureEvent;
 
   Future<List<String>> getLocalAddresses();
 

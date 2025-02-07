@@ -2,6 +2,8 @@ import 'package:event/event.dart';
 
 import 'android_bridge.g.dart';
 import 'backend.dart';
+import 'failure_event.dart';
+import 'state_event.dart';
 
 class NoopBackend implements Backend {
   @override
@@ -11,10 +13,10 @@ class NoopBackend implements Backend {
   bool senderIsAlive = false;
 
   @override
-  final Event<Value<String>> stateChangeEvent = Event("stateChangeEvent");
+  final Event<Value<StateEvent>> stateChangeEvent = Event("stateChangeEvent");
 
   @override
-  final Event<Value<String>> failureEvent = Event("failureEvent");
+  final Event<Value<FailureEvent>> failureEvent = Event("failureEvent");
 
   @override
   Future<List<String>> getLocalAddresses() async {
