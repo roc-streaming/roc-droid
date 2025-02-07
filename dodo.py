@@ -78,7 +78,7 @@ def task_test():
     """run tests"""
     return {
         'basename': 'test',
-        'actions': ['flutter test -j1 -r expanded'],
+        'actions': ['flutter test -j1 -r github'],
         'title': title_with_actions,
     }
 

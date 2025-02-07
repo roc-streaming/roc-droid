@@ -10,6 +10,7 @@ import signal
 import subprocess
 
 LEVEL_COLORS = {
+    'F': Back.RED,
     'E': Back.RED,
     'W': Back.YELLOW,
     'I': Back.GREEN,
