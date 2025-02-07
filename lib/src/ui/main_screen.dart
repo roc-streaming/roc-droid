@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 import '../model/model_root.dart';
+import 'components/roc_snackbar.dart';
 import 'fragments/roc_bottom_navigation_bar.dart';
 import 'pages/about_page.dart';
 import 'pages/receiver_page.dart';
@@ -15,7 +16,7 @@ import 'utils/roc_keys.dart';
 // Main screen class implementation - Screen layer.
 class MainScreen extends StatefulWidget {
   // Controls the appearance of the floating test button
-  final bool _addTestButton = true;
+  final bool _addTestButton = false;
   final ModelRoot _modelRoot;
 
   const MainScreen({required ModelRoot modelRoot}) : _modelRoot = modelRoot;
@@ -41,7 +42,13 @@ class _MainScreenState extends State<MainScreen> {
         _pages = [
           ReceiverPage(modelRoot),
           SenderPage(modelRoot),
-        ];
+        ] {
+    // Subscribe to model failure event (coming from backend failure event).
+    _modelRoot.failureEvent.subscribe((args) {
+      var message = args.value;
+      RocSnackbar.showMessage(context: context, message: 'Error: $message');
+    });
+  }
 
   void _onTabTapped(int index) {
     setState(() {
@@ -120,7 +127,6 @@ class _TestFloatingButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: () => {
-        _modelRoot.receiver.setReceiverIPs(formRandomIPs()),
         _modelRoot.receiver.setSourcePort(Random().nextInt(99999)),
         _modelRoot.receiver.setRepairPort(Random().nextInt(99999)),
         _modelRoot.sender.setSourcePort(Random().nextInt(99999)),

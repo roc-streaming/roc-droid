@@ -40,6 +40,18 @@ Here is how you can setup Android emulator using Android Studio:
 
 * Click `Run/Start Debugging` in the IDE while the Android emulator device is active to verify that the application opens and runs correctly on the new AVD.
 
+## Running the app on Android phone using VS Code
+
+* Connect your phone to your PC
+
+* Enable developer mode on your phone
+
+* Enable USB debugging mode
+
+* In VS-code: Run: RUN > Start Debugging or press F5
+
+* Select your phone from the list
+
 ## Capture device logs
 
 This script is a wrapper for `adb logcat`:

@@ -121,19 +121,20 @@ mixin _$Sender on _Sender, Store {
     });
   }
 
-  late final _$startAsyncAction =
-      AsyncAction('_Sender.start', context: context);
+  late final _$requestAsyncStartAsyncAction =
+      AsyncAction('_Sender.requestAsyncStart', context: context);
 
   @override
-  Future<bool> start() {
-    return _$startAsyncAction.run(() => super.start());
+  Future<void> requestAsyncStart() {
+    return _$requestAsyncStartAsyncAction.run(() => super.requestAsyncStart());
   }
 
-  late final _$stopAsyncAction = AsyncAction('_Sender.stop', context: context);
+  late final _$requestAsyncStopAsyncAction =
+      AsyncAction('_Sender.requestAsyncStop', context: context);
 
   @override
-  Future<bool> stop() {
-    return _$stopAsyncAction.run(() => super.stop());
+  Future<void> requestAsyncStop() {
+    return _$requestAsyncStopAsyncAction.run(() => super.requestAsyncStop());
   }
 
   late final _$_SenderActionController =
@@ -178,6 +179,17 @@ mixin _$Sender on _Sender, Store {
         _$_SenderActionController.startAction(name: '_Sender.setCaptureSource');
     try {
       return super.setCaptureSource(value);
+    } finally {
+      _$_SenderActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void _setDefultValues() {
+    final _$actionInfo =
+        _$_SenderActionController.startAction(name: '_Sender._setDefultValues');
+    try {
+      return super._setDefultValues();
     } finally {
       _$_SenderActionController.endAction(_$actionInfo);
     }

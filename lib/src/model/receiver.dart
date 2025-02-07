@@ -45,51 +45,29 @@ abstract class _Receiver with Store {
 
   _Receiver(Logger logger, Backend backend)
       : _logger = logger,
-        _backend = backend;
+        _backend = backend {
+    // Subscribe to backend state change event.
+    _backend.stateChangeEvent.subscribe(
+      (args) async {
+        _isStarted = await backend.receiverIsAlive;
+      },
+    );
+    _setDefultValues();
+  }
 
   // Start current receiver.
   @action
-  Future<bool> start() async {
-    if (isStarted) {
-      _logger.i('Attempt to start an already running receiver.');
-      return _isStarted;
-    }
-
-    // Main backend call
+  Future<void> requestAsyncStart() async {
     await _backend.startReceiver(AndroidReceiverSettings(
-      sourcePort: 10001,
-      repairPort: 10002,
+      sourcePort: _sourcePort,
+      repairPort: _repairPort,
     ));
-
-    var status = await _backend.isReceiverAlive();
-    _logger.i('Trying to start the receiver. roc service status: $status');
-    _isStarted = status;
-    return _isStarted;
   }
 
   // Stop current receiver.
   @action
-  Future<bool> stop() async {
-    if (!isStarted) {
-      _logger.i('Attempt to stop inactive receiver.');
-      return isStarted;
-    }
-
-    // Main backend call
+  Future<void> requestAsyncStop() async {
     await _backend.stopReceiver();
-
-    var status = await _backend.isReceiverAlive();
-    _logger.i('Trying to stop the receiver. roc service status: $status');
-    _isStarted = status;
-    return _isStarted;
-  }
-
-  // Update collection of available receiver IP addresses.
-  @action
-  void setReceiverIPs(Iterable<String> addresses) {
-    _receiverIPs = ObservableList.of(addresses);
-    _logger.d(
-        'Collection of available receiver IP addresses changed to: ${_receiverIPs}');
   }
 
   // Update source port value.
@@ -104,5 +82,14 @@ abstract class _Receiver with Store {
   void setRepairPort(int value) {
     _repairPort = value;
     _logger.d('Receiver repair port value changed to: ${_repairPort}');
+  }
+
+  // Update all sender controls using "hardcoded" and default values.
+  @action
+  Future<void> _setDefultValues() async {
+    _isStarted = _backend.receiverIsAlive;
+    _receiverIPs = ObservableList.of(await _backend.getLocalAddresses());
+    setSourcePort(10001);
+    setRepairPort(10002);
   }
 }

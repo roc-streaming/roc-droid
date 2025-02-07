@@ -418,7 +418,6 @@ class StreamingService : Service() {
         } finally {
             Log.d(LOG_TAG, "Releasing sender resources")
 
-            audioRecord?.stop()
             audioRecord?.release()
 
             Log.d(LOG_TAG, "Exiting sender thread")
@@ -491,7 +490,6 @@ class StreamingService : Service() {
         } finally {
             Log.d(LOG_TAG, "Releasing receiver resources")
 
-            audioTrack?.stop()
             audioTrack?.release()
 
             Log.d(LOG_TAG, "Exiting receiver thread")

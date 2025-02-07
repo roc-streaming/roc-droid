@@ -51,68 +51,65 @@ abstract class _Sender with Store {
 
   _Sender(Logger logger, Backend backend)
       : _logger = logger,
-        _backend = backend;
+        _backend = backend {
+    // Subscribe to backend state change event.
+    _backend.stateChangeEvent.subscribe(
+      (args) async {
+        _isStarted = await backend.senderIsAlive;
+      },
+    );
+    _setDefultValues();
+  }
 
   // Start current sender.
   @action
-  Future<bool> start() async {
-    if (isStarted) {
-      _logger.i('Attempt to start an already running sender.');
-      return isStarted;
-    }
-
-    // Main backend call
+  Future<void> requestAsyncStart() async {
     await _backend.startSender(AndroidSenderSettings(
       captureType: AndroidCaptureType.captureApps,
       host: receiverIP,
-      sourcePort: 10001,
-      repairPort: 10002,
+      sourcePort: _sourcePort,
+      repairPort: _repairPort,
     ));
-
-    var status = await _backend.isSenderAlive();
-    _logger.i('Trying to start the sender. roc service status: $status');
-    _isStarted = status;
-    return _isStarted;
   }
 
   // Stop current sender.
   @action
-  Future<bool> stop() async {
-    if (!isStarted) {
-      _logger.i('Attempt to stop inactive sender.');
-      return isStarted;
-    }
-
-    // Main backend call
+  Future<void> requestAsyncStop() async {
     await _backend.stopSender();
-
-    var status = await _backend.isSenderAlive();
-    _logger.i('Trying to stop the sender. roc service status: $status');
-    _isStarted = status;
-    return _isStarted;
   }
 
   // Update source port value.
   @action
   void setSourcePort(int value) {
     _sourcePort = value;
+    _logger.d('Sender source port value changed to: ${_sourcePort}');
   }
 
   // Update repair port value.
   @action
   void setRepairPort(int value) {
     _repairPort = value;
+    _logger.d('Sender repair port value changed to: ${_repairPort}');
   }
 
   // Update the active source port.
   @action
   void setReceiverIP(String value) {
     _receiverIP = value;
+    _logger.d('Receiver IP value changed to: ${_receiverIP}');
   }
 
   // Update the active the user-selected capture source enum.
   @action
   void setCaptureSource(CaptureSourceType value) {
     _captureSource = value;
+  }
+
+  // Update all sender controls using "hardcoded" and default values.
+  @action
+  void _setDefultValues() {
+    _isStarted = _backend.senderIsAlive;
+    setSourcePort(10001);
+    setRepairPort(10002);
   }
 }

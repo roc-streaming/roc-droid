@@ -13,42 +13,17 @@ void main() {
   test('Check the senders initial values and getters.', () async {
     final sender = makeSender();
     expect(sender.isStarted, false);
-    expect(sender.sourcePort, -1);
-    expect(sender.repairPort, -1);
+    expect(sender.sourcePort, 10001);
+    expect(sender.repairPort, 10002);
     expect(sender.receiverIP, '');
     expect(
         sender.captureSource, CaptureSourceType.currentlyPlayingApplications);
   });
 
-  test('Check the senders start method when sender is not active.', () async {
-    final sender = makeSender();
-    expect(sender.isStarted, false);
-    await sender.start();
-    expect(sender.isStarted, true);
-  });
-
-  test('Check the senders start method when sender is active.', () async {
-    final sender = makeSender();
-    expect(sender.isStarted, false);
-    await sender.start();
-    expect(sender.isStarted, true);
-    await sender.start();
-    expect(sender.isStarted, true);
-  });
-
-  test('Check the senders stop method when sender is active.', () async {
-    final sender = makeSender();
-    expect(sender.isStarted, false);
-    await sender.start();
-    expect(sender.isStarted, true);
-    await sender.stop();
-    expect(sender.isStarted, false);
-  });
-
   test('Check the senders stop method when sender is not active.', () async {
     final sender = makeSender();
     expect(sender.isStarted, false);
-    await sender.stop();
+    await sender.requestAsyncStop();
     expect(sender.isStarted, false);
   });
 

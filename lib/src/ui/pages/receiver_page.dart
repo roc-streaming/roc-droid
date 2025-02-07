@@ -5,9 +5,9 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:logger/logger.dart';
 
 import '../../model/model_root.dart';
+import '../components/roc_button.dart';
 import '../components/roc_chip.dart';
 import '../components/roc_page_view.dart';
-import '../components/roc_stateful_button.dart';
 import '../components/roc_text_row.dart';
 
 // Receiver page class implementation - Page layer.
@@ -39,12 +39,12 @@ class ReceiverPage extends StatelessWidget {
         RocTextRow(AppLocalizations.of(context)!.receiverStartStep),
       ],
       bottomButton: Observer(
-        builder: (_) => RocStatefulButton(
+        builder: (_) => RocButton(
           isActive: _modelRoot.receiver.isStarted,
-          inactiveFunction: _modelRoot.receiver.start,
-          activeFunction: _modelRoot.receiver.stop,
-          inactiveText: AppLocalizations.of(context)!.startReceiverButton,
-          activeText: AppLocalizations.of(context)!.stopReceiverButton,
+          deactivatedFunction: _modelRoot.receiver.requestAsyncStart,
+          activatedFunction: _modelRoot.receiver.requestAsyncStop,
+          deactivatedText: AppLocalizations.of(context)!.startReceiverButton,
+          activatedText: AppLocalizations.of(context)!.stopReceiverButton,
         ),
       ),
     );

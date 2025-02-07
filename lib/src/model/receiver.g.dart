@@ -99,35 +99,32 @@ mixin _$Receiver on _Receiver, Store {
     });
   }
 
-  late final _$startAsyncAction =
-      AsyncAction('_Receiver.start', context: context);
+  late final _$requestAsyncStartAsyncAction =
+      AsyncAction('_Receiver.requestAsyncStart', context: context);
 
   @override
-  Future<bool> start() {
-    return _$startAsyncAction.run(() => super.start());
+  Future<void> requestAsyncStart() {
+    return _$requestAsyncStartAsyncAction.run(() => super.requestAsyncStart());
   }
 
-  late final _$stopAsyncAction =
-      AsyncAction('_Receiver.stop', context: context);
+  late final _$requestAsyncStopAsyncAction =
+      AsyncAction('_Receiver.requestAsyncStop', context: context);
 
   @override
-  Future<bool> stop() {
-    return _$stopAsyncAction.run(() => super.stop());
+  Future<void> requestAsyncStop() {
+    return _$requestAsyncStopAsyncAction.run(() => super.requestAsyncStop());
+  }
+
+  late final _$_setDefultValuesAsyncAction =
+      AsyncAction('_Receiver._setDefultValues', context: context);
+
+  @override
+  Future<void> _setDefultValues() {
+    return _$_setDefultValuesAsyncAction.run(() => super._setDefultValues());
   }
 
   late final _$_ReceiverActionController =
       ActionController(name: '_Receiver', context: context);
-
-  @override
-  void setReceiverIPs(Iterable<String> addresses) {
-    final _$actionInfo = _$_ReceiverActionController.startAction(
-        name: '_Receiver.setReceiverIPs');
-    try {
-      return super.setReceiverIPs(addresses);
-    } finally {
-      _$_ReceiverActionController.endAction(_$actionInfo);
-    }
-  }
 
   @override
   void setSourcePort(int value) {

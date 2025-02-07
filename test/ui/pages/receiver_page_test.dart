@@ -3,9 +3,9 @@ import 'package:logger/logger.dart';
 import 'package:roc_droid/src/agent.dart';
 import 'package:roc_droid/src/model.dart';
 import 'package:roc_droid/src/ui.dart';
+import 'package:roc_droid/src/ui/components/roc_button.dart';
 import 'package:roc_droid/src/ui/components/roc_chip.dart';
 import 'package:roc_droid/src/ui/components/roc_page_view.dart';
-import 'package:roc_droid/src/ui/components/roc_stateful_button.dart';
 import 'package:roc_droid/src/ui/components/roc_text_row.dart';
 import 'package:roc_droid/src/ui/pages/receiver_page.dart';
 
@@ -20,7 +20,7 @@ void main() {
     final pageView = find.byType(RocPageView);
     final textRows = find.byType(RocTextRow);
     final chips = find.byType(RocChip<int>);
-    final bottomButton = find.byType(RocStatefulButton);
+    final bottomButton = find.byType(RocButton);
 
     // Assertion
     expect(receiverPage, findsOneWidget);

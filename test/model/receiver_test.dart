@@ -17,45 +17,6 @@ void main() {
     expect(receiver.repairPort, -1);
   });
 
-  test('Check the receivers start method when receiver is not active.', () async {
-    final receiver = makeReceiver();
-    expect(receiver.isStarted, false);
-    await receiver.start();
-    expect(receiver.isStarted, true);
-  });
-
-  test('Check the receivers start method when receiver is active.', () async {
-    final receiver = makeReceiver();
-    expect(receiver.isStarted, false);
-    await receiver.start();
-    expect(receiver.isStarted, true);
-    await receiver.start();
-    expect(receiver.isStarted, true);
-  });
-
-  test('Check the receivers stop method when receiver is active.', () async {
-    final receiver = makeReceiver();
-    expect(receiver.isStarted, false);
-    await receiver.start();
-    expect(receiver.isStarted, true);
-    await receiver.stop();
-    expect(receiver.isStarted, false);
-  });
-
-  test('Check the receivers stop method when receiver is not active.', () async {
-    final receiver = makeReceiver();
-    expect(receiver.isStarted, false);
-    await receiver.stop();
-    expect(receiver.isStarted, false);
-  });
-
-  test('Check the receivers IPs setter method.', () async {
-    final receiver = makeReceiver();
-    final testIPs = List<String>.from(['1', '2', '3']);
-    receiver.setReceiverIPs(testIPs);
-    expect(receiver.receiverIPs, testIPs);
-  });
-
   test('Check the source port setter method.', () async {
     final receiver = makeReceiver();
     final testValue = 123;
