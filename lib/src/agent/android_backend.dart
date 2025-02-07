@@ -3,6 +3,8 @@ import 'package:logger/logger.dart';
 
 import 'android_bridge.g.dart';
 import 'backend.dart';
+import 'failure_event.dart';
+import 'state_event.dart';
 
 /// Android-specific implementation of Backend interface.
 ///
@@ -29,10 +31,10 @@ class AndroidBackend implements Backend, AndroidListener {
   bool senderIsAlive = false;
 
   @override
-  final Event<Value<String>> stateChangeEvent = Event();
+  final Event<Value<StateEvent>> stateChangeEvent = Event("stateChangeEvent");
 
   @override
-  final Event<Value<String>> failureEvent = Event();
+  final Event<Value<FailureEvent>> failureEvent = Event("failureEvent");
 
   /// Inherited from Backend interface.
   /// Invoked from model.
@@ -190,7 +192,7 @@ class AndroidBackend implements Backend, AndroidListener {
   @override
   void onEvent(AndroidServiceEvent eventCode) async {
     _logger.d("Registered event: $eventCode");
-    await refreshState(eventCode.name);
+    await refreshState();
   }
 
   /// Inherited from AndroidListener interface.
@@ -198,14 +200,22 @@ class AndroidBackend implements Backend, AndroidListener {
   @override
   void onError(AndroidServiceError errorCode) async {
     _logger.d("Registered event: $errorCode");
-    await refreshState(errorCode.name);
+
+    await refreshState();
+
+    switch (errorCode) {
+      case AndroidServiceError.audioRecordFailed:
+      case AndroidServiceError.audioTrackFailed:
+        failureEvent.broadcast(Value<FailureEvent>(FailureEvent.deviceError));
+
+      case AndroidServiceError.senderConnectFailed:
+      case AndroidServiceError.receiverBindFailed:
+        failureEvent.broadcast(Value<FailureEvent>(FailureEvent.networkError));
+    }
   }
 
   /// Async method used in all Android service event types.
-  Future<void> refreshState([String? eventCode]) async {
-    final broadcastValue =
-        eventCode == null ? "Register state change" : eventCode;
-
+  Future<void> refreshState() async {
     final newReceiverIsAlive = await _connector.isReceiverAlive();
     if (receiverIsAlive != newReceiverIsAlive) {
       _logger.d(
@@ -214,7 +224,8 @@ class AndroidBackend implements Backend, AndroidListener {
 
       // Whenever receiver state changes, no matter how we've found out (from kotlin
       // event of from finally block), we notify subscribers
-      stateChangeEvent.broadcast(Value(broadcastValue));
+      stateChangeEvent
+          .broadcast(Value<StateEvent>(StateEvent.receiverStateChanged));
     }
 
     final newSenderIsAlive = await _connector.isSenderAlive();
@@ -225,7 +236,8 @@ class AndroidBackend implements Backend, AndroidListener {
 
       // Whenever sender state changes, no matter how we've found out (from kotlin
       // event of from finally block), we notify subscribers
-      stateChangeEvent.broadcast(Value(broadcastValue));
+      stateChangeEvent
+          .broadcast(Value<StateEvent>(StateEvent.senderStateChanged));
     }
   }
 }

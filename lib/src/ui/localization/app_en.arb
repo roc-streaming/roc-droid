@@ -53,5 +53,9 @@
 
     "enterIp": "Enter IP address",
 
+    "deviceError": "Audio device error",
+
+    "networkError": "Network error",
+
     "appVersion": "v0.2.1"
 }

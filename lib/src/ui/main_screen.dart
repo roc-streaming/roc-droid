@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
+import '../agent.dart';
 import '../model/model_root.dart';
 import 'components/roc_snackbar.dart';
 import 'fragments/roc_bottom_navigation_bar.dart';
@@ -45,8 +46,11 @@ class _MainScreenState extends State<MainScreen> {
         ] {
     // Subscribe to model failure event (coming from backend failure event).
     _modelRoot.failureEvent.subscribe((args) {
-      var message = args.value;
-      RocSnackbar.showMessage(context: context, message: 'Error: $message');
+      var message = switch (args.value) {
+        FailureEvent.deviceError => AppLocalizations.of(context)!.deviceError,
+        FailureEvent.networkError => AppLocalizations.of(context)!.networkError,
+      };
+      RocSnackbar.showMessage(context: context, message: message);
     });
   }
 
