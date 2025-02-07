@@ -3,7 +3,6 @@ import 'package:logger/logger.dart';
 
 import 'android_bridge.g.dart';
 import 'backend.dart';
-import 'backend_event.dart';
 
 /// Android-specific implementation of Backend interface.
 ///
@@ -30,12 +29,10 @@ class AndroidBackend implements Backend, AndroidListener {
   bool senderIsAlive = false;
 
   @override
-  final Event<Value<String>> stateChangeEvent =
-      Event(BackendEvent.stateChangeEvent.name);
+  final Event<Value<String>> stateChangeEvent = Event();
 
   @override
-  final Event<Value<String>> failureEvent =
-      Event(BackendEvent.failureEvent.name);
+  final Event<Value<String>> failureEvent = Event();
 
   /// Inherited from Backend interface.
   /// Invoked from model.
@@ -80,10 +77,13 @@ class AndroidBackend implements Backend, AndroidListener {
         await _connector.releaseProjection();
       }
     } finally {
-      // This call is necessary for security purposes -
-      // to ensure that the service is in the correct state at any time
-      // while the application is running.
-      await refreshState(BackendEvent.statusCheckEvent.name);
+      // This call is necessary for safety purposes.
+      // Calls to connector may change service state.
+      // We want to refresh our cached state to ensure that the new state is
+      // visible to the caller immediately after return.
+      // Otherwise the caller may observe outdated state until we handle
+      // asynchronous event from connector.
+      await refreshState();
     }
   }
 
@@ -101,10 +101,13 @@ class AndroidBackend implements Backend, AndroidListener {
 
       await _connector.stopReceiver();
     } finally {
-      // This call is necessary for security purposes -
-      // to ensure that the service is in the correct state at any time
-      // while the application is running.
-      await refreshState(BackendEvent.statusCheckEvent.name);
+      // This call is necessary for safety purposes.
+      // Calls to connector may change service state.
+      // We want to refresh our cached state to ensure that the new state is
+      // visible to the caller immediately after return.
+      // Otherwise the caller may observe outdated state until we handle
+      // asynchronous event from connector.
+      await refreshState();
     }
   }
 
@@ -148,10 +151,13 @@ class AndroidBackend implements Backend, AndroidListener {
         await _connector.releaseProjection();
       }
     } finally {
-      // This call is necessary for security purposes -
-      // to ensure that the service is in the correct state at any time
-      // while the application is running.
-      await refreshState(BackendEvent.statusCheckEvent.name);
+      // This call is necessary for safety purposes.
+      // Calls to connector may change service state.
+      // We want to refresh our cached state to ensure that the new state is
+      // visible to the caller immediately after return.
+      // Otherwise the caller may observe outdated state until we handle
+      // asynchronous event from connector.
+      await refreshState();
     }
   }
 
@@ -169,10 +175,13 @@ class AndroidBackend implements Backend, AndroidListener {
 
       await _connector.stopSender();
     } finally {
-      // This call is necessary for security purposes -
-      // to ensure that the service is in the correct state at any time
-      // while the application is running.
-      await refreshState(BackendEvent.statusCheckEvent.name);
+      // This call is necessary for safety purposes.
+      // Calls to connector may change service state.
+      // We want to refresh our cached state to ensure that the new state is
+      // visible to the caller immediately after return.
+      // Otherwise the caller may observe outdated state until we handle
+      // asynchronous event from connector.
+      await refreshState();
     }
   }
 
@@ -180,22 +189,43 @@ class AndroidBackend implements Backend, AndroidListener {
   /// Invoked from kotlin.
   @override
   void onEvent(AndroidServiceEvent eventCode) async {
+    _logger.d("Registered event: $eventCode");
     await refreshState(eventCode.name);
-    stateChangeEvent.broadcast(Value(eventCode.name));
   }
 
   /// Inherited from AndroidListener interface.
   /// Invoked from kotlin.
   @override
   void onError(AndroidServiceError errorCode) async {
+    _logger.d("Registered event: $errorCode");
     await refreshState(errorCode.name);
-    failureEvent.broadcast(Value(errorCode.name));
   }
 
   /// Async method used in all Android service event types.
-  Future<void> refreshState(String eventCode) async {
-    receiverIsAlive = await _connector.isReceiverAlive();
-    senderIsAlive = await _connector.isSenderAlive();
-    _logger.d("Registered event: $eventCode");
+  Future<void> refreshState([String? eventCode]) async {
+    final broadcastValue =
+        eventCode == null ? "Register state change" : eventCode;
+
+    final newReceiverIsAlive = await _connector.isReceiverAlive();
+    if (receiverIsAlive != newReceiverIsAlive) {
+      _logger.d(
+          "Detected receiver state change from $receiverIsAlive to $newReceiverIsAlive");
+      receiverIsAlive = newReceiverIsAlive;
+
+      // Whenever receiver state changes, no matter how we've found out (from kotlin
+      // event of from finally block), we notify subscribers
+      stateChangeEvent.broadcast(Value(broadcastValue));
+    }
+
+    final newSenderIsAlive = await _connector.isSenderAlive();
+    if (senderIsAlive != newSenderIsAlive) {
+      _logger.d(
+          "Detected sender state change from $senderIsAlive to $newSenderIsAlive");
+      senderIsAlive = newSenderIsAlive;
+
+      // Whenever sender state changes, no matter how we've found out (from kotlin
+      // event of from finally block), we notify subscribers
+      stateChangeEvent.broadcast(Value(broadcastValue));
+    }
   }
 }

@@ -13,8 +13,8 @@ void main() {
   test('Check the senders initial values and getters.', () async {
     final sender = makeSender();
     expect(sender.isStarted, false);
-    expect(sender.sourcePort, -1);
-    expect(sender.repairPort, -1);
+    expect(sender.sourcePort, 10001);
+    expect(sender.repairPort, 10002);
     expect(sender.receiverIP, '');
     expect(
         sender.captureSource, CaptureSourceType.currentlyPlayingApplications);
