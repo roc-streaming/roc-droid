@@ -11,7 +11,7 @@ import '../test_helpers.dart';
 void main() {
   testWidgets('The MainScreen widget is built correctly.', (tester) async {
     // Action
-    await tester.pumpWidget(AppRoot(testModelRoot()));
+    await tester.pumpWidget(AppRoot(await testModelRoot()));
 
     // Find required widgets
     final mainScreen = find.byType(MainScreen);

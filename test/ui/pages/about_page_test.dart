@@ -11,7 +11,7 @@ import '../../test_helpers.dart';
 void main() {
   testWidgets('The about page widget is built correctly.', (tester) async {
     // Action
-    await tester.pumpWidget(AppRoot(testModelRoot()));
+    await tester.pumpWidget(AppRoot(await testModelRoot()));
     await tester.tap(find.byKey(RocKeys.sidePaneKey));
     await tester.pumpAndSettle();
 

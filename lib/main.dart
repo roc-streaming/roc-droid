@@ -12,5 +12,5 @@ Future<void> main() async {
   final backend = AndroidBackend(logger);
   await backend.refreshState();
 
-  runApp(AppRoot(ModelRoot(logger, backend)));
+  runApp(AppRoot(await ModelRoot.create(logger, backend)));
 }
