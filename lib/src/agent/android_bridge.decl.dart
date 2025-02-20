@@ -127,6 +127,8 @@ abstract class AndroidConnector {
 
 /// Asynchronous events produces by android service.
 enum AndroidServiceEvent {
+  streamingServiceConnected,
+  streamingServiceDisconnected,
   senderStateChanged,
   receiverStateChanged,
 }

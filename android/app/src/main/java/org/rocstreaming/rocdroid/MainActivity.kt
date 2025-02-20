@@ -3,7 +3,9 @@ package org.rocstreaming.rocdroid
 import AndroidListener
 import AndroidServiceError
 import AndroidServiceEvent
+import android.app.ActivityManager
 import android.content.ComponentName
+import android.content.Context
 import android.content.Context.MEDIA_PROJECTION_SERVICE
 import android.content.Intent
 import android.content.ServiceConnection
@@ -94,6 +96,9 @@ class MainActivity : FlutterFragmentActivity() {
             ActivityResultContracts.StartActivityForResult(),
             this::onProjectionResult
         )
+
+        // bind to service if it's running
+        bindRunningService()
     }
 
     // when app is resumed
@@ -113,6 +118,23 @@ class MainActivity : FlutterFragmentActivity() {
         }
 
         super.onDestroy()
+    }
+
+    // bind to service if it's running
+    fun bindRunningService() {
+        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in activityManager.getRunningServices(Integer.MAX_VALUE)) {
+            if (service.service.className == StreamingService::class.java.name) {
+                Log.d(LOG_TAG, "Found running service, binding")
+
+                val serviceIntent = Intent(this, StreamingService::class.java)
+                bindService(serviceIntent, serviceConnection, 0)
+
+                return
+            }
+        }
+
+        Log.d(LOG_TAG, "No running service found")
     }
 
     // start service if not started yet
@@ -136,16 +158,16 @@ class MainActivity : FlutterFragmentActivity() {
     // handler for events produced by streaming service
     private val streamingEventHandler: StreamingEventListener = object : StreamingEventListener {
         override fun onEvent(event: AndroidServiceEvent) {
-            Log.d(LOG_TAG, "Sending event: " + event.toString())
             runOnUiThread {
-                eventListener.onEvent(event) { result -> }
+                // notify dart
+                emitEvent(event)
             }
         }
 
         override fun onError(error: AndroidServiceError) {
-            Log.d(LOG_TAG, "Sending error: " + error.toString())
             runOnUiThread {
-                eventListener.onError(error) { result -> }
+                // notify dart
+                emitError(error)
             }
         }
     }
@@ -163,6 +185,9 @@ class MainActivity : FlutterFragmentActivity() {
             // for startService()
             serviceStartedCallback?.invoke(service!!)
             serviceStartedCallback = null
+
+            // notify dart
+            emitEvent(AndroidServiceEvent.STREAMING_SERVICE_CONNECTED)
         }
 
         // called when we've lost connectio to service
@@ -172,6 +197,9 @@ class MainActivity : FlutterFragmentActivity() {
             // forget service reference
             service?.removeEventListener()
             service = null
+
+            // notify dart
+            emitEvent(AndroidServiceEvent.STREAMING_SERVICE_DISCONNECTED)
 
             // (re)start & reconnect
             Log.d(LOG_TAG, "Initiating asynchronous reconnect")
@@ -247,5 +275,15 @@ class MainActivity : FlutterFragmentActivity() {
         }
         permissionRequestCallback?.invoke(isGranted)
         permissionRequestCallback = null
+    }
+
+    private fun emitEvent(event: AndroidServiceEvent) {
+        Log.d(LOG_TAG, "Sending event: " + event.toString())
+        eventListener.onEvent(event) { result -> }
+    }
+
+    private fun emitError(error: AndroidServiceError) {
+        Log.d(LOG_TAG, "Sending error: " + error.toString())
+        eventListener.onError(error) { result -> }
     }
 }

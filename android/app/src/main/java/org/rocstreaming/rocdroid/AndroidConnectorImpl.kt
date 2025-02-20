@@ -23,8 +23,8 @@ private const val NO_PERMISSION_TEXT = "Microhpone permission wasn't granted"
 
 private const val LOG_TAG = "rocdroid.AndroidConnectorImpl"
 
-// Implementation of generated interface AndroidConnector, which methods are invoked
-// from the dart side.
+// Implementation of generated interface AndroidConnector, which methods
+// are invoked from the dart side.
 class AndroidConnectorImpl : AndroidConnector {
     private var projectionAcquired: Boolean = false
 
