@@ -49,9 +49,11 @@ abstract class _Receiver with Store {
     // Subscribe to backend state change event.
     _backend.stateChangeEvent.subscribe(
       (args) async {
-        _isStarted = await backend.receiverIsAlive;
+        _isStarted = backend.receiverIsAlive;
       },
     );
+    // TODO(gh-98): async constructor
+    // ignore: discarded_futures
     _setDefultValues();
   }
 

@@ -55,7 +55,7 @@ abstract class _Sender with Store {
     // Subscribe to backend state change event.
     _backend.stateChangeEvent.subscribe(
       (args) async {
-        _isStarted = await backend.senderIsAlive;
+        _isStarted = backend.senderIsAlive;
       },
     );
     _setDefultValues();
