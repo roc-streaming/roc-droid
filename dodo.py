@@ -116,6 +116,7 @@ def task_build_apk():
         'basename': 'build:apk',
         'actions': [f'flutter build apk --{VARIANT}'],
         'title': title_with_actions,
+        'task_dep': ['lint:dart', 'lint:kotlin'],
     }
 
 # doit wipe
