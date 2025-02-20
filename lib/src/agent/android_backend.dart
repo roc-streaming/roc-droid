@@ -39,10 +39,7 @@ class AndroidBackend implements Backend, AndroidListener {
   @override
   Future<List<String>> getLocalAddresses() async {
     // Cast List<String?> to List<String>.
-    return (await _connector.getLocalAddresses())
-        .where((addr) => addr != null)
-        .cast<String>()
-        .toList();
+    return (await _connector.getLocalAddresses()).toList();
   }
 
   /// Inherited from Backend interface.
