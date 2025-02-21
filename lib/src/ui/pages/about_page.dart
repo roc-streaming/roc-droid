@@ -14,8 +14,7 @@ class AboutPage extends StatelessWidget {
       'https://github.com/roc-streaming/roc-droid/issues';
   static const String _urlContributors =
       'https://github.com/roc-streaming/roc-droid/graphs/contributors';
-  static const String _urlLicenseData =
-      'https://github.com/roc-streaming/roc-droid/blob/main/LICENSE';
+  static const String _urlLicenseData = 'https://www.mozilla.org/en-US/MPL/2.0';
   final double _buttonWidth = 260;
   final ModelRoot _modelRoot;
 
@@ -56,7 +55,8 @@ class AboutPage extends StatelessWidget {
               _AboutPageButton(
                 icon: Icon(Icons.code),
                 text: AppLocalizations.of(context)!.sourceCode,
-                function: () => launchUrl(Uri.parse(_urlSourceCode)),
+                function: () async =>
+                    await launchUrl(Uri.parse(_urlSourceCode)),
                 width: _buttonWidth,
               ),
 
@@ -64,7 +64,8 @@ class AboutPage extends StatelessWidget {
               _AboutPageButton(
                 icon: Icon(Icons.bug_report_outlined),
                 text: AppLocalizations.of(context)!.bugTracker,
-                function: () => launchUrl(Uri.parse(_urlBugTracker)),
+                function: () async =>
+                    await launchUrl(Uri.parse(_urlBugTracker)),
                 width: _buttonWidth,
               ),
 
@@ -72,7 +73,8 @@ class AboutPage extends StatelessWidget {
               _AboutPageButton(
                 icon: Icon(Icons.group),
                 text: AppLocalizations.of(context)!.contributors,
-                function: () => launchUrl(Uri.parse(_urlContributors)),
+                function: () async =>
+                    await launchUrl(Uri.parse(_urlContributors)),
                 width: _buttonWidth,
               ),
               Spacer(),
@@ -81,7 +83,8 @@ class AboutPage extends StatelessWidget {
               _AboutPageButton(
                 icon: Icon(Icons.description),
                 text: AppLocalizations.of(context)!.licenseData,
-                function: () => launchUrl(Uri.parse(_urlLicenseData)),
+                function: () async =>
+                    await launchUrl(Uri.parse(_urlLicenseData)),
               ),
             ],
           ),

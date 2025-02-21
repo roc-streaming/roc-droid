@@ -28,16 +28,10 @@ class ModelRoot {
   }
 
   /// Public ModelRoot factory
-  static Future<ModelRoot> create(Logger logger, Backend backend,
-      [bool useTestInfo = false]) async {
+  static Future<ModelRoot> create(
+      Logger logger, Backend backend, PackageInfo packageInfo) async {
     var modelRoot = ModelRoot._create(logger, backend);
-    modelRoot.packageInfo = useTestInfo
-        ? PackageInfo.new(
-            appName: 'Undefined',
-            packageName: 'Undefined',
-            version: 'Undefined',
-            buildNumber: 'Undefined')
-        : await PackageInfo.fromPlatform();
+    modelRoot.packageInfo = packageInfo;
     return modelRoot;
   }
 }
