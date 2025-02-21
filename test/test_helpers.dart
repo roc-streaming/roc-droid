@@ -12,12 +12,12 @@ Future<ModelRoot> testModelRoot() async => await ModelRoot.create(
         version: 'Undefined',
         buildNumber: 'Undefined'));
 
-Receiver testReceiver() => Receiver(
+Future<Receiver> testReceiver() async => await ReceiverFactory.create(
       Logger(printer: SimplePrinter()),
       NoopBackend(),
     );
 
-Sender testSender() => Sender(
+Future<Sender> testSender() async => await SenderFactory.create(
       Logger(printer: SimplePrinter()),
       NoopBackend(),
     );

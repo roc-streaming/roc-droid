@@ -17,8 +17,6 @@ class ModelRoot {
   final Event<Value<FailureEvent>> failureEvent = Event("failureEvent");
 
   ModelRoot._create(Logger logger, Backend backend) {
-    this.receiver = Receiver(logger, backend);
-    this.sender = Sender(logger, backend);
     this.logger = logger;
 
     // Broadcast failure event only on backend failure events
@@ -31,6 +29,8 @@ class ModelRoot {
   static Future<ModelRoot> create(
       Logger logger, Backend backend, PackageInfo packageInfo) async {
     var modelRoot = ModelRoot._create(logger, backend);
+    modelRoot.receiver = await ReceiverFactory.create(logger, backend);
+    modelRoot.sender = await SenderFactory.create(logger, backend);
     modelRoot.packageInfo = packageInfo;
     return modelRoot;
   }

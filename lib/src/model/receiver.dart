@@ -10,6 +10,14 @@ part 'receiver.g.dart';
 /// Implementation of the Model Receiver class.
 class Receiver = _Receiver with _$Receiver;
 
+class ReceiverFactory {
+  static Future<Receiver> create(Logger logger, Backend backend) async {
+    var receiver = Receiver._create(logger, backend);
+    await receiver._setDefultValues();
+    return receiver;
+  }
+}
+
 abstract class _Receiver with Store {
   final Logger _logger;
   final Backend _backend;
@@ -43,7 +51,7 @@ abstract class _Receiver with Store {
   @computed
   int get repairPort => _repairPort;
 
-  _Receiver(Logger logger, Backend backend)
+  _Receiver._create(Logger logger, Backend backend)
       : _logger = logger,
         _backend = backend {
     // Subscribe to backend state change event.
@@ -52,9 +60,6 @@ abstract class _Receiver with Store {
         _isStarted = backend.receiverIsAlive;
       },
     );
-    // TODO(gh-98): async constructor
-    // ignore: discarded_futures
-    _setDefultValues();
   }
 
   // Start current receiver.

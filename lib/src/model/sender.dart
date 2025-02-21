@@ -9,6 +9,14 @@ part 'sender.g.dart';
 /// Implementation of the Model Sender class.
 class Sender = _Sender with _$Sender;
 
+class SenderFactory {
+  static Future<Sender> create(Logger logger, Backend backend) async {
+    var sender = Sender._create(logger, backend);
+    await sender._setDefultValues();
+    return sender;
+  }
+}
+
 abstract class _Sender with Store {
   final Logger _logger;
   final Backend _backend;
@@ -49,7 +57,7 @@ abstract class _Sender with Store {
   @computed
   CaptureSourceType get captureSource => _captureSource;
 
-  _Sender(Logger logger, Backend backend)
+  _Sender._create(Logger logger, Backend backend)
       : _logger = logger,
         _backend = backend {
     // Subscribe to backend state change event.
@@ -58,14 +66,17 @@ abstract class _Sender with Store {
         _isStarted = backend.senderIsAlive;
       },
     );
-    _setDefultValues();
   }
 
   // Start current sender.
   @action
   Future<void> requestAsyncStart() async {
     await _backend.startSender(AndroidSenderSettings(
-      captureType: AndroidCaptureType.captureApps,
+      captureType: switch (captureSource) {
+        CaptureSourceType.currentlyPlayingApplications =>
+          AndroidCaptureType.captureApps,
+        CaptureSourceType.microphone => AndroidCaptureType.captureMic,
+      },
       host: receiverIP,
       sourcePort: _sourcePort,
       repairPort: _repairPort,
@@ -107,7 +118,7 @@ abstract class _Sender with Store {
 
   // Update all sender controls using "hardcoded" and default values.
   @action
-  void _setDefultValues() {
+  Future<void> _setDefultValues() async {
     _isStarted = _backend.senderIsAlive;
     setSourcePort(10001);
     setRepairPort(10002);
