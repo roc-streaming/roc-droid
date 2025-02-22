@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:logger/logger.dart';
 
-import '../../model/model_root.dart';
+import '../../model.dart';
 import '../components/roc_button.dart';
 import '../components/roc_chip.dart';
 import '../components/roc_page_view.dart';

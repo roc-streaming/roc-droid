@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../model/model_root.dart';
+import '../../model.dart';
 import '../components/roc_scroll_view.dart';
 import '../styles/roc_colors.dart';
 
