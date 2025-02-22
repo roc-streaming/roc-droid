@@ -2,7 +2,9 @@ from doit import get_var
 from doit.tools import title_with_actions, LongRunning, Interactive
 import atexit
 import fnmatch
+import functools
 import glob
+import json
 import os
 import pathlib
 import platform
@@ -17,18 +19,37 @@ if os.name == 'posix':
     signal.signal(signal.SIGINT, lambda s, f: exit(1))
 
 DOIT_CONFIG = {
-    'default_tasks': ['lint', 'test'],
+    'default_tasks': ['check', 'test'],
     'verbosity': 2,
 }
 
 VARIANT = get_var('variant', 'release')
 WATCH = get_var('watch', 'false')
 
+def _platform():
+    if platform.system() == 'Linux':
+        return 'linux'
+    if platform.system() == 'Darwin':
+        return 'macos'
+    elif platform.system() == 'Windows':
+        return 'windows'
+
+def _device(platform):
+    out = subprocess.check_output(['flutter', 'devices', '--machine'])
+    if out:
+        for dev in json.loads(out):
+            if dev['isSupported'] and dev['targetPlatform'].startswith(platform):
+                return dev['id']
+    return ''
+
 def _gradlew():
     if platform.system() == 'Windows':
         return 'gradlew.bat'
     else:
         return './gradlew'
+
+def _truish(s):
+    return s.lower() in ['true', 'yes', 'on', '1']
 
 def _copy_file(src, dst):
     def task():
@@ -47,76 +68,103 @@ def _delete_files(pattern):
                 os.remove(path)
     return task
 
-# doit lint
-def task_lint():
-    """run all linters"""
-    return {
-        'basename': 'lint',
-        'actions': None,
-        'task_dep': ['lint:dart', 'lint:kotlin'],
-    }
+@functools.cache
+def _colorize(text, color):
+    try:
+        import colorama
+        if sys.stderr.isatty():
+            return getattr(colorama.Fore, color.upper(), '') + \
+                text + colorama.Style.RESET_ALL
+    except ImportError:
+        pass
+    return text
 
-# doit lint:dart
-def task_lint_dart():
+def _color_title(task):
+    name, title = title_with_actions(task).split('=>')
+    return '{}=>{}'.format(
+        _colorize(name, 'blue'), _colorize(title, 'yellow'))
+
+# doit check:desktop
+def task_check_desktop():
     """run dart analyzer"""
     return {
-        'basename': 'lint:dart',
-        'actions': ['flutter analyze --fatal-infos --fatal-warnings'],
-        'title': title_with_actions,
-    }
-
-# doit lint:kotlin
-def task_lint_kotlin():
-    """run spotless linter"""
-    return {
-        'basename': 'lint:kotlin',
-        'actions': [f'cd android && {_gradlew()} spotlessCheck'],
-    }
-
-# doit test
-def task_test():
-    """run tests"""
-    return {
-        'basename': 'test',
-        'actions': ['flutter test -j1 -r github'],
-        'title': title_with_actions,
-    }
-
-# doit launch [variant=debug|release]
-def task_launch():
-    """deploy and run on device"""
-    def _do_cleanup():
-        subprocess.call(
-            'adb shell am force-stop org.rocstreaming.rocdroid',
-            shell=True)
-    def _register_cleanup():
-        atexit.register(_do_cleanup)
-    return {
-        'basename': 'launch',
+        'basename': 'check:desktop',
         'actions': [
-            _register_cleanup,
-            Interactive(f'flutter run --{VARIANT}'),
+            'flutter analyze',
         ],
-        'title': title_with_actions,
+        'title': _color_title,
     }
 
-# doit build [variant=debug|release]
-def task_build():
-    """build for all platforms"""
-    return {
-        'basename': 'build',
-        'actions': None,
-        'task_dep': ['build:apk'],
+# doit check:android
+def task_check_android():
+    """run dart analyzer, kotlin compiler, and spotless linter"""
+    yield {
+        'basename': 'check:android',
+        'name': 'dart',
+        'actions': [
+            'flutter analyze',
+        ],
+        'title': _color_title,
+    }
+    yield {
+        'basename': 'check:android',
+        'name': 'kotlin',
+        'actions': [
+            f'cd android && {_gradlew()} compileDebugJavaWithJavac',
+        ],
+        'title': _color_title,
+    }
+    yield {
+        'basename': 'check:android',
+        'name': 'spotless',
+        'actions': [
+            f'cd android && {_gradlew()} spotlessCheck',
+        ],
+        'title': _color_title,
     }
 
-# doit build:apk [variant=debug|release]
-def task_build_apk():
-    """build android apk"""
+# doit test:desktop
+def task_test_desktop():
+    """run check:desktop, then run unit tests locally"""
     return {
-        'basename': 'build:apk',
+        'basename': 'test:desktop',
+        'task_dep': ['check:desktop'],
+        'actions': [
+            'flutter test -j1 -r github',
+        ],
+        'title': _color_title,
+    }
+
+# doit test:android
+def task_test_android():
+    """run check:android, then run unit tests locally"""
+    return {
+        'basename': 'test:android',
+        'task_dep': ['check:android'],
+        'actions': [
+            'flutter test -j1 -r github',
+        ],
+        'title': _color_title,
+    }
+
+# doit build:desktop [variant=debug|release]
+def task_build_desktop():
+    """run check:desktop, then build desktop app bundle"""
+    return {
+        'basename': 'build:desktop',
+        'task_dep': ['check:desktop'],
+        'actions': [f'flutter build {_platform()} --{VARIANT}'],
+        'title': _color_title,
+    }
+
+# doit build:android [variant=debug|release]
+def task_build_android():
+    """run check:android, then build android apk"""
+    return {
+        'basename': 'build:android',
+        'task_dep': ['check:android'],
         'actions': [f'flutter build apk --{VARIANT}'],
-        'title': title_with_actions,
-        'task_dep': ['lint:dart', 'lint:kotlin'],
+        'title': _color_title,
     }
 
 # doit wipe
@@ -131,38 +179,96 @@ def task_wipe():
             _delete_files('dist'),
             _delete_files('site'),
         ],
-        'title': title_with_actions,
+        'title': _color_title,
+    }
+
+# doit install:android [variant=debug|release]
+def task_install_android():
+    """build android apk, then install it on connected device"""
+    return {
+        'basename': 'install:android',
+        'task_dep': ['build:android'],
+        'actions': [
+            f'flutter install --{VARIANT}',
+        ],
+        'title': _color_title,
+    }
+
+# doit launch:desktop [variant=debug|release]
+def task_launch_desktop():
+    """build desktop app, then launch it locally"""
+    def _run_app():
+        cmd = f'flutter run --{VARIANT} -d "{_device(_platform())}"'
+        print(f'Running: {cmd}', file=sys.stderr)
+        return Interactive(cmd).execute()
+    return {
+        'basename': 'launch:desktop',
+        'task_dep': ['build:desktop'],
+        'actions': [
+            _run_app,
+        ],
+        'title': _color_title,
+    }
+
+# doit launch:android [variant=debug|release]
+def task_launch_android():
+    """build android apk, then launch it on connected device"""
+    def _register_cleanup():
+        atexit.register(lambda: subprocess.call(
+            'adb shell am force-stop org.rocstreaming.rocdroid',
+            shell=True))
+    def _run_app():
+        cmd = f'flutter run --{VARIANT} -d "{_device("android")}"'
+        print(f'Running: {cmd}', file=sys.stderr)
+        return Interactive(cmd).execute()
+    return {
+        'basename': 'launch:android',
+        'task_dep': ['build:android'],
+        'actions': [
+            _register_cleanup,
+            _run_app,
+        ],
+        'title': _color_title,
     }
 
 # doit gen
 def task_gen():
-    """run all code generators"""
+    """run all code generation (but not resource generation)"""
     return {
         'basename': 'gen',
-        'actions': None,
         'task_dep': ['gen:model', 'gen:agent'],
+        'actions': None,
     }
 
 # doit gen:model [watch=true|false]
 def task_gen_model():
     """run flutter build_runner Model code generation"""
-    if WATCH == 'true':
-        subcmd = 'watch'
+    if _truish(WATCH):
+        return {
+            'basename': 'gen:model',
+            'actions': [
+                LongRunning(f'dart run build_runner watch --delete-conflicting-outputs'),
+            ],
+            'title': _color_title,
+        }
     else:
-        subcmd = 'build'
-    return {
-        'basename': 'gen:model',
-        'actions': [f'dart run build_runner {subcmd} --delete-conflicting-outputs'],
-        'title': title_with_actions,
-    }
+        return {
+            'basename': 'gen:model',
+            'actions': [
+                f'dart run build_runner build --delete-conflicting-outputs',
+            ],
+            'title': _color_title,
+        }
 
 # doit gen:agent
 def task_gen_agent():
     """run flutter pigeon Agent code generation"""
     return {
         'basename': 'gen:agent',
-        'actions': ['dart run pigeon --input lib/src/agent/android_bridge.decl.dart'],
-        'title': title_with_actions,
+        'actions': [
+            'dart run pigeon --input lib/src/agent/android_bridge.decl.dart',
+        ],
+        'title': _color_title,
     }
 
 # doit gen:deps
@@ -180,7 +286,7 @@ def task_gen_deps():
             # generate metadata/dependencies.json
             f'{sys.executable} script/generate_dependencies.py',
         ],
-        'title': title_with_actions,
+        'title': _color_title,
     }
 
 # doit gen:icons
@@ -189,7 +295,7 @@ def task_gen_icons():
     return {
         'basename': 'gen:icons',
         'actions': ['dart run flutter_launcher_icons'],
-        'title': title_with_actions,
+        'title': _color_title,
     }
 
 # doit gen:splash
@@ -198,7 +304,7 @@ def task_gen_splash():
     return {
         'basename': 'gen:splash',
         'actions': ['dart run flutter_native_splash:create'],
-        'title': title_with_actions,
+        'title': _color_title,
     }
 
 # doit fmt
@@ -206,8 +312,8 @@ def task_fmt():
     """run all code formatters"""
     return {
         'basename': 'fmt',
-        'actions': None,
         'task_dep': ['fmt:dart', 'fmt:kotlin'],
+        'actions': None,
     }
 
 # doit fmt:dart
