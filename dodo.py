@@ -1,4 +1,5 @@
 from doit import get_var
+from doit.action import CmdAction
 from doit.tools import title_with_actions, LongRunning, Interactive
 import atexit
 import fnmatch
@@ -17,6 +18,9 @@ atexit.register(
     lambda: shutil.rmtree('__pycache__', ignore_errors=True))
 if os.name == 'posix':
     signal.signal(signal.SIGINT, lambda s, f: exit(1))
+
+sys.stdin.reconfigure(encoding='utf-8')
+sys.stdout.reconfigure(encoding='utf-8')
 
 DOIT_CONFIG = {
     'default_tasks': ['check', 'test'],
