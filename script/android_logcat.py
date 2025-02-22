@@ -81,11 +81,15 @@ while True:
     line = proc.stdout.readline()
     if not line:
         break
+    try:
+        line = line.decode()
+    except:
+        continue
 
     m = re.match(
         r'^\s*(?P<date>\S+)\s+(?P<time>\S+)\s+(?P<pid>\S+)\s+(?P<tid>\S+)\s+(?P<level>\S+)\s+'
         r'(?P<tag>\S+)\s*:\s?(?P<msg>.*)$',
-        line.decode().rstrip())
+        line.rstrip())
     if not m:
         continue
 
