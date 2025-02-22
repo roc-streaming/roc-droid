@@ -8,10 +8,11 @@ void main() {
 
   test(
       'The Receiver, Sender and Logger must be created correctly during the creation of the ModelRoot instance.',
-      () {
-    var modelRoot = testModelRoot();
+      () async {
+    var modelRoot = await testModelRoot();
     expect(modelRoot.receiver, isNotNull);
     expect(modelRoot.sender, isNotNull);
+    expect(modelRoot.packageInfo, isNotNull);
     expect(modelRoot.logger, isNotNull);
   });
 }

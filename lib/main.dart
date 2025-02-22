@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'src/agent.dart';
 import 'src/model.dart';
@@ -11,6 +12,7 @@ Future<void> main() async {
   final logger = Logger();
   final backend = AndroidBackend(logger);
   await backend.refreshState();
+  final packageInfo = await PackageInfo.fromPlatform();
 
-  runApp(AppRoot(ModelRoot(logger, backend)));
+  runApp(AppRoot(await ModelRoot.create(logger, backend, packageInfo)));
 }

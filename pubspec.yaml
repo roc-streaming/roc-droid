@@ -19,6 +19,8 @@ dependencies:
   flutter_launcher_icons: ^0.14.3
   pigeon: ^22.3.0
   event: ^3.1.0
+  url_launcher: ^6.3.1
+  package_info_plus: ^8.2.1
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../model/model_root.dart';
 import '../components/roc_scroll_view.dart';
@@ -7,6 +8,13 @@ import '../styles/roc_colors.dart';
 
 /// Roc's about page class widget.
 class AboutPage extends StatelessWidget {
+  static const String _urlSourceCode =
+      'https://github.com/roc-streaming/roc-droid';
+  static const String _urlBugTracker =
+      'https://github.com/roc-streaming/roc-droid/issues';
+  static const String _urlContributors =
+      'https://github.com/roc-streaming/roc-droid/graphs/contributors';
+  static const String _urlLicenseData = 'https://www.mozilla.org/en-US/MPL/2.0';
   final double _buttonWidth = 260;
   final ModelRoot _modelRoot;
 
@@ -38,37 +46,45 @@ class AboutPage extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.only(bottom: 10.0),
                 child: Text(
-                  AppLocalizations.of(context)!.appVersion,
+                  _modelRoot.packageInfo.version,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ),
+
+              // About page button: the "Source code" command link.
               _AboutPageButton(
                 icon: Icon(Icons.code),
                 text: AppLocalizations.of(context)!.sourceCode,
-                function: () =>
-                    _modelRoot.logger.d('The "Source code" command is called.'),
+                function: () async =>
+                    await launchUrl(Uri.parse(_urlSourceCode)),
                 width: _buttonWidth,
               ),
+
+              // About page button: the "Bug tracker" command link.
               _AboutPageButton(
                 icon: Icon(Icons.bug_report_outlined),
                 text: AppLocalizations.of(context)!.bugTracker,
-                function: () =>
-                    _modelRoot.logger.d('The "Bug tracker" command is called.'),
+                function: () async =>
+                    await launchUrl(Uri.parse(_urlBugTracker)),
                 width: _buttonWidth,
               ),
+
+              // About page button: the "Contributors" command link.
               _AboutPageButton(
                 icon: Icon(Icons.group),
                 text: AppLocalizations.of(context)!.contributors,
-                function: () => _modelRoot.logger
-                    .d('The "Contributors" command is called.'),
+                function: () async =>
+                    await launchUrl(Uri.parse(_urlContributors)),
                 width: _buttonWidth,
               ),
               Spacer(),
+
+              // About page button: the "License" command link.
               _AboutPageButton(
                 icon: Icon(Icons.description),
                 text: AppLocalizations.of(context)!.licenseData,
-                function: () =>
-                    _modelRoot.logger.d('The "License" command is called.'),
+                function: () async =>
+                    await launchUrl(Uri.parse(_urlLicenseData)),
               ),
             ],
           ),

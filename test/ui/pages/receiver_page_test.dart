@@ -12,7 +12,7 @@ import '../../test_helpers.dart';
 void main() {
   testWidgets('The ReceiverPage widget is built correctly.', (tester) async {
     // Action
-    await tester.pumpWidget(AppRoot(testModelRoot()));
+    await tester.pumpWidget(AppRoot(await testModelRoot()));
 
     // Find required widgets
     final receiverPage = find.byType(ReceiverPage);
