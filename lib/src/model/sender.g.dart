@@ -137,6 +137,14 @@ mixin _$Sender on _Sender, Store {
     return _$requestAsyncStopAsyncAction.run(() => super.requestAsyncStop());
   }
 
+  late final _$_setDefultValuesAsyncAction =
+      AsyncAction('_Sender._setDefultValues', context: context);
+
+  @override
+  Future<void> _setDefultValues() {
+    return _$_setDefultValuesAsyncAction.run(() => super._setDefultValues());
+  }
+
   late final _$_SenderActionController =
       ActionController(name: '_Sender', context: context);
 
@@ -179,17 +187,6 @@ mixin _$Sender on _Sender, Store {
         _$_SenderActionController.startAction(name: '_Sender.setCaptureSource');
     try {
       return super.setCaptureSource(value);
-    } finally {
-      _$_SenderActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void _setDefultValues() {
-    final _$actionInfo =
-        _$_SenderActionController.startAction(name: '_Sender._setDefultValues');
-    try {
-      return super._setDefultValues();
     } finally {
       _$_SenderActionController.endAction(_$actionInfo);
     }

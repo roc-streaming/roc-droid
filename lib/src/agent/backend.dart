@@ -24,8 +24,8 @@ import 'state_event.dart';
 // Similarly, AndroidReceiverSettings and AndroidSenderSettings likely will remain
 // as is, but Backend will use some higher-level classes (e.g. LinkConfig, HostConfig).
 abstract class Backend {
-  abstract bool receiverIsAlive;
-  abstract bool senderIsAlive;
+  bool get receiverIsAlive;
+  bool get senderIsAlive;
 
   /// Emitted when receiverIsAlive or senderIsAlive changes its value.
   abstract final Event<Value<StateEvent>> stateChangeEvent;
