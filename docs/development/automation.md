@@ -115,6 +115,7 @@ Run individual steps:
 ```
 doit gen:model [watch=true|false]
 doit gen:agent
+doit gen:l10n
 ```
 
 `watch` parameter runs code generator in watch mode, when it monitors source files updates and automatically regenerates code when needed.
@@ -122,6 +123,8 @@ doit gen:agent
 Generated files have `*.g.dart` or `.g.kt` extension and must no be modified by hand.
 
 `model` package uses `mobx_codegen` to generate reactive model classes. `agent` package uses `pigeon` to generate android platform channels bridge.
+
+`l10n` step generates localization package from `.arb` file.
 
 ## Generate resources
 

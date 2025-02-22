@@ -236,7 +236,7 @@ def task_gen():
     """run all code generation (but not resource generation)"""
     return {
         'basename': 'gen',
-        'task_dep': ['gen:model', 'gen:agent'],
+        'task_dep': ['gen:model', 'gen:agent', 'gen:l10n'],
         'actions': None,
     }
 
@@ -267,6 +267,17 @@ def task_gen_agent():
         'basename': 'gen:agent',
         'actions': [
             'dart run pigeon --input lib/src/agent/android_bridge.decl.dart',
+        ],
+        'title': _color_title,
+    }
+
+# doit gen:l10n
+def task_gen_l10n():
+    """run flutter localization generation"""
+    return {
+        'basename': 'gen:l10n',
+        'actions': [
+            'flutter gen-l10n',
         ],
         'title': _color_title,
     }
