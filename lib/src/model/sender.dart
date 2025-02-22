@@ -7,12 +7,13 @@ import 'capture_source_type.dart';
 part 'sender.g.dart';
 
 /// Implementation of the Model Sender class.
-class Sender = _Sender with _$Sender;
+class Sender extends _Sender with _$Sender {
+  Sender._create(Logger logger, Backend backend) : super(logger, backend);
 
-class SenderFactory {
+  /// Public Sender factory
   static Future<Sender> create(Logger logger, Backend backend) async {
     var sender = Sender._create(logger, backend);
-    await sender._setDefultValues();
+    await sender._init();
     return sender;
   }
 }
@@ -57,20 +58,26 @@ abstract class _Sender with Store {
   @computed
   CaptureSourceType get captureSource => _captureSource;
 
-  _Sender._create(Logger logger, Backend backend)
-      : _logger = logger,
-        _backend = backend {
-    // Subscribe to backend state change event.
+  // Synchronous part of the constructor.
+  _Sender(this._logger, this._backend) {
     _backend.stateChangeEvent.subscribe(
       (args) async {
-        _isStarted = backend.senderIsAlive;
+        _isStarted = _backend.senderIsAlive;
       },
     );
   }
 
+  // Asynchronous part of the constructor.
+  @action
+  Future<void> _init() async {
+    _isStarted = _backend.senderIsAlive;
+    setSourcePort(10001);
+    setRepairPort(10002);
+  }
+
   // Start current sender.
   @action
-  Future<void> requestAsyncStart() async {
+  Future<void> requestStart() async {
     await _backend.startSender(AndroidSenderSettings(
       captureType: switch (captureSource) {
         CaptureSourceType.currentlyPlayingApplications =>
@@ -85,7 +92,7 @@ abstract class _Sender with Store {
 
   // Stop current sender.
   @action
-  Future<void> requestAsyncStop() async {
+  Future<void> requestStop() async {
     await _backend.stopSender();
   }
 
@@ -114,13 +121,5 @@ abstract class _Sender with Store {
   @action
   void setCaptureSource(CaptureSourceType value) {
     _captureSource = value;
-  }
-
-  // Update all sender controls using "hardcoded" and default values.
-  @action
-  Future<void> _setDefultValues() async {
-    _isStarted = _backend.senderIsAlive;
-    setSourcePort(10001);
-    setRepairPort(10002);
   }
 }
