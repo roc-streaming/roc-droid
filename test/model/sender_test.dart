@@ -20,7 +20,7 @@ void main() {
   test('Check the senders stop method when sender is not active.', () async {
     final sender = await testSender();
     expect(sender.isStarted, false);
-    await sender.requestAsyncStop();
+    await sender.requestStop();
     expect(sender.isStarted, false);
   });
 

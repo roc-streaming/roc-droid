@@ -121,28 +121,28 @@ mixin _$Sender on _Sender, Store {
     });
   }
 
-  late final _$requestAsyncStartAsyncAction =
-      AsyncAction('_Sender.requestAsyncStart', context: context);
+  late final _$_initAsyncAction =
+      AsyncAction('_Sender._init', context: context);
 
   @override
-  Future<void> requestAsyncStart() {
-    return _$requestAsyncStartAsyncAction.run(() => super.requestAsyncStart());
+  Future<void> _init() {
+    return _$_initAsyncAction.run(() => super._init());
   }
 
-  late final _$requestAsyncStopAsyncAction =
-      AsyncAction('_Sender.requestAsyncStop', context: context);
+  late final _$requestStartAsyncAction =
+      AsyncAction('_Sender.requestStart', context: context);
 
   @override
-  Future<void> requestAsyncStop() {
-    return _$requestAsyncStopAsyncAction.run(() => super.requestAsyncStop());
+  Future<void> requestStart() {
+    return _$requestStartAsyncAction.run(() => super.requestStart());
   }
 
-  late final _$_setDefultValuesAsyncAction =
-      AsyncAction('_Sender._setDefultValues', context: context);
+  late final _$requestStopAsyncAction =
+      AsyncAction('_Sender.requestStop', context: context);
 
   @override
-  Future<void> _setDefultValues() {
-    return _$_setDefultValuesAsyncAction.run(() => super._setDefultValues());
+  Future<void> requestStop() {
+    return _$requestStopAsyncAction.run(() => super.requestStop());
   }
 
   late final _$_SenderActionController =

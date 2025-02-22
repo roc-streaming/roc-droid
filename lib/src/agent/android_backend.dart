@@ -16,6 +16,9 @@ class AndroidBackend implements Backend, AndroidListener {
   final Logger _logger;
   final AndroidConnector _connector;
 
+  bool _receiverIsAlive = false;
+  bool _senderIsAlive = false;
+
   AndroidBackend(Logger logger)
       : _logger = logger,
         _connector = AndroidConnector() {
@@ -25,10 +28,10 @@ class AndroidBackend implements Backend, AndroidListener {
   }
 
   @override
-  bool receiverIsAlive = false;
+  bool get receiverIsAlive => _receiverIsAlive;
 
   @override
-  bool senderIsAlive = false;
+  bool get senderIsAlive => _senderIsAlive;
 
   @override
   final Event<Value<StateEvent>> stateChangeEvent = Event("stateChangeEvent");
@@ -214,10 +217,10 @@ class AndroidBackend implements Backend, AndroidListener {
   /// Async method used in all Android service event types.
   Future<void> refreshState() async {
     final newReceiverIsAlive = await _connector.isReceiverAlive();
-    if (receiverIsAlive != newReceiverIsAlive) {
+    if (_receiverIsAlive != newReceiverIsAlive) {
       _logger.d(
-          "Detected receiver state change from $receiverIsAlive to $newReceiverIsAlive");
-      receiverIsAlive = newReceiverIsAlive;
+          "Detected receiver state change from $_receiverIsAlive to $newReceiverIsAlive");
+      _receiverIsAlive = newReceiverIsAlive;
 
       // Whenever receiver state changes, no matter how we've found out (from kotlin
       // event of from finally block), we notify subscribers
@@ -226,10 +229,10 @@ class AndroidBackend implements Backend, AndroidListener {
     }
 
     final newSenderIsAlive = await _connector.isSenderAlive();
-    if (senderIsAlive != newSenderIsAlive) {
+    if (_senderIsAlive != newSenderIsAlive) {
       _logger.d(
-          "Detected sender state change from $senderIsAlive to $newSenderIsAlive");
-      senderIsAlive = newSenderIsAlive;
+          "Detected sender state change from $_senderIsAlive to $newSenderIsAlive");
+      _senderIsAlive = newSenderIsAlive;
 
       // Whenever sender state changes, no matter how we've found out (from kotlin
       // event of from finally block), we notify subscribers

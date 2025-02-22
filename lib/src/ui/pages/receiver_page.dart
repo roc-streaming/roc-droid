@@ -41,8 +41,8 @@ class ReceiverPage extends StatelessWidget {
       bottomButton: Observer(
         builder: (_) => RocButton(
           isActive: _modelRoot.receiver.isStarted,
-          deactivatedFunction: _modelRoot.receiver.requestAsyncStart,
-          activatedFunction: _modelRoot.receiver.requestAsyncStop,
+          deactivatedFunction: _modelRoot.receiver.requestStart,
+          activatedFunction: _modelRoot.receiver.requestStop,
           deactivatedText: AppLocalizations.of(context)!.startReceiverButton,
           activatedText: AppLocalizations.of(context)!.stopReceiverButton,
         ),
