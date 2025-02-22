@@ -67,7 +67,7 @@ class StreamingService : Service() {
     private var senderThread: Thread? = null
     private var receiverStarted = false
     private var senderStarted = false
-    private var eventListener: StreamingEventListener? = null
+    private var eventListeners: MutableList<StreamingEventListener> = mutableListOf()
     private var autoDetach: Boolean = true
     private var currentProjection: MediaProjection? = null
 
@@ -321,31 +321,35 @@ class StreamingService : Service() {
     }
 
     @Synchronized
-    fun setEventListener(listener: StreamingEventListener) {
-        Log.d(LOG_TAG, "Setting event listener")
+    fun addEventListener(listener: StreamingEventListener) {
+        Log.d(LOG_TAG, "Adding event listener")
 
-        eventListener = listener
+        eventListeners.add(listener)
     }
 
     @Synchronized
-    fun removeEventListener() {
+    fun removeEventListener(listener: StreamingEventListener) {
         Log.d(LOG_TAG, "Removing event listener")
 
-        eventListener = null
+        eventListeners.remove(listener)
     }
 
     @Synchronized
     private fun reportEvent(event: AndroidServiceEvent) {
         Log.d(LOG_TAG, "Reporting event: " + event.toString())
 
-        eventListener?.onEvent(event)
+        eventListeners.forEach {
+            it.onEvent(event)
+        }
     }
 
     @Synchronized
     private fun reportError(error: AndroidServiceError) {
         Log.d(LOG_TAG, "Reporting error: " + error.toString())
 
-        eventListener?.onError(error)
+        eventListeners.forEach {
+            it.onError(error)
+        }
     }
 
     private fun runSenderThread(settings: AndroidSenderSettings, projection: MediaProjection) {

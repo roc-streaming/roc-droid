@@ -180,7 +180,7 @@ class MainActivity : FlutterFragmentActivity() {
 
             // remember service reference
             service = (binder as StreamingService.LocalBinder).getService()
-            service?.setEventListener(streamingEventHandler)
+            service?.addEventListener(streamingEventHandler)
 
             // for startService()
             serviceStartedCallback?.invoke(service!!)
@@ -195,7 +195,7 @@ class MainActivity : FlutterFragmentActivity() {
             Log.w(LOG_TAG, "Service disconnected")
 
             // forget service reference
-            service?.removeEventListener()
+            service?.removeEventListener(streamingEventHandler)
             service = null
 
             // notify dart
