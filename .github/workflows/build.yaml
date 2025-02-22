@@ -36,6 +36,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install ninja
+        uses: seanmiddleditch/gha-setup-ninja@v5
+
+      - name: Install libs
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libgtk-3-dev
+
       - name: Install flutter
         uses: subosito/flutter-action@v2
         with:
@@ -51,13 +59,21 @@ jobs:
         run: |
           pip install doit
 
-      - name: Run dart analyzer
+      - name: Run checks
         run: |
-          doit lint:dart
+          doit check:desktop
+
+      - name: Run build (debug)
+        run: |
+          doit build:desktop variant=debug
+
+      - name: Run build (release)
+        run: |
+          doit build:desktop variant=release
 
       - name: Run tests
         run: |
-          doit test
+          doit test:desktop
 
   # build for android on different hosts
   android:
@@ -101,21 +117,21 @@ jobs:
         run: |
           pip install doit
 
-      - name: Run dart analyzer
+      - name: Run checks
         run: |
-          doit lint:dart
+          doit check:android
 
-      - name: Run spotless linter
+      - name: Run build (debug)
         run: |
-          doit lint:kotlin
+          doit build:android variant=debug
 
-      - name: Build debug apk
+      - name: Run build (release)
         run: |
-          doit build:apk variant=debug
+          doit build:android variant=release
 
-      - name: Build release apk
+      - name: Run tests
         run: |
-          doit build:apk variant=release
+          doit test:android
 
   # build for different targets on different hosts using docker
   docker:
@@ -188,7 +204,7 @@ jobs:
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: |
           echo "${{ secrets.SIGNING_STORE_BASE64 }}" | base64 -di > app/${{ env.SIGNING_STORE_FILE }}
-          doit build:apk variant=release
+          doit build:android variant=release
 
       - name: Deploy APK
         uses: softprops/action-gh-release@v2
