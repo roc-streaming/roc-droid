@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../model.dart';
 import '../components/roc_scroll_view.dart';
+import '../localization/app_localizations.g.dart';
 import '../styles/roc_colors.dart';
 
 /// Roc's about page class widget.

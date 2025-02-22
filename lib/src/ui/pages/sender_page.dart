@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 import '../../model.dart';
@@ -9,6 +8,7 @@ import '../components/roc_chip.dart';
 import '../components/roc_dropdown_button.dart';
 import '../components/roc_page_view.dart';
 import '../components/roc_text_row.dart';
+import '../localization/app_localizations.g.dart';
 import '../styles/roc_colors.dart';
 
 // Sender page class implementation - Page layer.

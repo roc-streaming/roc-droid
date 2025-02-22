@@ -1,3 +1,7 @@
+synthetic-package: false
+
 arb-dir: lib/src/ui/localization
 template-arb-file: app_en.arb
-output-localization-file: app_localizations.dart
+
+output-dir: lib/src/ui/localization
+output-localization-file: app_localizations.g.dart
