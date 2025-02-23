@@ -28,7 +28,7 @@ private const val LOG_TAG = "rocdroid.AndroidConnectorImpl"
 class AndroidConnectorImpl : AndroidConnector {
     private var projectionAcquired: Boolean = false
 
-    fun getActivity(): MainActivity {
+    fun getMainActivity(): MainActivity {
         return MainActivity.instance
     }
 
@@ -50,7 +50,7 @@ class AndroidConnectorImpl : AndroidConnector {
     override fun requestNotifications(callback: (Result<Boolean>) -> Unit) {
         Log.i(LOG_TAG, "Requesting POST_NOTIFICATIONS permission")
 
-        getActivity().requestPermission(
+        getMainActivity().requestPermission(
             Manifest.permission.POST_NOTIFICATIONS,
             R.string.allow_notifications_title,
             R.string.allow_notifications_message,
@@ -70,7 +70,7 @@ class AndroidConnectorImpl : AndroidConnector {
     override fun requestMicrophone(callback: (Result<Boolean>) -> Unit) {
         Log.i(LOG_TAG, "Requesting RECORD_AUDIO permission")
 
-        getActivity().requestPermission(
+        getMainActivity().requestPermission(
             Manifest.permission.RECORD_AUDIO,
             R.string.allow_mic_title,
             R.string.allow_mic_message,
@@ -100,17 +100,17 @@ class AndroidConnectorImpl : AndroidConnector {
 
         // If service isn't started yet, start it and invoke callback when we've connected.
         // If service is already started, invoke callback immediately.
-        getActivity().startService({ service: StreamingService ->
+        getMainActivity().startStreamingService({ service: StreamingService ->
             // Ensure that service won't detach projection until releaseProjection().
             service.disableAutoDetach()
 
             if (service.hasProjection()) {
                 Log.d(LOG_TAG, "Projection already acquired")
                 callback(Result.success(true))
-                return@startService
+                return@startStreamingService
             }
 
-            getActivity().requestProjection({ projection: MediaProjection? ->
+            getMainActivity().requestProjection({ projection: MediaProjection? ->
                 if (projection == null) {
                     Log.w(LOG_TAG, "Projection request failed")
                     callback(Result.success(false))
@@ -134,7 +134,7 @@ class AndroidConnectorImpl : AndroidConnector {
 
         projectionAcquired = false
 
-        val service = getActivity().getService()
+        val service = getMainActivity().getStreamingService()
         if (service == null) {
             return
         }
@@ -151,7 +151,7 @@ class AndroidConnectorImpl : AndroidConnector {
             throw FlutterError(BAD_SEQUENCE_CODE, BAD_SEQUENCE_TEXT)
         }
 
-        val service = getActivity().getService()
+        val service = getMainActivity().getStreamingService()
         if (service == null) {
             Log.e(LOG_TAG, "Lost connection to service")
             throw FlutterError(NO_SERVICE_CODE, NO_SERVICE_TEXT)
@@ -168,7 +168,7 @@ class AndroidConnectorImpl : AndroidConnector {
     override fun stopReceiver() {
         Log.i(LOG_TAG, "Stopping receiver if needed")
 
-        val service = getActivity().getService()
+        val service = getMainActivity().getStreamingService()
         if (service == null) {
             Log.d(LOG_TAG, "Lost connection to service")
             return
@@ -178,7 +178,7 @@ class AndroidConnectorImpl : AndroidConnector {
     }
 
     override fun isReceiverAlive(): Boolean {
-        val service = getActivity().getService()
+        val service = getMainActivity().getStreamingService()
         if (service == null) {
             return false
         }
@@ -194,7 +194,7 @@ class AndroidConnectorImpl : AndroidConnector {
             throw FlutterError(BAD_SEQUENCE_CODE, BAD_SEQUENCE_TEXT)
         }
 
-        val service = getActivity().getService()
+        val service = getMainActivity().getStreamingService()
         if (service == null) {
             Log.e(LOG_TAG, "Lost connection to service")
             throw FlutterError(NO_SERVICE_CODE, NO_SERVICE_TEXT)
@@ -206,7 +206,7 @@ class AndroidConnectorImpl : AndroidConnector {
         }
 
         if (settings.captureType == AndroidCaptureType.CAPTURE_MIC &&
-            !getActivity().hasPermission(Manifest.permission.RECORD_AUDIO)
+            !getMainActivity().hasPermission(Manifest.permission.RECORD_AUDIO)
         ) {
             Log.e(LOG_TAG, "Microphone permission must be granted when using CAPTURE_MIC")
             throw FlutterError(NO_PERMISSION_CODE, NO_PERMISSION_TEXT)
@@ -218,7 +218,7 @@ class AndroidConnectorImpl : AndroidConnector {
     override fun stopSender() {
         Log.i(LOG_TAG, "Stopping sender if needed")
 
-        val service = getActivity().getService()
+        val service = getMainActivity().getStreamingService()
         if (service == null) {
             Log.d(LOG_TAG, "Lost connection to service")
             return
@@ -228,7 +228,7 @@ class AndroidConnectorImpl : AndroidConnector {
     }
 
     override fun isSenderAlive(): Boolean {
-        val service = getActivity().getService()
+        val service = getMainActivity().getStreamingService()
         if (service == null) {
             return false
         }
