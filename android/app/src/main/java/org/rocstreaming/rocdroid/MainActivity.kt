@@ -3,18 +3,13 @@ package org.rocstreaming.rocdroid
 import AndroidListener
 import AndroidServiceError
 import AndroidServiceEvent
-import android.app.ActivityManager
-import android.content.ComponentName
-import android.content.Context
 import android.content.Context.MEDIA_PROJECTION_SERVICE
 import android.content.Intent
-import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
-import android.os.IBinder
 import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -30,14 +25,6 @@ class MainActivity : FlutterFragmentActivity() {
     // main activity is a singleton used by AndroidConnectorImpl
     companion object {
         lateinit var instance: MainActivity
-    }
-
-    // non-null once successfully connected to server
-    // may temporarily become null when connection is lost
-    private var service: StreamingService? = null
-
-    fun getService(): StreamingService? {
-        return service
     }
 
     // called when we've started the service and connected to it
@@ -98,7 +85,7 @@ class MainActivity : FlutterFragmentActivity() {
         )
 
         // bind to service if it's running
-        bindRunningService()
+        streamingConnector.bindService()
     }
 
     // when app is resumed
@@ -113,52 +100,24 @@ class MainActivity : FlutterFragmentActivity() {
     override fun onDestroy() {
         Log.i(LOG_TAG, "Destroying main activity")
 
-        unbindService(serviceConnection)
+        streamingConnector.unbindService()
 
         super.onDestroy()
     }
 
-    // bind to service if it's running
-    fun bindRunningService() {
-        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-
-        @Suppress("DEPRECATION")
-        val allServices = activityManager.getRunningServices(Integer.MAX_VALUE)
-
-        for (service in allServices) {
-            if (service.service.className == StreamingService::class.java.name) {
-                Log.d(LOG_TAG, "Found running service, binding")
-
-                val serviceIntent = Intent(this, StreamingService::class.java)
-                bindService(serviceIntent, serviceConnection, 0)
-
-                return
+    // handler for StreamingConnector events
+    private val streamingHandler: StreamingConnectionHandler = object : StreamingConnectionHandler {
+        override fun onConnected() {
+            // callback stored by startService()
+            val service = streamingConnector.getService()
+            if (service != null) {
+                serviceStartedCallback?.invoke(service)
+                serviceStartedCallback = null
+                // notify dart
+                emitEvent(AndroidServiceEvent.STREAMING_SERVICE_CONNECTED)
             }
         }
 
-        Log.d(LOG_TAG, "No running service found")
-    }
-
-    // start service if not started yet
-    fun startService(callback: (StreamingService) -> Unit) {
-        if (service != null) {
-            Log.d(LOG_TAG, "Service already started, nothing to do")
-            callback(service!!)
-            return
-        }
-
-        Log.d(LOG_TAG, "Starting service")
-
-        // callback will be invoked from onServiceConnected()
-        serviceStartedCallback = callback
-
-        val serviceIntent = Intent(this, StreamingService::class.java)
-        startForegroundService(serviceIntent)
-        bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE)
-    }
-
-    // handler for events produced by streaming service
-    private val streamingEventHandler: StreamingEventListener = object : StreamingEventListener {
         override fun onEvent(event: AndroidServiceEvent) {
             runOnUiThread {
                 // notify dart
@@ -172,43 +131,31 @@ class MainActivity : FlutterFragmentActivity() {
                 emitError(error)
             }
         }
-    }
 
-    // handler for connect & disconnect events
-    private val serviceConnection = object : ServiceConnection {
-        // called when we've successfully connected to the service
-        override fun onServiceConnected(componentName: ComponentName, binder: IBinder) {
-            Log.i(LOG_TAG, "Service connected")
-
-            // remember service reference
-            service = (binder as StreamingService.LocalBinder).getService()
-            service?.addEventListener(streamingEventHandler)
-
-            // for startService()
-            serviceStartedCallback?.invoke(service!!)
-            serviceStartedCallback = null
-
-            // notify dart
-            emitEvent(AndroidServiceEvent.STREAMING_SERVICE_CONNECTED)
-        }
-
-        // called when we've lost connectio to service
-        override fun onServiceDisconnected(componentName: ComponentName) {
-            Log.w(LOG_TAG, "Service disconnected")
-
-            // forget service reference
-            service?.removeEventListener(streamingEventHandler)
-            service = null
-
+        override fun onDisconnected() {
             // notify dart
             emitEvent(AndroidServiceEvent.STREAMING_SERVICE_DISCONNECTED)
-
-            // (re)start & reconnect
-            Log.d(LOG_TAG, "Initiating asynchronous reconnect")
-            val serviceIntent = Intent(this@MainActivity, StreamingService::class.java)
-            startForegroundService(serviceIntent)
-            bindService(serviceIntent, this, BIND_AUTO_CREATE)
         }
+    }
+
+    val streamingConnector = StreamingConnector(this, streamingHandler)
+
+    fun getStreamingService(): StreamingService? {
+        return streamingConnector.getService()
+    }
+
+    // start service if not started yet
+    fun startStreamingService(callback: (StreamingService) -> Unit) {
+        val service = streamingConnector.getService()
+        if (service != null) {
+            Log.d(LOG_TAG, "Service already started, nothing to do")
+            callback(service)
+            return
+        }
+
+        // callback will be invoked from onConnected()
+        serviceStartedCallback = callback
+        streamingConnector.startService()
     }
 
     fun requestProjection(callback: (MediaProjection?) -> Unit) {
