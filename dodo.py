@@ -9,6 +9,7 @@ import json
 import os
 import pathlib
 import platform
+import shlex
 import shutil
 import signal
 import subprocess
@@ -44,7 +45,7 @@ def _device(platform):
         for dev in json.loads(out):
             if dev['isSupported'] and dev['targetPlatform'].startswith(platform):
                 return dev['id']
-    return ''
+    _die(f'No {platform} device found!')
 
 def _gradlew():
     if platform.system() == 'Windows':
@@ -73,20 +74,49 @@ def _delete_files(pattern):
     return task
 
 @functools.cache
-def _colorize(text, color):
+def _colors_supported():
     try:
         import colorama
         if sys.stderr.isatty():
-            return getattr(colorama.Fore, color.upper(), '') + \
-                text + colorama.Style.RESET_ALL
+            colorama.init(autoreset=False)
+            return True
     except ImportError:
         pass
+    return False
+
+@functools.cache
+def _colorize(text, color):
+    if _colors_supported():
+        import colorama
+        text = getattr(colorama.Fore, color.upper(), '') + \
+            text + colorama.Style.RESET_ALL
     return text
 
 def _color_title(task):
-    name, title = title_with_actions(task).split('=>')
-    return '{}=>{}'.format(
-        _colorize(name, 'blue'), _colorize(title, 'yellow'))
+    text = title_with_actions(task)
+    if '=>' in text:
+        name, title = text.split('=>')
+        return '{}=>{}'.format(
+            _colorize(name, 'blue'), _colorize(title, 'yellow'))
+    else:
+        return _colorize(text, 'blue')
+
+def _die(msg):
+    msg = _colorize(msg, 'lightred_ex')
+    print(f'error: {msg}', file=sys.stderr)
+    sys.exit(1)
+
+class _LongCmd(CmdAction):
+    def __init__(self, func, title):
+        super().__init__(self._make_cmd)
+        self._func = func
+        self._title = title
+
+    def _make_cmd(self):
+        return ' '.join(map(shlex.quote, self._func()))
+
+    def __str__(self):
+        return 'Cmd: ' + self._title
 
 # doit check:desktop
 def task_check_desktop():
@@ -189,11 +219,17 @@ def task_wipe():
 # doit install:android [variant=debug|release]
 def task_install_android():
     """build android apk, then install it on connected device"""
+    def _install_app():
+        device = _device('android')
+        cmd = f'flutter install --{VARIANT} -d "{device}"'
+        print(f'Running: {cmd}', file=sys.stderr)
+        return LongRunning(cmd).execute()
+
     return {
         'basename': 'install:android',
         'task_dep': ['build:android'],
         'actions': [
-            f'flutter install --{VARIANT}',
+            _install_app,
         ],
         'title': _color_title,
     }
@@ -201,15 +237,17 @@ def task_install_android():
 # doit launch:desktop [variant=debug|release]
 def task_launch_desktop():
     """build desktop app, then launch it locally"""
-    def _run_app():
-        cmd = f'flutter run --{VARIANT} -d "{_device(_platform())}"'
+    def _launch_app():
+        device = _device(_platform())
+        cmd = f'flutter run --{VARIANT} -d "{device}"'
         print(f'Running: {cmd}', file=sys.stderr)
         return Interactive(cmd).execute()
+
     return {
         'basename': 'launch:desktop',
         'task_dep': ['build:desktop'],
         'actions': [
-            _run_app,
+            _launch_app,
         ],
         'title': _color_title,
     }
@@ -221,16 +259,19 @@ def task_launch_android():
         atexit.register(lambda: subprocess.call(
             'adb shell am force-stop org.rocstreaming.rocdroid',
             shell=True))
-    def _run_app():
-        cmd = f'flutter run --{VARIANT} -d "{_device("android")}"'
+
+    def _launch_app():
+        device = _device('android')
+        cmd = f'flutter run --{VARIANT} -d "{device}"'
         print(f'Running: {cmd}', file=sys.stderr)
         return Interactive(cmd).execute()
+
     return {
         'basename': 'launch:android',
         'task_dep': ['build:android'],
         'actions': [
             _register_cleanup,
-            _run_app,
+            _launch_app,
         ],
         'title': _color_title,
     }
@@ -338,13 +379,20 @@ def task_fmt_dart():
         if fnmatch.fnmatch(path.name, '*.g.dart'):
             return True
         return False
-    files = list(sorted(
-        map(str,
-            filter(lambda x: not _is_ignored(x),
-                   pathlib.Path('lib').rglob('*.dart')))))
+
+    def _make_command():
+        files = list(sorted(
+            map(str,
+                filter(lambda x: not _is_ignored(x),
+                       pathlib.Path('lib').rglob('*.dart')))))
+        return ['dart', 'format', *files]
+
     return {
         'basename': 'fmt:dart',
-        'actions': [['dart', 'format', *files]],
+        'actions': [
+            _LongCmd(func=_make_command, title='dart format'),
+        ],
+        'title': _color_title,
     }
 
 # doit fmt:kotlin
@@ -353,4 +401,5 @@ def task_fmt_kotlin():
     return {
         'basename': 'fmt:kotlin',
         'actions': [f'cd android && {_gradlew()} spotlessApply'],
+        'title': _color_title,
     }
