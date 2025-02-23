@@ -36,8 +36,11 @@ class AndroidConnectorImpl : AndroidConnector {
         try {
             return NetworkInterface.getNetworkInterfaces().toList()
                 .flatMap { it.inetAddresses.toList() }
-                .filter { !it.isLoopbackAddress && !it.hostAddress.contains(':') }
-                .map { it.hostAddress }
+                .filter {
+                    it != null && !it.isLoopbackAddress &&
+                        it.hostAddress?.contains(':') == false
+                }
+                .mapNotNull { it.hostAddress }
         } catch (e: Exception) {
             Log.e(LOG_TAG, "Failed to retrieve address list: " + e.toString())
             return emptyList()

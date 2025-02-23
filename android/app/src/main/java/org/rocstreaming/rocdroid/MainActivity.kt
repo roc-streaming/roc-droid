@@ -113,9 +113,7 @@ class MainActivity : FlutterFragmentActivity() {
     override fun onDestroy() {
         Log.i(LOG_TAG, "Destroying main activity")
 
-        if (serviceConnection != null) {
-            unbindService(serviceConnection)
-        }
+        unbindService(serviceConnection)
 
         super.onDestroy()
     }
@@ -123,7 +121,11 @@ class MainActivity : FlutterFragmentActivity() {
     // bind to service if it's running
     fun bindRunningService() {
         val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        for (service in activityManager.getRunningServices(Integer.MAX_VALUE)) {
+
+        @Suppress("DEPRECATION")
+        val allServices = activityManager.getRunningServices(Integer.MAX_VALUE)
+
+        for (service in allServices) {
             if (service.service.className == StreamingService::class.java.name) {
                 Log.d(LOG_TAG, "Found running service, binding")
 
@@ -279,11 +281,11 @@ class MainActivity : FlutterFragmentActivity() {
 
     private fun emitEvent(event: AndroidServiceEvent) {
         Log.d(LOG_TAG, "Sending event: " + event.toString())
-        eventListener.onEvent(event) { result -> }
+        eventListener.onEvent(event) { _ -> }
     }
 
     private fun emitError(error: AndroidServiceError) {
         Log.d(LOG_TAG, "Sending error: " + error.toString())
-        eventListener.onError(error) { result -> }
+        eventListener.onError(error) { _ -> }
     }
 }

@@ -138,7 +138,7 @@ class StreamingService : Service() {
 
         Log.d(LOG_TAG, "Stopping service")
 
-        stopForeground(true)
+        stopForeground(STOP_FOREGROUND_REMOVE)
     }
 
     @Synchronized
@@ -428,7 +428,10 @@ class StreamingService : Service() {
         }
     }
 
-    private fun runReceiverThread(settings: AndroidReceiverSettings, projection: MediaProjection) {
+    private fun runReceiverThread(
+        settings: AndroidReceiverSettings,
+        @Suppress("UNUSED_PARAMETER") projection: MediaProjection
+    ) {
         Log.d(LOG_TAG, "Running receiver thread")
 
         var audioTrack: AudioTrack? = null

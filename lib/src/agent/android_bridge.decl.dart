@@ -1,10 +1,10 @@
 import 'package:pigeon/pigeon.dart';
 
-/// This file (android_connector.decl.dart) is not actually included into build and
+/// This file (android_bridge.decl.dart) is not actually included into build and
 /// is never imported by other dart code. It's only used during code generation to
 /// produce two other files:
-///  - android_connector.g.dart
-///  - AndroidConnector.g.kt
+///  - android_bridge.g.dart
+///  - AndroidBridge.g.kt
 @ConfigurePigeon(PigeonOptions(
   dartOut: 'lib/src/agent/android_bridge.g.dart',
   dartOptions: DartOptions(),
@@ -125,7 +125,7 @@ abstract class AndroidConnector {
   bool isSenderAlive();
 }
 
-/// Asynchronous events produces by android service.
+/// Asynchronous events produced by android service.
 enum AndroidServiceEvent {
   streamingServiceConnected,
   streamingServiceDisconnected,
@@ -133,7 +133,7 @@ enum AndroidServiceEvent {
   receiverStateChanged,
 }
 
-/// Asynchronous errors produces by android service.
+/// Asynchronous errors produced by android service.
 enum AndroidServiceError {
   audioRecordFailed,
   audioTrackFailed,
