@@ -18,4 +18,6 @@
     <string name="notification_title_active">Streaming active</string>
     <string name="notification_title_inactive">Streaming inactive</string>
     <string name="notification_stop_action">Stop streaming</string>
+
+    <string name="tile_label">Roc Droid</string>
 </resources>
