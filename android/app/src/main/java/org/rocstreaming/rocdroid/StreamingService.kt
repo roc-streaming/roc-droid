@@ -45,10 +45,8 @@ private const val NOTIFICATION_ID = 1
 
 private const val NOTIFICATION_ACTION_DELETE =
     "org.rocstreaming.rocdroid.NotificationActionDelete"
-private const val NOTIFICATION_ACTION_STOP_SENDER =
-    "org.rocstreaming.rocdroid.NotificationActionStopSender"
-private const val NOTIFICATION_ACTION_STOP_RECEIVER =
-    "org.rocstreaming.rocdroid.NotificationActionStopReceiver"
+private const val NOTIFICATION_ACTION_STOP =
+    "org.rocstreaming.rocdroid.NotificationActionStop"
 
 private const val LOG_TAG = "rocdroid.StreamingService"
 
@@ -77,8 +75,10 @@ class StreamingService : Service() {
 
             when (intent.action) {
                 NOTIFICATION_ACTION_DELETE -> stopAllNoNotification()
-                NOTIFICATION_ACTION_STOP_SENDER -> stopSender()
-                NOTIFICATION_ACTION_STOP_RECEIVER -> stopReceiver()
+                NOTIFICATION_ACTION_STOP -> {
+                    stopSender()
+                    stopReceiver()
+                }
             }
         }
     }
@@ -592,8 +592,7 @@ class StreamingService : Service() {
             notificationActionHandler,
             IntentFilter().apply {
                 addAction(NOTIFICATION_ACTION_DELETE)
-                addAction(NOTIFICATION_ACTION_STOP_SENDER)
-                addAction(NOTIFICATION_ACTION_STOP_RECEIVER)
+                addAction(NOTIFICATION_ACTION_STOP)
             },
             RECEIVER_EXPORTED
         )
@@ -628,38 +627,25 @@ class StreamingService : Service() {
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        // invoked when "stop sender" notification button is pressed
-        val stopSenderIntent = Intent(NOTIFICATION_ACTION_STOP_SENDER)
-        val pendingStopSenderIntent = PendingIntent.getBroadcast(
+        // invoked when "stop streaming" notification button is pressed
+        // we want to stop sender & receiver
+        val stopIntent = Intent(NOTIFICATION_ACTION_STOP)
+        val pendingStopIntent = PendingIntent.getBroadcast(
             this,
             0,
-            stopSenderIntent,
+            stopIntent,
             PendingIntent.FLAG_IMMUTABLE
         )
-        val stopSenderAction = Notification.Action.Builder(
+        val stopAction = Notification.Action.Builder(
             Icon.createWithResource(this@StreamingService, R.drawable.ic_stop),
-            getString(R.string.notification_stop_sender_action),
-            pendingStopSenderIntent
-        ).build()
-
-        // invoked when "stop receiver" notification button is pressed
-        val stopReceiverIntent = Intent(NOTIFICATION_ACTION_STOP_RECEIVER)
-        val pendingStopReceiverIntent = PendingIntent.getBroadcast(
-            this,
-            0,
-            stopReceiverIntent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
-        val stopReceiverAction = Notification.Action.Builder(
-            Icon.createWithResource(this@StreamingService, R.drawable.ic_stop),
-            getString(R.string.notification_stop_receiver_action),
-            pendingStopReceiverIntent
+            getString(R.string.notification_stop_action),
+            pendingStopIntent
         ).build()
 
         return Notification.Builder(this, NOTIFICATION_CHANNEL_ID).apply {
             // appearance
             setSmallIcon(R.drawable.ic_notification)
-            setContentTitle(getString(R.string.notification_title))
+            setContentTitle(getNotificationTitle())
             setContentText(getNotificationText())
             // when notification is tapped
             setContentIntent(pendingContentIntent)
@@ -670,11 +656,8 @@ class StreamingService : Service() {
             // show on lock screen
             setVisibility(Notification.VISIBILITY_PUBLIC)
             // notification buttons
-            if (senderStarted) {
-                addAction(stopSenderAction)
-            }
-            if (receiverStarted) {
-                addAction(stopReceiverAction)
+            if (senderStarted || receiverStarted) {
+                addAction(stopAction)
             }
         }.build()
     }
@@ -687,6 +670,13 @@ class StreamingService : Service() {
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
+    private fun getNotificationTitle(): String {
+        return when {
+            senderStarted || receiverStarted -> getString(R.string.notification_title_active)
+            else -> getString(R.string.notification_title_inactive)
+        }
     }
 
     private fun getNotificationText(): String {
