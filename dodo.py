@@ -24,7 +24,7 @@ sys.stdin.reconfigure(encoding='utf-8')
 sys.stdout.reconfigure(encoding='utf-8')
 
 DOIT_CONFIG = {
-    'default_tasks': ['check', 'test'],
+    'default_tasks': ['check:desktop', 'test:desktop'],
     'verbosity': 2,
 }
 
