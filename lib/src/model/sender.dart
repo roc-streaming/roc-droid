@@ -60,9 +60,11 @@ abstract class _Sender with Store {
 
   // Synchronous part of the constructor.
   _Sender(this._logger, this._agent) {
-    _agent.stateChangeEvent.subscribe(
+    _agent.eventSource.subscribe(
       (args) async {
-        _isStarted = _agent.senderIsAlive;
+        if (args.value == AgentEvent.stateChanged) {
+          _isStarted = _agent.receiverIsAlive;
+        }
       },
     );
   }

@@ -1,9 +1,8 @@
 import 'package:event/event.dart';
 import 'package:logger/logger.dart';
 
+import 'agent_event.dart';
 import 'android_bridge.g.dart';
-import 'failure_event.dart';
-import 'state_event.dart';
 
 /// Implements communication with Android code via platform channels.
 ///
@@ -30,8 +29,8 @@ class AndroidConnector implements AndroidListener {
   bool get receiverIsAlive => _receiverIsAlive;
   bool get senderIsAlive => _senderIsAlive;
 
-  final Event<Value<StateEvent>> stateChangeEvent = Event("stateChangeEvent");
-  final Event<Value<FailureEvent>> failureEvent = Event("failureEvent");
+  final Event<Value<AgentEvent>> eventSource =
+      Event("AndroidConnector.eventSource");
 
   Future<void> startReceiver(AndroidReceiverSettings settings) async {
     try {
@@ -180,11 +179,11 @@ class AndroidConnector implements AndroidListener {
     switch (errorCode) {
       case AndroidServiceError.audioRecordFailed:
       case AndroidServiceError.audioTrackFailed:
-        failureEvent.broadcast(Value<FailureEvent>(FailureEvent.deviceError));
+        eventSource.broadcast(Value<AgentEvent>(AgentEvent.deviceError));
 
       case AndroidServiceError.senderConnectFailed:
       case AndroidServiceError.receiverBindFailed:
-        failureEvent.broadcast(Value<FailureEvent>(FailureEvent.networkError));
+        eventSource.broadcast(Value<AgentEvent>(AgentEvent.networkError));
     }
   }
 
@@ -198,8 +197,7 @@ class AndroidConnector implements AndroidListener {
 
       // Whenever receiver state changes, no matter how we've found out (from kotlin
       // event of from finally block), we notify subscribers
-      stateChangeEvent
-          .broadcast(Value<StateEvent>(StateEvent.receiverStateChanged));
+      eventSource.broadcast(Value<AgentEvent>(AgentEvent.stateChanged));
     }
 
     final newSenderIsAlive = await _controller.isSenderAlive();
@@ -210,8 +208,7 @@ class AndroidConnector implements AndroidListener {
 
       // Whenever sender state changes, no matter how we've found out (from kotlin
       // event of from finally block), we notify subscribers
-      stateChangeEvent
-          .broadcast(Value<StateEvent>(StateEvent.senderStateChanged));
+      eventSource.broadcast(Value<AgentEvent>(AgentEvent.stateChanged));
     }
   }
 }

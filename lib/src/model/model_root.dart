@@ -3,6 +3,7 @@ import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../agent.dart';
+import 'failure_event.dart';
 import 'receiver.dart';
 import 'sender.dart';
 
@@ -14,13 +15,21 @@ class ModelRoot {
   final Logger logger;
 
   /// Used to notify if the backend service has registered an error event.
-  final Event<Value<FailureEvent>> failureEvent = Event("failureEvent");
+  final Event<Value<FailureEvent>> failureEvent =
+      Event("ModelRoot.failureEvent");
 
   ModelRoot._create(
       Agent agent, this.receiver, this.sender, this.packageInfo, this.logger) {
     // Broadcast failure event only on backend failure events
-    agent.failureEvent.subscribe((args) {
-      failureEvent.broadcast(args);
+    agent.eventSource.subscribe((args) {
+      switch (args.value) {
+        case AgentEvent.deviceError:
+          failureEvent.broadcast(FailureEvent.deviceError);
+        case AgentEvent.networkError:
+          failureEvent.broadcast(FailureEvent.networkError);
+        case AgentEvent.stateChanged:
+          break;
+      }
     });
   }
 

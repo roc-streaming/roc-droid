@@ -1,16 +1,12 @@
 import 'package:event/event.dart';
 
 import 'agent.dart';
+import 'agent_event.dart';
 import 'android_bridge.g.dart';
-import 'failure_event.dart';
-import 'state_event.dart';
 
 class NoopAgent implements Agent {
   @override
-  final Event<Value<StateEvent>> stateChangeEvent = Event("stateChangeEvent");
-
-  @override
-  final Event<Value<FailureEvent>> failureEvent = Event("failureEvent");
+  final Event<Value<AgentEvent>> eventSource = Event("NoopAgent.eventSource");
 
   @override
   bool receiverIsAlive = false;

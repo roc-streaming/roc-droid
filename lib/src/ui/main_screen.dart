@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
-import '../agent.dart';
 import '../model.dart';
 import 'components/roc_snackbar.dart';
 import 'fragments/roc_bottom_navigation_bar.dart';

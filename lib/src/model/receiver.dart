@@ -55,9 +55,11 @@ abstract class _Receiver with Store {
   // Synchronous part of the constructor.
   _Receiver(this._logger, this._agent) {
     // Subscribe to agent state change event.
-    _agent.stateChangeEvent.subscribe(
+    _agent.eventSource.subscribe(
       (args) async {
-        _isStarted = _agent.receiverIsAlive;
+        if (args.value == AgentEvent.stateChanged) {
+          _isStarted = _agent.receiverIsAlive;
+        }
       },
     );
   }

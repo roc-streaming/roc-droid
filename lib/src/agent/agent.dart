@@ -2,10 +2,9 @@ import 'dart:io';
 import 'package:event/event.dart';
 import 'package:logger/logger.dart';
 
+import 'agent_event.dart';
 import 'android_bridge.g.dart';
 import 'android_connector.dart';
-import 'failure_event.dart';
-import 'state_event.dart';
 
 // TODO: rework Agent so that it uses AndroidConnector + DaemonConnector.
 // AndroidConnector will be used on Android to acquire permissions and
@@ -22,9 +21,7 @@ class Agent {
   }
 
   // TODO: combine events from AndroidConnector and DaemonConnector
-  Event<Value<StateEvent>> get stateChangeEvent =>
-      _androidConnector.stateChangeEvent;
-  Event<Value<FailureEvent>> get failureEvent => _androidConnector.failureEvent;
+  Event<Value<AgentEvent>> get eventSource => _androidConnector.eventSource;
 
   // TODO: use AndroidConnector to start/stop daemon and DaemonConnector to
   // start/stop sender/receiver.
