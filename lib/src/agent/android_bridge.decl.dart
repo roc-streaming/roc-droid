@@ -68,9 +68,6 @@ enum AndroidCaptureType {
 ///          AndroidControllerImpl, where the actual work is done
 @HostApi()
 abstract class AndroidController {
-  /// Get list of IP addresses of available network interfaces.
-  List<String> getLocalAddresses();
-
   /// Request permission to post notifications, if no already granted.
   /// Must be called before acquiring projection first time.
   /// If returns false, user rejected permission and notifications won't appear.

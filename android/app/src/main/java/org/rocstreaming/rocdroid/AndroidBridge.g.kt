@@ -222,8 +222,6 @@ private open class AndroidBridgePigeonCodec : StandardMessageCodec() {
  * Generated interface from Pigeon that represents a handler of messages from Flutter.
  */
 interface AndroidController {
-  /** Get list of IP addresses of available network interfaces. */
-  fun getLocalAddresses(): List<String>
   /**
    * Request permission to post notifications, if no already granted.
    * Must be called before acquiring projection first time.
@@ -286,21 +284,6 @@ interface AndroidController {
     @JvmOverloads
     fun setUp(binaryMessenger: BinaryMessenger, api: AndroidController?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.getLocalAddresses$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { _, reply ->
-            val wrapped: List<Any?> = try {
-              listOf(api.getLocalAddresses())
-            } catch (exception: Throwable) {
-              wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
       run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.requestNotifications$separatedMessageChannelSuffix", codec)
         if (api != null) {

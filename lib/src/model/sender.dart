@@ -8,11 +8,11 @@ part 'sender.g.dart';
 
 /// Implementation of the Model Sender class.
 class Sender extends _Sender with _$Sender {
-  Sender._create(Logger logger, Backend backend) : super(logger, backend);
+  Sender._create(Logger logger, Agent agent) : super(logger, agent);
 
   /// Public Sender factory
-  static Future<Sender> create(Logger logger, Backend backend) async {
-    var sender = Sender._create(logger, backend);
+  static Future<Sender> create(Logger logger, Agent agent) async {
+    var sender = Sender._create(logger, agent);
     await sender._init();
     return sender;
   }
@@ -20,7 +20,7 @@ class Sender extends _Sender with _$Sender {
 
 abstract class _Sender with Store {
   final Logger _logger;
-  final Backend _backend;
+  final Agent _agent;
 
   // Determines whether the sender is running or not
   @observable
@@ -59,10 +59,10 @@ abstract class _Sender with Store {
   CaptureSourceType get captureSource => _captureSource;
 
   // Synchronous part of the constructor.
-  _Sender(this._logger, this._backend) {
-    _backend.stateChangeEvent.subscribe(
+  _Sender(this._logger, this._agent) {
+    _agent.stateChangeEvent.subscribe(
       (args) async {
-        _isStarted = _backend.senderIsAlive;
+        _isStarted = _agent.senderIsAlive;
       },
     );
   }
@@ -70,7 +70,7 @@ abstract class _Sender with Store {
   // Asynchronous part of the constructor.
   @action
   Future<void> _init() async {
-    _isStarted = _backend.senderIsAlive;
+    _isStarted = _agent.senderIsAlive;
     setSourcePort(10001);
     setRepairPort(10002);
   }
@@ -78,7 +78,7 @@ abstract class _Sender with Store {
   // Start current sender.
   @action
   Future<void> requestStart() async {
-    await _backend.startSender(AndroidSenderSettings(
+    await _agent.startSender(AndroidSenderSettings(
       captureType: switch (captureSource) {
         CaptureSourceType.currentlyPlayingApplications =>
           AndroidCaptureType.captureApps,
@@ -93,7 +93,7 @@ abstract class _Sender with Store {
   // Stop current sender.
   @action
   Future<void> requestStop() async {
-    await _backend.stopSender();
+    await _agent.stopSender();
   }
 
   // Update source port value.

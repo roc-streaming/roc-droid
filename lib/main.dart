@@ -10,9 +10,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final logger = Logger();
-  final backend = AndroidBackend(logger);
-  await backend.refreshState();
+  final agent = await Agent.create(logger);
   final packageInfo = await PackageInfo.fromPlatform();
 
-  runApp(AppRoot(await ModelRoot.create(logger, backend, packageInfo)));
+  runApp(AppRoot(await ModelRoot.create(logger, agent, packageInfo)));
 }

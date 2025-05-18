@@ -7,7 +7,6 @@ import FlutterError
 import android.Manifest
 import android.media.projection.MediaProjection
 import android.util.Log
-import java.net.NetworkInterface
 
 private const val BAD_SEQUENCE_CODE = "rocdroid.BAD_SEQUENCE"
 private const val BAD_SEQUENCE_TEXT = "Invalid method invocation sequence"
@@ -30,21 +29,6 @@ class AndroidControllerImpl : AndroidController {
 
     fun getMainActivity(): MainActivity {
         return MainActivity.instance
-    }
-
-    override fun getLocalAddresses(): List<String> {
-        try {
-            return NetworkInterface.getNetworkInterfaces().toList()
-                .flatMap { it.inetAddresses.toList() }
-                .filter {
-                    it != null && !it.isLoopbackAddress &&
-                        it.hostAddress?.contains(':') == false
-                }
-                .mapNotNull { it.hostAddress }
-        } catch (e: Exception) {
-            Log.e(LOG_TAG, "Failed to retrieve address list: " + e.toString())
-            return emptyList()
-        }
     }
 
     override fun requestNotifications(callback: (Result<Boolean>) -> Unit) {

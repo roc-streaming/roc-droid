@@ -1,17 +1,11 @@
 import 'package:event/event.dart';
 
+import 'agent.dart';
 import 'android_bridge.g.dart';
-import 'backend.dart';
 import 'failure_event.dart';
 import 'state_event.dart';
 
-class NoopBackend implements Backend {
-  @override
-  bool receiverIsAlive = false;
-
-  @override
-  bool senderIsAlive = false;
-
+class NoopAgent implements Agent {
   @override
   final Event<Value<StateEvent>> stateChangeEvent = Event("stateChangeEvent");
 
@@ -19,9 +13,10 @@ class NoopBackend implements Backend {
   final Event<Value<FailureEvent>> failureEvent = Event("failureEvent");
 
   @override
-  Future<List<String>> getLocalAddresses() async {
-    return [];
-  }
+  bool receiverIsAlive = false;
+
+  @override
+  bool senderIsAlive = false;
 
   @override
   Future<void> startReceiver(AndroidReceiverSettings settings) async {
@@ -41,5 +36,10 @@ class NoopBackend implements Backend {
   @override
   Future<void> stopSender() async {
     senderIsAlive = false;
+  }
+
+  @override
+  Future<List<String>> discoverLocalAddresses() async {
+    return [];
   }
 }

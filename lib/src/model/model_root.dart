@@ -16,19 +16,19 @@ class ModelRoot {
   /// Used to notify if the backend service has registered an error event.
   final Event<Value<FailureEvent>> failureEvent = Event("failureEvent");
 
-  ModelRoot._create(Backend backend, this.receiver, this.sender,
-      this.packageInfo, this.logger) {
+  ModelRoot._create(
+      Agent agent, this.receiver, this.sender, this.packageInfo, this.logger) {
     // Broadcast failure event only on backend failure events
-    backend.failureEvent.subscribe((args) {
+    agent.failureEvent.subscribe((args) {
       failureEvent.broadcast(args);
     });
   }
 
   /// Public ModelRoot factory
   static Future<ModelRoot> create(
-      Logger logger, Backend backend, PackageInfo packageInfo) async {
-    final receiver = await Receiver.create(logger, backend);
-    final sender = await Sender.create(logger, backend);
-    return ModelRoot._create(backend, receiver, sender, packageInfo, logger);
+      Logger logger, Agent agent, PackageInfo packageInfo) async {
+    final receiver = await Receiver.create(logger, agent);
+    final sender = await Sender.create(logger, agent);
+    return ModelRoot._create(agent, receiver, sender, packageInfo, logger);
   }
 }

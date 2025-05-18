@@ -2,24 +2,24 @@ import 'package:event/event.dart';
 import 'package:logger/logger.dart';
 
 import 'android_bridge.g.dart';
-import 'backend.dart';
 import 'failure_event.dart';
 import 'state_event.dart';
 
-/// Android-specific implementation of Backend interface.
+/// Implements communication with Android code via platform channels.
 ///
 /// Uses AndroidController, which is a bridge to AndroidControllerImpl,
 /// which is implemented in Kotlin.
 ///
-/// Implements AndroidListener, which is invoked from kotlin.
-class AndroidBackend implements Backend, AndroidListener {
+/// Implements AndroidListener, which is invoked back from kotlin
+/// when asynchonous event or error occurs.
+class AndroidConnector implements AndroidListener {
   final Logger _logger;
   final AndroidController _controller;
 
   bool _receiverIsAlive = false;
   bool _senderIsAlive = false;
 
-  AndroidBackend(Logger logger)
+  AndroidConnector(Logger logger)
       : _logger = logger,
         _controller = AndroidController() {
     // Tell kotlin that we implement AndroidListener interface, so
@@ -27,29 +27,12 @@ class AndroidBackend implements Backend, AndroidListener {
     AndroidListener.setUp(this);
   }
 
-  @override
   bool get receiverIsAlive => _receiverIsAlive;
-
-  @override
   bool get senderIsAlive => _senderIsAlive;
 
-  @override
   final Event<Value<StateEvent>> stateChangeEvent = Event("stateChangeEvent");
-
-  @override
   final Event<Value<FailureEvent>> failureEvent = Event("failureEvent");
 
-  /// Inherited from Backend interface.
-  /// Invoked from model.
-  @override
-  Future<List<String>> getLocalAddresses() async {
-    // Cast List<String?> to List<String>.
-    return (await _controller.getLocalAddresses()).toList();
-  }
-
-  /// Inherited from Backend interface.
-  /// Invoked from model.
-  @override
   Future<void> startReceiver(AndroidReceiverSettings settings) async {
     try {
       if (await _controller.isReceiverAlive()) {
@@ -89,9 +72,6 @@ class AndroidBackend implements Backend, AndroidListener {
     }
   }
 
-  /// Inherited from Backend interface.
-  /// Invoked from model.
-  @override
   Future<void> stopReceiver() async {
     try {
       if (!await _controller.isReceiverAlive()) {
@@ -113,9 +93,6 @@ class AndroidBackend implements Backend, AndroidListener {
     }
   }
 
-  /// Inherited from Backend interface.
-  /// Invoked from model.
-  @override
   Future<void> startSender(AndroidSenderSettings settings) async {
     try {
       if (await _controller.isSenderAlive()) {
@@ -163,9 +140,6 @@ class AndroidBackend implements Backend, AndroidListener {
     }
   }
 
-  /// Inherited from Backend interface.
-  /// Invoked from model.
-  @override
   Future<void> stopSender() async {
     try {
       if (!await _controller.isSenderAlive()) {

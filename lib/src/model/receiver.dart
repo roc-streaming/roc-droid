@@ -9,11 +9,11 @@ part 'receiver.g.dart';
 
 /// Implementation of the Model Receiver class.
 class Receiver extends _Receiver with _$Receiver {
-  Receiver._create(Logger logger, Backend backend) : super(logger, backend);
+  Receiver._create(Logger logger, Agent agent) : super(logger, agent);
 
   /// Public Receiver factory
-  static Future<Receiver> create(Logger logger, Backend backend) async {
-    var receiver = Receiver._create(logger, backend);
+  static Future<Receiver> create(Logger logger, Agent agent) async {
+    var receiver = Receiver._create(logger, agent);
     await receiver._init();
     return receiver;
   }
@@ -21,7 +21,7 @@ class Receiver extends _Receiver with _$Receiver {
 
 abstract class _Receiver with Store {
   final Logger _logger;
-  final Backend _backend;
+  final Agent _agent;
 
   // Determines whether the receiver is running or not
   @observable
@@ -53,11 +53,11 @@ abstract class _Receiver with Store {
   int get repairPort => _repairPort;
 
   // Synchronous part of the constructor.
-  _Receiver(this._logger, this._backend) {
-    // Subscribe to backend state change event.
-    _backend.stateChangeEvent.subscribe(
+  _Receiver(this._logger, this._agent) {
+    // Subscribe to agent state change event.
+    _agent.stateChangeEvent.subscribe(
       (args) async {
-        _isStarted = _backend.receiverIsAlive;
+        _isStarted = _agent.receiverIsAlive;
       },
     );
   }
@@ -65,8 +65,8 @@ abstract class _Receiver with Store {
   // Asynchronous part of the constructor.
   @action
   Future<void> _init() async {
-    _isStarted = _backend.receiverIsAlive;
-    _receiverIPs = ObservableList.of(await _backend.getLocalAddresses());
+    _isStarted = _agent.receiverIsAlive;
+    _receiverIPs = ObservableList.of(await _agent.discoverLocalAddresses());
     setSourcePort(10001);
     setRepairPort(10002);
   }
@@ -74,7 +74,7 @@ abstract class _Receiver with Store {
   // Start current receiver.
   @action
   Future<void> requestStart() async {
-    await _backend.startReceiver(AndroidReceiverSettings(
+    await _agent.startReceiver(AndroidReceiverSettings(
       sourcePort: _sourcePort,
       repairPort: _repairPort,
     ));
@@ -83,7 +83,7 @@ abstract class _Receiver with Store {
   // Stop current receiver.
   @action
   Future<void> requestStop() async {
-    await _backend.stopReceiver();
+    await _agent.stopReceiver();
   }
 
   // Update source port value.

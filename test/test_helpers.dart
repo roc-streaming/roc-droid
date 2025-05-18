@@ -5,7 +5,7 @@ import 'package:roc_droid/src/model.dart';
 
 Future<ModelRoot> testModelRoot() async => await ModelRoot.create(
     Logger(printer: SimplePrinter()),
-    NoopBackend(),
+    NoopAgent(),
     PackageInfo.new(
         appName: 'Undefined',
         packageName: 'Undefined',
@@ -14,10 +14,10 @@ Future<ModelRoot> testModelRoot() async => await ModelRoot.create(
 
 Future<Receiver> testReceiver() async => await Receiver.create(
       Logger(printer: SimplePrinter()),
-      NoopBackend(),
+      NoopAgent(),
     );
 
 Future<Sender> testSender() async => await Sender.create(
       Logger(printer: SimplePrinter()),
-      NoopBackend(),
+      NoopAgent(),
     );
