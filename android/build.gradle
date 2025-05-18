@@ -3,7 +3,7 @@ import com.github.jk1.license.render.*
 buildscript {
     ext {
         // must be in-sync with settings.gradle
-        gradle_plugin_version = "8.4.0"
+        gradle_plugin_version = "8.6.0"
         kotlin_version = "1.8.10"
     }
 
