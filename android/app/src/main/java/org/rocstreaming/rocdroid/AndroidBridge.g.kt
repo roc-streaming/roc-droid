@@ -62,7 +62,7 @@ enum class AndroidCaptureType(val raw: Int) {
   }
 }
 
-/** Asynchronous events produces by android service. */
+/** Asynchronous events produced by android service. */
 enum class AndroidServiceEvent(val raw: Int) {
   STREAMING_SERVICE_CONNECTED(0),
   STREAMING_SERVICE_DISCONNECTED(1),
@@ -76,7 +76,7 @@ enum class AndroidServiceEvent(val raw: Int) {
   }
 }
 
-/** Asynchronous errors produces by android service. */
+/** Asynchronous errors produced by android service. */
 enum class AndroidServiceError(val raw: Int) {
   AUDIO_RECORD_FAILED(0),
   AUDIO_TRACK_FAILED(1),
@@ -214,14 +214,14 @@ private open class AndroidBridgePigeonCodec : StandardMessageCodec() {
  * Allows to invoke kotlin methods from dart.
  *
  * This declaration emits 2 classes:
- *  dart:   AndroidConnector implementation class, which methods invoke kotlin
+ *  dart:   AndroidController implementation class, which methods invoke kotlin
  *          methods under the hood (via platform channels)
- *  kotlin: AndroidConnector interface, which we implement in
- *          AndroidConnectorImpl, where the actual work is done
+ *  kotlin: AndroidController interface, which we implement in
+ *          AndroidControllerImpl, where the actual work is done
  *
  * Generated interface from Pigeon that represents a handler of messages from Flutter.
  */
-interface AndroidConnector {
+interface AndroidController {
   /** Get list of IP addresses of available network interfaces. */
   fun getLocalAddresses(): List<String>
   /**
@@ -278,16 +278,16 @@ interface AndroidConnector {
   fun isSenderAlive(): Boolean
 
   companion object {
-    /** The codec used by AndroidConnector. */
+    /** The codec used by AndroidController. */
     val codec: MessageCodec<Any?> by lazy {
       AndroidBridgePigeonCodec()
     }
-    /** Sets up an instance of `AndroidConnector` to handle messages through the `binaryMessenger`. */
+    /** Sets up an instance of `AndroidController` to handle messages through the `binaryMessenger`. */
     @JvmOverloads
-    fun setUp(binaryMessenger: BinaryMessenger, api: AndroidConnector?, messageChannelSuffix: String = "") {
+    fun setUp(binaryMessenger: BinaryMessenger, api: AndroidController?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.getLocalAddresses$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.getLocalAddresses$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
@@ -302,7 +302,7 @@ interface AndroidConnector {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.requestNotifications$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.requestNotifications$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             api.requestNotifications{ result: Result<Boolean> ->
@@ -320,7 +320,7 @@ interface AndroidConnector {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.requestMicrophone$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.requestMicrophone$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             api.requestMicrophone{ result: Result<Boolean> ->
@@ -338,7 +338,7 @@ interface AndroidConnector {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.acquireProjection$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.acquireProjection$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             api.acquireProjection{ result: Result<Boolean> ->
@@ -356,7 +356,7 @@ interface AndroidConnector {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.releaseProjection$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.releaseProjection$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
@@ -372,7 +372,7 @@ interface AndroidConnector {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.startReceiver$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.startReceiver$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
@@ -390,7 +390,7 @@ interface AndroidConnector {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.stopReceiver$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.stopReceiver$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
@@ -406,7 +406,7 @@ interface AndroidConnector {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.isReceiverAlive$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.isReceiverAlive$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
@@ -421,7 +421,7 @@ interface AndroidConnector {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.startSender$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.startSender$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
@@ -439,7 +439,7 @@ interface AndroidConnector {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.stopSender$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.stopSender$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
@@ -455,7 +455,7 @@ interface AndroidConnector {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidConnector.isSenderAlive$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.isSenderAlive$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {

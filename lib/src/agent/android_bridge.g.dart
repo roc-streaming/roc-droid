@@ -33,7 +33,7 @@ enum AndroidCaptureType {
   captureMic,
 }
 
-/// Asynchronous events produces by android service.
+/// Asynchronous events produced by android service.
 enum AndroidServiceEvent {
   streamingServiceConnected,
   streamingServiceDisconnected,
@@ -41,7 +41,7 @@ enum AndroidServiceEvent {
   receiverStateChanged,
 }
 
-/// Asynchronous errors produces by android service.
+/// Asynchronous errors produced by android service.
 enum AndroidServiceError {
   audioRecordFailed,
   audioTrackFailed,
@@ -172,15 +172,15 @@ class _PigeonCodec extends StandardMessageCodec {
 /// Allows to invoke kotlin methods from dart.
 ///
 /// This declaration emits 2 classes:
-///  dart:   AndroidConnector implementation class, which methods invoke kotlin
+///  dart:   AndroidController implementation class, which methods invoke kotlin
 ///          methods under the hood (via platform channels)
-///  kotlin: AndroidConnector interface, which we implement in
-///          AndroidConnectorImpl, where the actual work is done
-class AndroidConnector {
-  /// Constructor for [AndroidConnector].  The [binaryMessenger] named argument is
+///  kotlin: AndroidController interface, which we implement in
+///          AndroidControllerImpl, where the actual work is done
+class AndroidController {
+  /// Constructor for [AndroidController].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  AndroidConnector({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+  AndroidController({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
       : pigeonVar_binaryMessenger = binaryMessenger,
         pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
@@ -191,7 +191,7 @@ class AndroidConnector {
 
   /// Get list of IP addresses of available network interfaces.
   Future<List<String>> getLocalAddresses() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.getLocalAddresses$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.getLocalAddresses$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -221,7 +221,7 @@ class AndroidConnector {
   /// Must be called before acquiring projection first time.
   /// If returns false, user rejected permission and notifications won't appear.
   Future<bool> requestNotifications() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.requestNotifications$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.requestNotifications$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -251,7 +251,7 @@ class AndroidConnector {
   /// Must be called before starting sender when using AndroidCaptureType.captureMic.
   /// If returns false, user rejected permission and sender won't start.
   Future<bool> requestMicrophone() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.requestMicrophone$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.requestMicrophone$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -283,7 +283,7 @@ class AndroidConnector {
   /// Throws exception if:
   ///  - lost connection to foreground service
   Future<bool> acquireProjection() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.acquireProjection$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.acquireProjection$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -312,7 +312,7 @@ class AndroidConnector {
   /// Allow service to stop projection when it's not needed.
   /// Must be called after *starting* sender or receiver.
   Future<void> releaseProjection() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.releaseProjection$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.releaseProjection$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -340,7 +340,7 @@ class AndroidConnector {
   ///  - lost connection to foreground service
   ///  - media projection wasn't acquired
   Future<void> startReceiver(AndroidReceiverSettings settings) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.startReceiver$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.startReceiver$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -363,7 +363,7 @@ class AndroidConnector {
 
   /// Stop receiver.
   Future<void> stopReceiver() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.stopReceiver$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.stopReceiver$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -386,7 +386,7 @@ class AndroidConnector {
 
   /// Check if receiver is running.
   Future<bool> isReceiverAlive() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.isReceiverAlive$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.isReceiverAlive$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -420,7 +420,7 @@ class AndroidConnector {
   ///  - media projection not acquired
   ///  - microphone permission is needed and wasn't granted
   Future<void> startSender(AndroidSenderSettings settings) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.startSender$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.startSender$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -443,7 +443,7 @@ class AndroidConnector {
 
   /// Stop sender.
   Future<void> stopSender() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.stopSender$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.stopSender$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -466,7 +466,7 @@ class AndroidConnector {
 
   /// Check if sender is running.
   Future<bool> isSenderAlive() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidConnector.isSenderAlive$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.isSenderAlive$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,

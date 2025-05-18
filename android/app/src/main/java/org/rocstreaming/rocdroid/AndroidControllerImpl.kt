@@ -1,6 +1,6 @@
 package org.rocstreaming.rocdroid
 
-import AndroidConnector
+import AndroidController
 import AndroidReceiverSettings
 import AndroidSenderSettings
 import FlutterError
@@ -21,11 +21,11 @@ private const val NO_PROJECTION_TEXT = "Media projection wasn't acquired"
 private const val NO_PERMISSION_CODE = "rocdroid.NO_PERMISSION"
 private const val NO_PERMISSION_TEXT = "Microhpone permission wasn't granted"
 
-private const val LOG_TAG = "rocdroid.AndroidConnectorImpl"
+private const val LOG_TAG = "rocdroid.AndroidControllerImpl"
 
-// Implementation of generated interface AndroidConnector, which methods
+// Implementation of generated interface AndroidController, which methods
 // are invoked from the dart side.
-class AndroidConnectorImpl : AndroidConnector {
+class AndroidControllerImpl : AndroidController {
     private var projectionAcquired: Boolean = false
 
     fun getMainActivity(): MainActivity {

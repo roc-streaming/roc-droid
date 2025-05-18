@@ -8,20 +8,20 @@ import 'state_event.dart';
 
 /// Android-specific implementation of Backend interface.
 ///
-/// Uses AndroidConnector, which is a bridge to AndroidConnectorImpl,
+/// Uses AndroidController, which is a bridge to AndroidControllerImpl,
 /// which is implemented in Kotlin.
 ///
 /// Implements AndroidListener, which is invoked from kotlin.
 class AndroidBackend implements Backend, AndroidListener {
   final Logger _logger;
-  final AndroidConnector _connector;
+  final AndroidController _controller;
 
   bool _receiverIsAlive = false;
   bool _senderIsAlive = false;
 
   AndroidBackend(Logger logger)
       : _logger = logger,
-        _connector = AndroidConnector() {
+        _controller = AndroidController() {
     // Tell kotlin that we implement AndroidListener interface, so
     // that it would invoke our methods.
     AndroidListener.setUp(this);
@@ -44,7 +44,7 @@ class AndroidBackend implements Backend, AndroidListener {
   @override
   Future<List<String>> getLocalAddresses() async {
     // Cast List<String?> to List<String>.
-    return (await _connector.getLocalAddresses()).toList();
+    return (await _controller.getLocalAddresses()).toList();
   }
 
   /// Inherited from Backend interface.
@@ -52,7 +52,7 @@ class AndroidBackend implements Backend, AndroidListener {
   @override
   Future<void> startReceiver(AndroidReceiverSettings settings) async {
     try {
-      if (await _connector.isReceiverAlive()) {
+      if (await _controller.isReceiverAlive()) {
         _logger.d("Receiver already started");
         return;
       }
@@ -60,23 +60,23 @@ class AndroidBackend implements Backend, AndroidListener {
       _logger.i("Starting receiver");
 
       // Ensure service can post notifications.
-      if (!await _connector.requestNotifications()) {
+      if (!await _controller.requestNotifications()) {
         return;
       }
 
       try {
         // First request media projection if not granted yet and acquire it
         // while we're starting receiver.
-        if (!await _connector.acquireProjection()) {
+        if (!await _controller.acquireProjection()) {
           return;
         }
 
         // Then start receiver.
-        await _connector.startReceiver(settings);
+        await _controller.startReceiver(settings);
       } finally {
         // Then release projection, i.e. allow service to stop it when it's
         // not needed anymore.
-        await _connector.releaseProjection();
+        await _controller.releaseProjection();
       }
     } finally {
       // This call is necessary for safety purposes.
@@ -94,14 +94,14 @@ class AndroidBackend implements Backend, AndroidListener {
   @override
   Future<void> stopReceiver() async {
     try {
-      if (!await _connector.isReceiverAlive()) {
+      if (!await _controller.isReceiverAlive()) {
         _logger.d("Receiver already stopped");
         return;
       }
 
       _logger.i("Stopping receiver");
 
-      await _connector.stopReceiver();
+      await _controller.stopReceiver();
     } finally {
       // This call is necessary for safety purposes.
       // Calls to connector may change service state.
@@ -118,7 +118,7 @@ class AndroidBackend implements Backend, AndroidListener {
   @override
   Future<void> startSender(AndroidSenderSettings settings) async {
     try {
-      if (await _connector.isSenderAlive()) {
+      if (await _controller.isSenderAlive()) {
         _logger.d("Sender already started");
         return;
       }
@@ -126,14 +126,14 @@ class AndroidBackend implements Backend, AndroidListener {
       _logger.i("Starting sender");
 
       // Ensure service can post notifications.
-      if (!await _connector.requestNotifications()) {
+      if (!await _controller.requestNotifications()) {
         return;
       }
 
       // If user want's to capture from microphone, we need to request
       // permission before starting the sender.
       if (settings.captureType == AndroidCaptureType.captureMic) {
-        if (!await _connector.requestMicrophone()) {
+        if (!await _controller.requestMicrophone()) {
           return;
         }
       }
@@ -141,16 +141,16 @@ class AndroidBackend implements Backend, AndroidListener {
       try {
         // First request media projection if not granted yet and acquire it
         // while we're starting sender.
-        if (!await _connector.acquireProjection()) {
+        if (!await _controller.acquireProjection()) {
           return;
         }
 
         // Then start sender.
-        await _connector.startSender(settings);
+        await _controller.startSender(settings);
       } finally {
         // Then release projection, i.e. allow service to stop it when it's
         // not needed anymore.
-        await _connector.releaseProjection();
+        await _controller.releaseProjection();
       }
     } finally {
       // This call is necessary for safety purposes.
@@ -168,14 +168,14 @@ class AndroidBackend implements Backend, AndroidListener {
   @override
   Future<void> stopSender() async {
     try {
-      if (!await _connector.isSenderAlive()) {
+      if (!await _controller.isSenderAlive()) {
         _logger.d("Sender already stopped");
         return;
       }
 
       _logger.i("Stopping sender");
 
-      await _connector.stopSender();
+      await _controller.stopSender();
     } finally {
       // This call is necessary for safety purposes.
       // Calls to connector may change service state.
@@ -216,7 +216,7 @@ class AndroidBackend implements Backend, AndroidListener {
 
   /// Async method used in all Android service event types.
   Future<void> refreshState() async {
-    final newReceiverIsAlive = await _connector.isReceiverAlive();
+    final newReceiverIsAlive = await _controller.isReceiverAlive();
     if (_receiverIsAlive != newReceiverIsAlive) {
       _logger.d(
           "Detected receiver state change from $_receiverIsAlive to $newReceiverIsAlive");
@@ -228,7 +228,7 @@ class AndroidBackend implements Backend, AndroidListener {
           .broadcast(Value<StateEvent>(StateEvent.receiverStateChanged));
     }
 
-    final newSenderIsAlive = await _connector.isSenderAlive();
+    final newSenderIsAlive = await _controller.isSenderAlive();
     if (_senderIsAlive != newSenderIsAlive) {
       _logger.d(
           "Detected sender state change from $_senderIsAlive to $newSenderIsAlive");

@@ -62,12 +62,12 @@ enum AndroidCaptureType {
 /// Allows to invoke kotlin methods from dart.
 ///
 /// This declaration emits 2 classes:
-///  dart:   AndroidConnector implementation class, which methods invoke kotlin
+///  dart:   AndroidController implementation class, which methods invoke kotlin
 ///          methods under the hood (via platform channels)
-///  kotlin: AndroidConnector interface, which we implement in
-///          AndroidConnectorImpl, where the actual work is done
+///  kotlin: AndroidController interface, which we implement in
+///          AndroidControllerImpl, where the actual work is done
 @HostApi()
-abstract class AndroidConnector {
+abstract class AndroidController {
   /// Get list of IP addresses of available network interfaces.
   List<String> getLocalAddresses();
 
