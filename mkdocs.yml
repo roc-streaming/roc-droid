@@ -4,11 +4,31 @@ copyright: Copyright (c) Roc Streaming authors.
 repo_url: https://github.com/roc-streaming/roc-droid
 edit_uri: https://github.com/roc-streaming/roc-droid/edit/main/docs/
 
+strict: true
+use_directory_urls: false
+
 theme:
-  name: readthedocs
+  name: material
+  features:
+    - navigation.sections
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
 
 markdown_extensions:
   - admonition
+
+plugins:
+  - search
+
+extra_css:
+  - stylesheets/extra.css
 
 nav:
   - Home: index.md

@@ -113,7 +113,7 @@ doit gen
 Run individual steps:
 
 ```
-doit gen:model [watch=true|false]
+doit gen:model
 doit gen:agent
 doit gen:l10n
 ```
@@ -148,6 +148,22 @@ Regenerate dependencies:
 
 ```
 doit gen:deps
+```
+
+## Build documentation
+
+Documentation for website is written in markdown and lives in `docs` directory.
+
+This will build HTML documentation from markdown using `mkdocs` and place it into `site` directory. It will run `mkdocs` in docker container, so docker is required:
+
+```
+doit docs:build
+```
+
+This will run a HTTP server on localhost that serves HTML documentation and automatically rebuilds it when markdown files (or other files in `docs` directory) are changed:
+
+```
+doit docs:serve
 ```
 
 ## Format code
