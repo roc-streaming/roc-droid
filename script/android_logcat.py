@@ -1,5 +1,4 @@
 #! /usr/bin/env python3
-
 from colorama import Fore, Back
 import colorama
 import functools

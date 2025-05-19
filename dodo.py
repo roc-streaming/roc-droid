@@ -29,7 +29,6 @@ DOIT_CONFIG = {
 }
 
 VARIANT = get_var('variant', 'release')
-WATCH = get_var('watch', 'false')
 
 def _platform():
     if platform.system() == 'Linux':
@@ -106,7 +105,22 @@ def _die(msg):
     print(f'error: {msg}', file=sys.stderr)
     sys.exit(1)
 
-class _LongCmd(CmdAction):
+class _InteractiveCmd(Interactive):
+    def __init__(self, cmd):
+        super().__init__(cmd)
+        self._cmd = cmd
+
+    def execute(self, *args, **kw):
+        if platform.system() != 'Windows':
+            # use execvp() to replace doit process with the command
+            os.execvp('bash', [
+                'bash', '-c',
+                # close file descriptors to release file locks
+                'eval exec {3..1024}">&-" && ' + self._cmd,
+            ])
+        super().execute(*args, **kw)
+
+class _HugeCmd(CmdAction):
     def __init__(self, func, title):
         super().__init__(self._make_cmd)
         self._func = func
@@ -216,6 +230,11 @@ def task_wipe():
         'title': _color_title,
     }
 
+# TODO
+# doit install:deskop [variant=debug|release]
+def todo_install_desktop():
+    pass
+
 # doit install:android [variant=debug|release]
 def task_install_android():
     """build android apk, then install it on connected device"""
@@ -241,7 +260,7 @@ def task_launch_desktop():
         device = _device(_platform())
         cmd = f'flutter run --{VARIANT} -d "{device}"'
         print(f'Running: {cmd}', file=sys.stderr)
-        return Interactive(cmd).execute()
+        return _InteractiveCmd(cmd).execute()
 
     return {
         'basename': 'launch:desktop',
@@ -264,7 +283,7 @@ def task_launch_android():
         device = _device('android')
         cmd = f'flutter run --{VARIANT} -d "{device}"'
         print(f'Running: {cmd}', file=sys.stderr)
-        return Interactive(cmd).execute()
+        return _InteractiveCmd(cmd).execute()
 
     return {
         'basename': 'launch:android',
@@ -288,22 +307,13 @@ def task_gen():
 # doit gen:model [watch=true|false]
 def task_gen_model():
     """run flutter build_runner Model code generation"""
-    if _truish(WATCH):
-        return {
-            'basename': 'gen:model',
-            'actions': [
-                LongRunning(f'dart run build_runner watch --delete-conflicting-outputs'),
-            ],
-            'title': _color_title,
-        }
-    else:
-        return {
-            'basename': 'gen:model',
-            'actions': [
-                f'dart run build_runner build --delete-conflicting-outputs',
-            ],
-            'title': _color_title,
-        }
+    return {
+        'basename': 'gen:model',
+        'actions': [
+            f'dart run build_runner build --delete-conflicting-outputs',
+        ],
+        'title': _color_title,
+    }
 
 # doit gen:agent
 def task_gen_agent():
@@ -363,6 +373,28 @@ def task_gen_splash():
         'title': _color_title,
     }
 
+# doit docs:build
+def task_docs_build():
+    """build html documentation"""
+    return {
+        'basename': 'docs:build',
+        'actions': [
+            f'{sys.executable} script/generate_docs.py build',
+        ],
+        'title': _color_title,
+    }
+
+# doit docs:serve
+def task_docs_serve():
+    """serve html documentation on localhost"""
+    return {
+        'basename': 'docs:serve',
+        'actions': [
+            _InteractiveCmd(f'{sys.executable} script/generate_docs.py serve'),
+        ],
+        'title': _color_title,
+    }
+
 # doit fmt
 def task_fmt():
     """run all code formatters"""
@@ -390,7 +422,7 @@ def task_fmt_dart():
     return {
         'basename': 'fmt:dart',
         'actions': [
-            _LongCmd(func=_make_command, title='dart format'),
+            _HugeCmd(func=_make_command, title='dart format'),
         ],
         'title': _color_title,
     }
