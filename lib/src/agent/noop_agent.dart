@@ -6,7 +6,7 @@ import 'android_bridge.g.dart';
 
 class NoopAgent implements Agent {
   @override
-  final Event<Value<AgentEvent>> eventSource = Event("NoopAgent.eventSource");
+  final Event<AgentEvent> eventSource = Event("NoopAgent.eventSource");
 
   @override
   bool receiverIsAlive = false;

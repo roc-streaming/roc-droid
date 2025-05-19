@@ -1,3 +1,4 @@
+import 'package:event/event.dart';
 import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:roc_droid/src/agent.dart';
@@ -15,9 +16,11 @@ Future<ModelRoot> testModelRoot() async => await ModelRoot.create(
 Future<Receiver> testReceiver() async => await Receiver.create(
       Logger(printer: SimplePrinter()),
       NoopAgent(),
+      Event<FailureEvent>("testReceiver"),
     );
 
 Future<Sender> testSender() async => await Sender.create(
       Logger(printer: SimplePrinter()),
       NoopAgent(),
+      Event<FailureEvent>("testSender"),
     );

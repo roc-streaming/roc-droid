@@ -90,8 +90,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterIp => 'Enter IP address';
 
   @override
+  String get permissionError => 'Permission not granted';
+
+  @override
   String get deviceError => 'Audio device error';
 
   @override
   String get networkError => 'Network error';
+
+  @override
+  String get internalError => 'Unexpected internal error';
 }

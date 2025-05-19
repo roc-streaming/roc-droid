@@ -12,16 +12,21 @@ import 'android_connector.dart';
 class Agent {
   final AndroidConnector _androidConnector;
 
+  final Event<AgentEvent> eventSource = Event("Agent.eventSource");
+
   Agent._create(Logger logger) : _androidConnector = AndroidConnector(logger);
 
   static Future<Agent> create(Logger logger) async {
     final agent = Agent._create(logger);
+
+    agent._androidConnector.eventSource.subscribe((args) {
+        // TODO: also forward events from DaemonConnector
+        agent.eventSource.broadcast(args);
+    });
+
     await agent._androidConnector.refreshState();
     return agent;
   }
-
-  // TODO: combine events from AndroidConnector and DaemonConnector
-  Event<Value<AgentEvent>> get eventSource => _androidConnector.eventSource;
 
   // TODO: use AndroidConnector to start/stop daemon and DaemonConnector to
   // start/stop sender/receiver.

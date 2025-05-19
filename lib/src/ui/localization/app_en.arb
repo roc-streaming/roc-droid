@@ -53,7 +53,11 @@
 
     "enterIp": "Enter IP address",
 
+    "permissionError": "Permission not granted",
+
     "deviceError": "Audio device error",
 
-    "networkError": "Network error"
+    "networkError": "Network error",
+
+    "internalError": "Unexpected internal error"
 }

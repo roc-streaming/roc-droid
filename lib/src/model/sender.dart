@@ -1,18 +1,22 @@
+import 'package:event/event.dart';
 import 'package:logger/logger.dart';
 import 'package:mobx/mobx.dart';
 
 import '../agent.dart';
 import 'capture_source_type.dart';
+import 'failure_event.dart';
 
 part 'sender.g.dart';
 
 /// Implementation of the Model Sender class.
 class Sender extends _Sender with _$Sender {
-  Sender._create(Logger logger, Agent agent) : super(logger, agent);
+  Sender._create(Logger logger, Agent agent, Event<FailureEvent> failureEvent)
+      : super(logger, agent, failureEvent);
 
   /// Public Sender factory
-  static Future<Sender> create(Logger logger, Agent agent) async {
-    var sender = Sender._create(logger, agent);
+  static Future<Sender> create(
+      Logger logger, Agent agent, Event<FailureEvent> failureEvent) async {
+    var sender = Sender._create(logger, agent, failureEvent);
     await sender._init();
     return sender;
   }
@@ -21,6 +25,7 @@ class Sender extends _Sender with _$Sender {
 abstract class _Sender with Store {
   final Logger _logger;
   final Agent _agent;
+  final Event<FailureEvent> _failureEvent;
 
   // Determines whether the sender is running or not
   @observable
@@ -59,10 +64,10 @@ abstract class _Sender with Store {
   CaptureSourceType get captureSource => _captureSource;
 
   // Synchronous part of the constructor.
-  _Sender(this._logger, this._agent) {
+  _Sender(this._logger, this._agent, this._failureEvent) {
     _agent.eventSource.subscribe(
       (args) async {
-        if (args.value == AgentEvent.stateChanged) {
+        if (args is AgentStateEvent) {
           _isStarted = _agent.receiverIsAlive;
         }
       },
@@ -80,22 +85,30 @@ abstract class _Sender with Store {
   // Start current sender.
   @action
   Future<void> requestStart() async {
-    await _agent.startSender(AndroidSenderSettings(
-      captureType: switch (captureSource) {
-        CaptureSourceType.currentlyPlayingApplications =>
-          AndroidCaptureType.captureApps,
-        CaptureSourceType.microphone => AndroidCaptureType.captureMic,
-      },
-      host: receiverIP,
-      sourcePort: _sourcePort,
-      repairPort: _repairPort,
-    ));
+    try {
+      await _agent.startSender(AndroidSenderSettings(
+        captureType: switch (captureSource) {
+          CaptureSourceType.currentlyPlayingApplications =>
+            AndroidCaptureType.captureApps,
+          CaptureSourceType.microphone => AndroidCaptureType.captureMic,
+        },
+        host: receiverIP,
+        sourcePort: _sourcePort,
+        repairPort: _repairPort,
+      ));
+    } on AgentException catch (ex) {
+      _failureEvent.broadcast(FailureEvent.fromAgent(ex.errorCode));
+    }
   }
 
   // Stop current sender.
   @action
   Future<void> requestStop() async {
-    await _agent.stopSender();
+    try {
+      await _agent.stopSender();
+    } on AgentException catch (ex) {
+      _failureEvent.broadcast(FailureEvent.fromAgent(ex.errorCode));
+    }
   }
 
   // Update source port value.
@@ -123,5 +136,6 @@ abstract class _Sender with Store {
   @action
   void setCaptureSource(CaptureSourceType value) {
     _captureSource = value;
+    _logger.d('Receiver Capture Source value changed to: ${_captureSource}');
   }
 }

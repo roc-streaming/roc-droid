@@ -255,6 +255,12 @@ abstract class AppLocalizations {
   /// **'Enter IP address'**
   String get enterIp;
 
+  /// No description provided for @permissionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission not granted'**
+  String get permissionError;
+
   /// No description provided for @deviceError.
   ///
   /// In en, this message translates to:
@@ -266,6 +272,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Network error'**
   String get networkError;
+
+  /// No description provided for @internalError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexpected internal error'**
+  String get internalError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

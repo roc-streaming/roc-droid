@@ -1,19 +1,23 @@
 import 'dart:collection';
 
+import 'package:event/event.dart';
 import 'package:logger/logger.dart';
 import 'package:mobx/mobx.dart';
 
 import '../agent.dart';
+import 'failure_event.dart';
 
 part 'receiver.g.dart';
 
 /// Implementation of the Model Receiver class.
 class Receiver extends _Receiver with _$Receiver {
-  Receiver._create(Logger logger, Agent agent) : super(logger, agent);
+  Receiver._create(Logger logger, Agent agent, Event<FailureEvent> failureEvent)
+      : super(logger, agent, failureEvent);
 
   /// Public Receiver factory
-  static Future<Receiver> create(Logger logger, Agent agent) async {
-    var receiver = Receiver._create(logger, agent);
+  static Future<Receiver> create(
+      Logger logger, Agent agent, Event<FailureEvent> failureEvent) async {
+    var receiver = Receiver._create(logger, agent, failureEvent);
     await receiver._init();
     return receiver;
   }
@@ -22,6 +26,7 @@ class Receiver extends _Receiver with _$Receiver {
 abstract class _Receiver with Store {
   final Logger _logger;
   final Agent _agent;
+  final Event<FailureEvent> _failureEvent;
 
   // Determines whether the receiver is running or not
   @observable
@@ -53,11 +58,11 @@ abstract class _Receiver with Store {
   int get repairPort => _repairPort;
 
   // Synchronous part of the constructor.
-  _Receiver(this._logger, this._agent) {
+  _Receiver(this._logger, this._agent, this._failureEvent) {
     // Subscribe to agent state change event.
     _agent.eventSource.subscribe(
       (args) async {
-        if (args.value == AgentEvent.stateChanged) {
+        if (args is AgentStateEvent) {
           _isStarted = _agent.receiverIsAlive;
         }
       },
@@ -76,16 +81,24 @@ abstract class _Receiver with Store {
   // Start current receiver.
   @action
   Future<void> requestStart() async {
-    await _agent.startReceiver(AndroidReceiverSettings(
-      sourcePort: _sourcePort,
-      repairPort: _repairPort,
-    ));
+    try {
+      await _agent.startReceiver(AndroidReceiverSettings(
+        sourcePort: _sourcePort,
+        repairPort: _repairPort,
+      ));
+    } on AgentException catch (ex) {
+      _failureEvent.broadcast(FailureEvent.fromAgent(ex.errorCode));
+    }
   }
 
   // Stop current receiver.
   @action
   Future<void> requestStop() async {
-    await _agent.stopReceiver();
+    try {
+      await _agent.stopReceiver();
+    } on AgentException catch (ex) {
+      _failureEvent.broadcast(FailureEvent.fromAgent(ex.errorCode));
+    }
   }
 
   // Update source port value.

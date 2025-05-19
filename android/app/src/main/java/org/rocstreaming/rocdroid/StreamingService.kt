@@ -194,7 +194,7 @@ class StreamingService : Service() {
         senderThread = Thread {
             try {
                 if (previousThread != null) {
-                    Log.d(LOG_TAG, "Joining previois sender thread")
+                    Log.d(LOG_TAG, "Joining previous sender thread")
                     previousThread.join()
                 }
 
@@ -255,7 +255,7 @@ class StreamingService : Service() {
         receiverThread = Thread {
             try {
                 if (previousThread != null) {
-                    Log.d(LOG_TAG, "Joining previois receiver thread")
+                    Log.d(LOG_TAG, "Joining previous receiver thread")
                     previousThread.join()
                 }
 

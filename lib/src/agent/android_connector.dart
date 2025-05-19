@@ -1,7 +1,10 @@
 import 'package:event/event.dart';
+import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 
+import 'agent_error_code.dart';
 import 'agent_event.dart';
+import 'agent_exception.dart';
 import 'android_bridge.g.dart';
 
 /// Implements communication with Android code via platform channels.
@@ -18,6 +21,8 @@ class AndroidConnector implements AndroidListener {
   bool _receiverIsAlive = false;
   bool _senderIsAlive = false;
 
+  final Event<AgentEvent> eventSource = Event("AndroidConnector.eventSource");
+
   AndroidConnector(Logger logger)
       : _logger = logger,
         _controller = AndroidController() {
@@ -28,9 +33,6 @@ class AndroidConnector implements AndroidListener {
 
   bool get receiverIsAlive => _receiverIsAlive;
   bool get senderIsAlive => _senderIsAlive;
-
-  final Event<Value<AgentEvent>> eventSource =
-      Event("AndroidConnector.eventSource");
 
   Future<void> startReceiver(AndroidReceiverSettings settings) async {
     try {
@@ -60,6 +62,9 @@ class AndroidConnector implements AndroidListener {
         // not needed anymore.
         await _controller.releaseProjection();
       }
+    } on PlatformException catch (ex) {
+      // Translate android-specific exception to generic agent exception.
+      throw _translateException(ex);
     } finally {
       // This call is necessary for safety purposes.
       // Calls to connector may change service state.
@@ -81,13 +86,11 @@ class AndroidConnector implements AndroidListener {
       _logger.i("Stopping receiver");
 
       await _controller.stopReceiver();
+    } on PlatformException catch (ex) {
+      // Translate android-specific exception to generic agent exception.
+      throw _translateException(ex);
     } finally {
-      // This call is necessary for safety purposes.
-      // Calls to connector may change service state.
-      // We want to refresh our cached state to ensure that the new state is
-      // visible to the caller immediately after return.
-      // Otherwise the caller may observe outdated state until we handle
-      // asynchronous event from connector.
+      // Ensure state reflects changes on android side.
       await refreshState();
     }
   }
@@ -128,6 +131,9 @@ class AndroidConnector implements AndroidListener {
         // not needed anymore.
         await _controller.releaseProjection();
       }
+    } on PlatformException catch (ex) {
+      // Translate android-specific exception to generic agent exception.
+      throw _translateException(ex);
     } finally {
       // This call is necessary for safety purposes.
       // Calls to connector may change service state.
@@ -149,13 +155,11 @@ class AndroidConnector implements AndroidListener {
       _logger.i("Stopping sender");
 
       await _controller.stopSender();
+    } on PlatformException catch (ex) {
+      // Translate android-specific exception to generic agent exception.
+      throw _translateException(ex);
     } finally {
-      // This call is necessary for safety purposes.
-      // Calls to connector may change service state.
-      // We want to refresh our cached state to ensure that the new state is
-      // visible to the caller immediately after return.
-      // Otherwise the caller may observe outdated state until we handle
-      // asynchronous event from connector.
+      // Ensure state reflects changes on android side.
       await refreshState();
     }
   }
@@ -179,11 +183,11 @@ class AndroidConnector implements AndroidListener {
     switch (errorCode) {
       case AndroidServiceError.audioRecordFailed:
       case AndroidServiceError.audioTrackFailed:
-        eventSource.broadcast(Value<AgentEvent>(AgentEvent.deviceError));
+        eventSource.broadcast(AgentErrorEvent(AgentErrorCode.deviceError));
 
       case AndroidServiceError.senderConnectFailed:
       case AndroidServiceError.receiverBindFailed:
-        eventSource.broadcast(Value<AgentEvent>(AgentEvent.networkError));
+        eventSource.broadcast(AgentErrorEvent(AgentErrorCode.networkError));
     }
   }
 
@@ -197,7 +201,7 @@ class AndroidConnector implements AndroidListener {
 
       // Whenever receiver state changes, no matter how we've found out (from kotlin
       // event of from finally block), we notify subscribers
-      eventSource.broadcast(Value<AgentEvent>(AgentEvent.stateChanged));
+      eventSource.broadcast(AgentStateEvent());
     }
 
     final newSenderIsAlive = await _controller.isSenderAlive();
@@ -208,7 +212,19 @@ class AndroidConnector implements AndroidListener {
 
       // Whenever sender state changes, no matter how we've found out (from kotlin
       // event of from finally block), we notify subscribers
-      eventSource.broadcast(Value<AgentEvent>(AgentEvent.stateChanged));
+      eventSource.broadcast(AgentStateEvent());
+    }
+  }
+
+  AgentException _translateException(PlatformException ex) {
+    _logger.d("Caught platform exception: [${ex.code}] ${ex.message}");
+
+    switch (ex.code) {
+      case "rocdroid.NO_PROJECTION" || "rocdroid.NO_PERMISSION":
+        return AgentPermissionException(ex.message ?? "Permission not granted");
+      default:
+        return AgentException(
+            AgentErrorCode.internalError, ex.message ?? "Unexpected error");
     }
   }
 }

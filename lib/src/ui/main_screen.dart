@@ -45,9 +45,13 @@ class _MainScreenState extends State<MainScreen> {
         ] {
     // Subscribe to model failure event (coming from backend failure event).
     _modelRoot.failureEvent.subscribe((args) {
-      var message = switch (args.value) {
-        FailureEvent.deviceError => AppLocalizations.of(context)!.deviceError,
-        FailureEvent.networkError => AppLocalizations.of(context)!.networkError,
+      var message = switch (args.code) {
+        FailureCode.permissionError =>
+          AppLocalizations.of(context)!.permissionError,
+        FailureCode.deviceError => AppLocalizations.of(context)!.deviceError,
+        FailureCode.networkError => AppLocalizations.of(context)!.networkError,
+        FailureCode.internalError =>
+          AppLocalizations.of(context)!.internalError,
       };
       RocSnackbar.showMessage(context: context, message: message);
     });
