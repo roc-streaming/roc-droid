@@ -395,6 +395,17 @@ def task_docs_serve():
         'title': _color_title,
     }
 
+# doit docs:authors
+def task_docs_md():
+    """re-generate authors list"""
+    return {
+        'basename': 'docs:md',
+        'actions': [
+            'md-authors -a -f "{index}. {name} ([{login}]({profile}))" docs/authors.md'
+        ],
+        'title': _color_title,
+    }
+
 # doit fmt
 def task_fmt():
     """run all code formatters"""

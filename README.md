@@ -53,7 +53,7 @@ If you would like to support the project financially, please refer to [this page
 
 Thank you!
 
-<a href="https://liberapay.com/roc-streaming"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
+<a href="https://github.com/sponsors/roc-streaming"><img alt="Donate on GitHub Sponsors" src="https://roc-streaming.org/images/logos/github_sponsors.svg"></a>
 
 ## Hacking
 
@@ -66,7 +66,7 @@ Welcome to join our matrix chat rooms for [users](https://app.element.io/#/room/
 Authors
 -------
 
-See [here](https://github.com/roc-streaming/roc-droid/graphs/contributors).
+You can find the list of maintainer and contributors on [this page](https://roc-streaming.org/droid/authors/).
 
 License
 -------

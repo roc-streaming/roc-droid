@@ -166,6 +166,12 @@ This will run a HTTP server on localhost that serves HTML documentation and auto
 doit docs:serve
 ```
 
+Re-generate some markdown pages:
+
+```
+doit docs:md
+```
+
 ## Format code
 
 Run all code formatters:
