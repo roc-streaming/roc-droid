@@ -59,5 +59,9 @@
 
     "networkError": "Network error",
 
+    "dbError": "Database error",
+
+    "notFoundError": "Object not found",
+
     "internalError": "Unexpected internal error"
 }

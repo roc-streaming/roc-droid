@@ -22,7 +22,7 @@ class RocButton extends StatelessWidget {
         _deactivatedText = deactivatedText,
         _activatedText = activatedText;
 
-  void _onPressed() async {
+  Future<void> _onPressed() async {
     _isActive ? await _activatedFunction() : await _deactivatedFunction();
   }
 

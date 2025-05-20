@@ -49,14 +49,14 @@ class FlutterError (
 ) : Throwable()
 
 /** Where sender gets sound. */
-enum class AndroidCaptureType(val raw: Int) {
+enum class AndroidCaptureSource(val raw: Int) {
   /** Capture from locally playing apps. */
   CAPTURE_APPS(0),
   /** Capture from local microphone. */
   CAPTURE_MIC(1);
 
   companion object {
-    fun ofRaw(raw: Int): AndroidCaptureType? {
+    fun ofRaw(raw: Int): AndroidCaptureSource? {
       return values().firstOrNull { it.raw == raw }
     }
   }
@@ -124,7 +124,7 @@ data class AndroidReceiverSettings (
  */
 data class AndroidSenderSettings (
   /** From where to capture stream. */
-  val captureType: AndroidCaptureType,
+  val captureSource: AndroidCaptureSource,
   /** IP address or hostname where to send packets. */
   val host: String,
   /** Remote port where to send source packets. */
@@ -135,16 +135,16 @@ data class AndroidSenderSettings (
  {
   companion object {
     fun fromList(pigeonVar_list: List<Any?>): AndroidSenderSettings {
-      val captureType = pigeonVar_list[0] as AndroidCaptureType
+      val captureSource = pigeonVar_list[0] as AndroidCaptureSource
       val host = pigeonVar_list[1] as String
       val sourcePort = pigeonVar_list[2] as Long
       val repairPort = pigeonVar_list[3] as Long
-      return AndroidSenderSettings(captureType, host, sourcePort, repairPort)
+      return AndroidSenderSettings(captureSource, host, sourcePort, repairPort)
     }
   }
   fun toList(): List<Any?> {
     return listOf(
-      captureType,
+      captureSource,
       host,
       sourcePort,
       repairPort,
@@ -156,7 +156,7 @@ private open class AndroidBridgePigeonCodec : StandardMessageCodec() {
     return when (type) {
       129.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          AndroidCaptureType.ofRaw(it.toInt())
+          AndroidCaptureSource.ofRaw(it.toInt())
         }
       }
       130.toByte() -> {
@@ -184,7 +184,7 @@ private open class AndroidBridgePigeonCodec : StandardMessageCodec() {
   }
   override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
     when (value) {
-      is AndroidCaptureType -> {
+      is AndroidCaptureSource -> {
         stream.write(129)
         writeValue(stream, value.raw)
       }
@@ -230,7 +230,7 @@ interface AndroidController {
   fun requestNotifications(callback: (Result<Boolean>) -> Unit)
   /**
    * Request permission to capture local microphone, if not already granted.
-   * Must be called before starting sender when using AndroidCaptureType.captureMic.
+   * Must be called before starting sender when using AndroidCaptureSource.captureMic.
    * If returns false, user rejected permission and sender won't start.
    */
   fun requestMicrophone(callback: (Result<Boolean>) -> Unit)

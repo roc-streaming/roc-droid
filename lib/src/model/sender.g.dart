@@ -9,11 +9,18 @@ part of 'sender.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$Sender on _Sender, Store {
-  Computed<bool>? _$isStartedComputed;
+  Computed<CaptureSource>? _$captureSourceComputed;
 
   @override
-  bool get isStarted => (_$isStartedComputed ??=
-          Computed<bool>(() => super.isStarted, name: '_Sender.isStarted'))
+  CaptureSource get captureSource => (_$captureSourceComputed ??=
+          Computed<CaptureSource>(() => super.captureSource,
+              name: '_Sender.captureSource'))
+      .value;
+  Computed<String>? _$receiverIPComputed;
+
+  @override
+  String get receiverIP => (_$receiverIPComputed ??=
+          Computed<String>(() => super.receiverIP, name: '_Sender.receiverIP'))
       .value;
   Computed<int>? _$sourcePortComputed;
 
@@ -27,19 +34,27 @@ mixin _$Sender on _Sender, Store {
   int get repairPort => (_$repairPortComputed ??=
           Computed<int>(() => super.repairPort, name: '_Sender.repairPort'))
       .value;
-  Computed<String>? _$receiverIPComputed;
+  Computed<bool>? _$isStartedComputed;
 
   @override
-  String get receiverIP => (_$receiverIPComputed ??=
-          Computed<String>(() => super.receiverIP, name: '_Sender.receiverIP'))
+  bool get isStarted => (_$isStartedComputed ??=
+          Computed<bool>(() => super.isStarted, name: '_Sender.isStarted'))
       .value;
-  Computed<CaptureSourceType>? _$captureSourceComputed;
+
+  late final _$_configAtom = Atom(name: '_Sender._config', context: context);
 
   @override
-  CaptureSourceType get captureSource => (_$captureSourceComputed ??=
-          Computed<CaptureSourceType>(() => super.captureSource,
-              name: '_Sender.captureSource'))
-      .value;
+  SenderConfig get _config {
+    _$_configAtom.reportRead();
+    return super._config;
+  }
+
+  @override
+  set _config(SenderConfig value) {
+    _$_configAtom.reportWrite(value, super._config, () {
+      super._config = value;
+    });
+  }
 
   late final _$_isStartedAtom =
       Atom(name: '_Sender._isStarted', context: context);
@@ -54,70 +69,6 @@ mixin _$Sender on _Sender, Store {
   set _isStarted(bool value) {
     _$_isStartedAtom.reportWrite(value, super._isStarted, () {
       super._isStarted = value;
-    });
-  }
-
-  late final _$_sourcePortAtom =
-      Atom(name: '_Sender._sourcePort', context: context);
-
-  @override
-  int get _sourcePort {
-    _$_sourcePortAtom.reportRead();
-    return super._sourcePort;
-  }
-
-  @override
-  set _sourcePort(int value) {
-    _$_sourcePortAtom.reportWrite(value, super._sourcePort, () {
-      super._sourcePort = value;
-    });
-  }
-
-  late final _$_repairPortAtom =
-      Atom(name: '_Sender._repairPort', context: context);
-
-  @override
-  int get _repairPort {
-    _$_repairPortAtom.reportRead();
-    return super._repairPort;
-  }
-
-  @override
-  set _repairPort(int value) {
-    _$_repairPortAtom.reportWrite(value, super._repairPort, () {
-      super._repairPort = value;
-    });
-  }
-
-  late final _$_receiverIPAtom =
-      Atom(name: '_Sender._receiverIP', context: context);
-
-  @override
-  String get _receiverIP {
-    _$_receiverIPAtom.reportRead();
-    return super._receiverIP;
-  }
-
-  @override
-  set _receiverIP(String value) {
-    _$_receiverIPAtom.reportWrite(value, super._receiverIP, () {
-      super._receiverIP = value;
-    });
-  }
-
-  late final _$_captureSourceAtom =
-      Atom(name: '_Sender._captureSource', context: context);
-
-  @override
-  CaptureSourceType get _captureSource {
-    _$_captureSourceAtom.reportRead();
-    return super._captureSource;
-  }
-
-  @override
-  set _captureSource(CaptureSourceType value) {
-    _$_captureSourceAtom.reportWrite(value, super._captureSource, () {
-      super._captureSource = value;
     });
   }
 
@@ -145,61 +96,47 @@ mixin _$Sender on _Sender, Store {
     return _$requestStopAsyncAction.run(() => super.requestStop());
   }
 
-  late final _$_SenderActionController =
-      ActionController(name: '_Sender', context: context);
+  late final _$setCaptureSourceAsyncAction =
+      AsyncAction('_Sender.setCaptureSource', context: context);
 
   @override
-  void setSourcePort(int value) {
-    final _$actionInfo =
-        _$_SenderActionController.startAction(name: '_Sender.setSourcePort');
-    try {
-      return super.setSourcePort(value);
-    } finally {
-      _$_SenderActionController.endAction(_$actionInfo);
-    }
+  Future<void> setCaptureSource(CaptureSource value) {
+    return _$setCaptureSourceAsyncAction
+        .run(() => super.setCaptureSource(value));
   }
 
-  @override
-  void setRepairPort(int value) {
-    final _$actionInfo =
-        _$_SenderActionController.startAction(name: '_Sender.setRepairPort');
-    try {
-      return super.setRepairPort(value);
-    } finally {
-      _$_SenderActionController.endAction(_$actionInfo);
-    }
-  }
+  late final _$setReceiverIPAsyncAction =
+      AsyncAction('_Sender.setReceiverIP', context: context);
 
   @override
-  void setReceiverIP(String value) {
-    final _$actionInfo =
-        _$_SenderActionController.startAction(name: '_Sender.setReceiverIP');
-    try {
-      return super.setReceiverIP(value);
-    } finally {
-      _$_SenderActionController.endAction(_$actionInfo);
-    }
+  Future<void> setReceiverIP(String value) {
+    return _$setReceiverIPAsyncAction.run(() => super.setReceiverIP(value));
   }
 
+  late final _$setSourcePortAsyncAction =
+      AsyncAction('_Sender.setSourcePort', context: context);
+
   @override
-  void setCaptureSource(CaptureSourceType value) {
-    final _$actionInfo =
-        _$_SenderActionController.startAction(name: '_Sender.setCaptureSource');
-    try {
-      return super.setCaptureSource(value);
-    } finally {
-      _$_SenderActionController.endAction(_$actionInfo);
-    }
+  Future<void> setSourcePort(int value) {
+    return _$setSourcePortAsyncAction.run(() => super.setSourcePort(value));
+  }
+
+  late final _$setRepairPortAsyncAction =
+      AsyncAction('_Sender.setRepairPort', context: context);
+
+  @override
+  Future<void> setRepairPort(int value) {
+    return _$setRepairPortAsyncAction.run(() => super.setRepairPort(value));
   }
 
   @override
   String toString() {
     return '''
-isStarted: ${isStarted},
+captureSource: ${captureSource},
+receiverIP: ${receiverIP},
 sourcePort: ${sourcePort},
 repairPort: ${repairPort},
-receiverIP: ${receiverIP},
-captureSource: ${captureSource}
+isStarted: ${isStarted}
     ''';
   }
 }

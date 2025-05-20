@@ -5,19 +5,21 @@ import 'package:logger/logger.dart';
 import 'package:mobx/mobx.dart';
 
 import '../agent.dart';
+import '../dto.dart';
+import '../storage.dart';
 import 'failure_event.dart';
 
 part 'receiver.g.dart';
 
-/// Implementation of the Model Receiver class.
+/// Represents running receiver.
 class Receiver extends _Receiver with _$Receiver {
-  Receiver._create(Logger logger, Agent agent, Event<FailureEvent> failureEvent)
-      : super(logger, agent, failureEvent);
+  Receiver._create(Logger logger, Agent agent, Storage storage,
+      Event<FailureEvent> failureEvent)
+      : super(logger, agent, storage, failureEvent);
 
-  /// Public Receiver factory
-  static Future<Receiver> create(
-      Logger logger, Agent agent, Event<FailureEvent> failureEvent) async {
-    var receiver = Receiver._create(logger, agent, failureEvent);
+  static Future<Receiver> create(Logger logger, Agent agent, Storage storage,
+      Event<FailureEvent> failureEvent) async {
+    var receiver = Receiver._create(logger, agent, storage, failureEvent);
     await receiver._init();
     return receiver;
   }
@@ -26,16 +28,30 @@ class Receiver extends _Receiver with _$Receiver {
 abstract class _Receiver with Store {
   final Logger _logger;
   final Agent _agent;
+  final Storage _storage;
   final Event<FailureEvent> _failureEvent;
 
-  // Determines whether the receiver is running or not
+  // Config.
+  @observable
+  ReceiverConfig _config = ReceiverConfig(
+    sourcePort: 10001,
+    repairPort: 10002,
+  );
+
+  @computed
+  int get sourcePort => _config.sourcePort;
+
+  @computed
+  int get repairPort => _config.repairPort;
+
+  // State.
   @observable
   bool _isStarted = false;
 
   @computed
   bool get isStarted => _isStarted;
 
-  // Represents a collection of available receiver IP addresses.
+  // Local addresses.
   @observable
   ObservableList<String> _receiverIPs = ObservableList();
 
@@ -43,23 +59,7 @@ abstract class _Receiver with Store {
   UnmodifiableListView<String> get receiverIPs =>
       UnmodifiableListView(_receiverIPs);
 
-  // Represents the active source port.
-  @observable
-  int _sourcePort = -1;
-
-  @computed
-  int get sourcePort => _sourcePort;
-
-  // Represents the active repair port.
-  @observable
-  int _repairPort = -1;
-
-  @computed
-  int get repairPort => _repairPort;
-
-  // Synchronous part of the constructor.
-  _Receiver(this._logger, this._agent, this._failureEvent) {
-    // Subscribe to agent state change event.
+  _Receiver(this._logger, this._agent, this._storage, this._failureEvent) {
     _agent.eventSource.subscribe(
       (args) async {
         if (args is AgentStateEvent) {
@@ -69,49 +69,66 @@ abstract class _Receiver with Store {
     );
   }
 
-  // Asynchronous part of the constructor.
+  // Async constructor.
   @action
   Future<void> _init() async {
     _isStarted = _agent.receiverIsAlive;
-    _receiverIPs = ObservableList.of(await _agent.discoverLocalAddresses());
-    setSourcePort(10001);
-    setRepairPort(10002);
-  }
+    _receiverIPs = ObservableList.of((await _agent.discoverLocalAddresses())
+        // FIXME: filter out IPv6 addresses because they break UI
+        .where((addr) => !addr.contains(':')));
 
-  // Start current receiver.
-  @action
-  Future<void> requestStart() async {
     try {
-      await _agent.startReceiver(AndroidReceiverSettings(
-        sourcePort: _sourcePort,
-        repairPort: _repairPort,
-      ));
-    } on AgentException catch (ex) {
-      _failureEvent.broadcast(FailureEvent.fromAgent(ex.errorCode));
+      _config = await _storage.readReceiverConfig();
+      _logger.d('Loaded receiver config from storage');
+    } on StorageNotFoundException catch (_) {
+      _logger.d('Receiver config not found in storage, using default');
+    } on StorageException catch (ex) {
+      _logger.e('Failed to load receiver config from storage: ${ex}');
+      _failureEvent.broadcast(FailureEvent(ex.errorCode));
     }
   }
 
-  // Stop current receiver.
+  // Save config to storage.
+  Future<void> _save() async {
+    try {
+      _logger.d('Saving receiver config to storage: $_config');
+      await _storage.writeReceiverConfig(_config);
+    } on StorageException catch (ex) {
+      _failureEvent.broadcast(FailureEvent(ex.errorCode));
+    }
+  }
+
+  // Start receiver.
+  @action
+  Future<void> requestStart() async {
+    try {
+      await _agent.startReceiver(_config);
+    } on AgentException catch (ex) {
+      _failureEvent.broadcast(FailureEvent(ex.errorCode));
+    }
+  }
+
+  // Stop receiver.
   @action
   Future<void> requestStop() async {
     try {
       await _agent.stopReceiver();
     } on AgentException catch (ex) {
-      _failureEvent.broadcast(FailureEvent.fromAgent(ex.errorCode));
+      _failureEvent.broadcast(FailureEvent(ex.errorCode));
     }
   }
 
-  // Update source port value.
+  // Update source port.
   @action
-  void setSourcePort(int value) {
-    _sourcePort = value;
-    _logger.d('Receiver source port value changed to: ${_sourcePort}');
+  Future<void> setSourcePort(int value) async {
+    _config = _config.copyWith(sourcePort: value);
+    await _save();
   }
 
-  // Update repair port value.
+  // Update repair port.
   @action
-  void setRepairPort(int value) {
-    _repairPort = value;
-    _logger.d('Receiver repair port value changed to: ${_repairPort}');
+  Future<void> setRepairPort(int value) async {
+    _config = _config.copyWith(repairPort: value);
+    await _save();
   }
 }

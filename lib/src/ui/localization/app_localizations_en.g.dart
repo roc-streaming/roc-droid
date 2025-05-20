@@ -99,5 +99,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get networkError => 'Network error';
 
   @override
+  String get dbError => 'Database error';
+
+  @override
+  String get notFoundError => 'Object not found';
+
+  @override
   String get internalError => 'Unexpected internal error';
 }

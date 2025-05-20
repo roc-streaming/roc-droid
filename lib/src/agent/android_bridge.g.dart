@@ -26,7 +26,7 @@ List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty
 }
 
 /// Where sender gets sound.
-enum AndroidCaptureType {
+enum AndroidCaptureSource {
   /// Capture from locally playing apps.
   captureApps,
   /// Capture from local microphone.
@@ -81,14 +81,14 @@ class AndroidReceiverSettings {
 /// Sender settings.
 class AndroidSenderSettings {
   AndroidSenderSettings({
-    required this.captureType,
+    required this.captureSource,
     required this.host,
     required this.sourcePort,
     required this.repairPort,
   });
 
   /// From where to capture stream.
-  AndroidCaptureType captureType;
+  AndroidCaptureSource captureSource;
 
   /// IP address or hostname where to send packets.
   String host;
@@ -101,7 +101,7 @@ class AndroidSenderSettings {
 
   Object encode() {
     return <Object?>[
-      captureType,
+      captureSource,
       host,
       sourcePort,
       repairPort,
@@ -111,7 +111,7 @@ class AndroidSenderSettings {
   static AndroidSenderSettings decode(Object result) {
     result as List<Object?>;
     return AndroidSenderSettings(
-      captureType: result[0]! as AndroidCaptureType,
+      captureSource: result[0]! as AndroidCaptureSource,
       host: result[1]! as String,
       sourcePort: result[2]! as int,
       repairPort: result[3]! as int,
@@ -127,7 +127,7 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is AndroidCaptureType) {
+    }    else if (value is AndroidCaptureSource) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
     }    else if (value is AndroidServiceEvent) {
@@ -152,7 +152,7 @@ class _PigeonCodec extends StandardMessageCodec {
     switch (type) {
       case 129: 
         final int? value = readValue(buffer) as int?;
-        return value == null ? null : AndroidCaptureType.values[value];
+        return value == null ? null : AndroidCaptureSource.values[value];
       case 130: 
         final int? value = readValue(buffer) as int?;
         return value == null ? null : AndroidServiceEvent.values[value];
@@ -220,7 +220,7 @@ class AndroidController {
   }
 
   /// Request permission to capture local microphone, if not already granted.
-  /// Must be called before starting sender when using AndroidCaptureType.captureMic.
+  /// Must be called before starting sender when using AndroidCaptureSource.captureMic.
   /// If returns false, user rejected permission and sender won't start.
   Future<bool> requestMicrophone() async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.requestMicrophone$pigeonVar_messageChannelSuffix';

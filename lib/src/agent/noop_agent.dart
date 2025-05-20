@@ -1,8 +1,8 @@
 import 'package:event/event.dart';
 
+import '../dto.dart';
 import 'agent.dart';
 import 'agent_event.dart';
-import 'android_bridge.g.dart';
 
 class NoopAgent implements Agent {
   @override
@@ -15,7 +15,7 @@ class NoopAgent implements Agent {
   bool senderIsAlive = false;
 
   @override
-  Future<void> startReceiver(AndroidReceiverSettings settings) async {
+  Future<void> startReceiver(ReceiverConfig config) async {
     receiverIsAlive = true;
   }
 
@@ -25,7 +25,7 @@ class NoopAgent implements Agent {
   }
 
   @override
-  Future<void> startSender(AndroidSenderSettings settings) async {
+  Future<void> startSender(SenderConfig config) async {
     senderIsAlive = true;
   }
 

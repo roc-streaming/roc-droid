@@ -273,6 +273,18 @@ abstract class AppLocalizations {
   /// **'Network error'**
   String get networkError;
 
+  /// No description provided for @dbError.
+  ///
+  /// In en, this message translates to:
+  /// **'Database error'**
+  String get dbError;
+
+  /// No description provided for @notFoundError.
+  ///
+  /// In en, this message translates to:
+  /// **'Object not found'**
+  String get notFoundError;
+
   /// No description provided for @internalError.
   ///
   /// In en, this message translates to:

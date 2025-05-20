@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
+import '../../dto.dart';
 import '../../model.dart';
 import '../components/roc_button.dart';
 import '../components/roc_chip.dart';
@@ -39,11 +40,11 @@ class SenderPage extends StatelessWidget {
         ),
         RocTextRow(AppLocalizations.of(context)!.senderChooseSourceStep),
         Observer(
-          builder: (_) => RocDropdownButton<CaptureSourceType>(
+          builder: (_) => RocDropdownButton<CaptureSource>(
             availableValues: {
-              CaptureSourceType.currentlyPlayingApplications:
+              CaptureSource.captureApps:
                   AppLocalizations.of(context)!.currentlyPlayingApplications,
-              CaptureSourceType.microphone:
+              CaptureSource.captureMic:
                   AppLocalizations.of(context)!.microphone,
             },
             changeAction: _modelRoot.sender.setCaptureSource,

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:roc_droid/src/model.dart';
+import 'package:roc_droid/src/dto.dart';
 import 'package:roc_droid/src/ui.dart';
 import 'package:roc_droid/src/ui/components/roc_button.dart';
 import 'package:roc_droid/src/ui/components/roc_chip.dart';
@@ -24,7 +24,7 @@ void main() {
     final pageView = find.byType(RocPageView);
     final textRows = find.byType(RocTextRow);
     final chips = find.byType(RocChip<int>);
-    final dropdownButton = find.byType(RocDropdownButton<CaptureSourceType>);
+    final dropdownButton = find.byType(RocDropdownButton<CaptureSource>);
     final bottomButton = find.byType(RocButton);
 
     // Assertion

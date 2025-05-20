@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
+import '../dto.dart';
 import '../model.dart';
 import 'components/roc_snackbar.dart';
 import 'fragments/roc_bottom_navigation_bar.dart';
@@ -46,12 +47,13 @@ class _MainScreenState extends State<MainScreen> {
     // Subscribe to model failure event (coming from backend failure event).
     _modelRoot.failureEvent.subscribe((args) {
       var message = switch (args.code) {
-        FailureCode.permissionError =>
+        ErrorCode.permissionError =>
           AppLocalizations.of(context)!.permissionError,
-        FailureCode.deviceError => AppLocalizations.of(context)!.deviceError,
-        FailureCode.networkError => AppLocalizations.of(context)!.networkError,
-        FailureCode.internalError =>
-          AppLocalizations.of(context)!.internalError,
+        ErrorCode.deviceError => AppLocalizations.of(context)!.deviceError,
+        ErrorCode.networkError => AppLocalizations.of(context)!.networkError,
+        ErrorCode.dbError => AppLocalizations.of(context)!.dbError,
+        ErrorCode.notFoundError => AppLocalizations.of(context)!.notFoundError,
+        ErrorCode.internalError => AppLocalizations.of(context)!.internalError,
       };
       RocSnackbar.showMessage(context: context, message: message);
     });
@@ -133,11 +135,11 @@ class _TestFloatingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      onPressed: () => {
-        _modelRoot.receiver.setSourcePort(Random().nextInt(99999)),
-        _modelRoot.receiver.setRepairPort(Random().nextInt(99999)),
-        _modelRoot.sender.setSourcePort(Random().nextInt(99999)),
-        _modelRoot.sender.setRepairPort(Random().nextInt(99999)),
+      onPressed: () async => {
+        await _modelRoot.receiver.setSourcePort(Random().nextInt(99999)),
+        await _modelRoot.receiver.setRepairPort(Random().nextInt(99999)),
+        await _modelRoot.sender.setSourcePort(Random().nextInt(99999)),
+        await _modelRoot.sender.setRepairPort(Random().nextInt(99999)),
       },
       icon: Icon(Icons.settings),
       iconSize: 30.0,

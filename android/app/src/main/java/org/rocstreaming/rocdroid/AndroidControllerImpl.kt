@@ -189,7 +189,7 @@ class AndroidControllerImpl : AndroidController {
             throw FlutterError(NO_PROJECTION_CODE, NO_PROJECTION_TEXT)
         }
 
-        if (settings.captureType == AndroidCaptureType.CAPTURE_MIC &&
+        if (settings.captureSource == AndroidCaptureSource.CAPTURE_MIC &&
             !getMainActivity().hasPermission(Manifest.permission.RECORD_AUDIO)
         ) {
             Log.e(LOG_TAG, "Microphone permission must be granted when using CAPTURE_MIC")

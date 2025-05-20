@@ -1,5 +1,5 @@
-/// Agent error code.
-enum AgentErrorCode {
+/// Error codes.
+enum ErrorCode {
   /// Missing or rejected permission.
   permissionError,
 
@@ -9,6 +9,12 @@ enum AgentErrorCode {
   /// Network I/O failure.
   networkError,
 
+  /// Database I/O failure.
+  dbError,
+
   /// Unexpected failure or bug.
   internalError,
+
+  /// Requested object wasn't found.
+  notFoundError,
 }

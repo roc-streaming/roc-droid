@@ -5,12 +5,12 @@ import '../styles/roc_colors.dart';
 /// Roc's custom dropdown button widget.
 class RocDropdownButton<T> extends StatefulWidget {
   final Map<T, String> _availableValues;
-  final void Function(T) _changeAction;
+  final Future<void> Function(T) _changeAction;
   final T _initialValue;
 
   const RocDropdownButton(
       {required Map<T, String> availableValues,
-      required void Function(T) changeAction,
+      required Future<void> Function(T) changeAction,
       required T initialValue})
       : _availableValues = availableValues,
         _initialValue = initialValue,
@@ -18,25 +18,27 @@ class RocDropdownButton<T> extends StatefulWidget {
 
   @override
   State<RocDropdownButton> createState() => _RocDropdownButtonState(
-      _availableValues, (value) => _changeAction(value), _initialValue);
+      _availableValues,
+      (value) async => await _changeAction(value),
+      _initialValue);
 }
 
 class _RocDropdownButtonState<T> extends State<RocDropdownButton<T>> {
   final Map<T, String> _availableValues;
-  final void Function(T) _changeAction;
+  final Future<void> Function(T) _changeAction;
   T _dropdownValue;
 
   _RocDropdownButtonState(Map<T, String> availableValues,
-      final void Function(T) changeAction, T initialValue)
+      final Future<void> Function(T) changeAction, T initialValue)
       : _availableValues = availableValues,
         _changeAction = changeAction,
         _dropdownValue = initialValue;
 
-  void _onChanged(T value) {
-    setState(() {
+  Future<void> _onChanged(T value) async {
+    setState(() async {
       _dropdownValue = value;
-      _changeAction.call(value);
     });
+    await _changeAction(value);
   }
 
   @override
@@ -56,7 +58,7 @@ class _RocDropdownButtonState<T> extends State<RocDropdownButton<T>> {
           items: _availableValues.entries
               .map(((entry) => _MenuItem(context, entry)))
               .toList(),
-          onChanged: (value) => _onChanged(value),
+          onChanged: (value) async => _onChanged(value),
         ),
       ),
     );

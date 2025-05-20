@@ -3,20 +3,21 @@ import 'package:logger/logger.dart';
 import 'package:mobx/mobx.dart';
 
 import '../agent.dart';
-import 'capture_source_type.dart';
+import '../dto.dart';
+import '../storage.dart';
 import 'failure_event.dart';
 
 part 'sender.g.dart';
 
-/// Implementation of the Model Sender class.
+/// Represents running sender.
 class Sender extends _Sender with _$Sender {
-  Sender._create(Logger logger, Agent agent, Event<FailureEvent> failureEvent)
-      : super(logger, agent, failureEvent);
+  Sender._create(Logger logger, Agent agent, Storage storage,
+      Event<FailureEvent> failureEvent)
+      : super(logger, agent, storage, failureEvent);
 
-  /// Public Sender factory
-  static Future<Sender> create(
-      Logger logger, Agent agent, Event<FailureEvent> failureEvent) async {
-    var sender = Sender._create(logger, agent, failureEvent);
+  static Future<Sender> create(Logger logger, Agent agent, Storage storage,
+      Event<FailureEvent> failureEvent) async {
+    var sender = Sender._create(logger, agent, storage, failureEvent);
     await sender._init();
     return sender;
   }
@@ -25,117 +26,119 @@ class Sender extends _Sender with _$Sender {
 abstract class _Sender with Store {
   final Logger _logger;
   final Agent _agent;
+  final Storage _storage;
   final Event<FailureEvent> _failureEvent;
 
-  // Determines whether the sender is running or not
+  // Config.
+  @observable
+  SenderConfig _config = SenderConfig(
+    captureSource: CaptureSource.captureApps,
+    receiverIP: '',
+    receiverSourcePort: 10001,
+    receiverRepairPort: 10002,
+  );
+
+  @computed
+  CaptureSource get captureSource => _config.captureSource;
+
+  @computed
+  String get receiverIP => _config.receiverIP;
+
+  @computed
+  int get sourcePort => _config.receiverSourcePort;
+
+  @computed
+  int get repairPort => _config.receiverRepairPort;
+
+  // State.
   @observable
   bool _isStarted = false;
 
   @computed
   bool get isStarted => _isStarted;
 
-  // Represents the active source port.
-  @observable
-  int _sourcePort = -1;
-
-  @computed
-  int get sourcePort => _sourcePort;
-
-  // Represents the active repair port.
-  @observable
-  int _repairPort = -1;
-
-  @computed
-  int get repairPort => _repairPort;
-
-  // Represents the active source port.
-  @observable
-  String _receiverIP = '';
-
-  @computed
-  String get receiverIP => _receiverIP;
-
-  // Represents the user-selected capture source enum.
-  @observable
-  CaptureSourceType _captureSource =
-      CaptureSourceType.currentlyPlayingApplications;
-
-  @computed
-  CaptureSourceType get captureSource => _captureSource;
-
-  // Synchronous part of the constructor.
-  _Sender(this._logger, this._agent, this._failureEvent) {
+  // Constructor.
+  _Sender(this._logger, this._agent, this._storage, this._failureEvent) {
     _agent.eventSource.subscribe(
       (args) async {
         if (args is AgentStateEvent) {
-          _isStarted = _agent.receiverIsAlive;
+          _isStarted = _agent.senderIsAlive;
         }
       },
     );
   }
 
-  // Asynchronous part of the constructor.
+  // Async constructor.
   @action
   Future<void> _init() async {
     _isStarted = _agent.senderIsAlive;
-    setSourcePort(10001);
-    setRepairPort(10002);
-  }
 
-  // Start current sender.
-  @action
-  Future<void> requestStart() async {
     try {
-      await _agent.startSender(AndroidSenderSettings(
-        captureType: switch (captureSource) {
-          CaptureSourceType.currentlyPlayingApplications =>
-            AndroidCaptureType.captureApps,
-          CaptureSourceType.microphone => AndroidCaptureType.captureMic,
-        },
-        host: receiverIP,
-        sourcePort: _sourcePort,
-        repairPort: _repairPort,
-      ));
-    } on AgentException catch (ex) {
-      _failureEvent.broadcast(FailureEvent.fromAgent(ex.errorCode));
+      _config = await _storage.readSenderConfig();
+      _logger.d('Loaded sender config from storage');
+    } on StorageNotFoundException catch (_) {
+      _logger.d('Sender config not found in storage, using default');
+    } on StorageException catch (ex) {
+      _logger.e('Failed to load sender config from storage: ${ex}');
+      _failureEvent.broadcast(FailureEvent(ex.errorCode));
     }
   }
 
-  // Stop current sender.
+  // Save config to storage.
+  Future<void> _save() async {
+    try {
+      _logger.d('Saving sender config to storage: $_config');
+      await _storage.writeSenderConfig(_config);
+    } on StorageException catch (ex) {
+      _failureEvent.broadcast(FailureEvent(ex.errorCode));
+    }
+  }
+
+  // Start sender.
+  @action
+  Future<void> requestStart() async {
+    try {
+      await _agent.startSender(_config);
+    } on AgentException catch (ex) {
+      _failureEvent.broadcast(FailureEvent(ex.errorCode));
+    }
+  }
+
+  // Stop sender.
   @action
   Future<void> requestStop() async {
     try {
       await _agent.stopSender();
     } on AgentException catch (ex) {
-      _failureEvent.broadcast(FailureEvent.fromAgent(ex.errorCode));
+      _failureEvent.broadcast(FailureEvent(ex.errorCode));
     }
   }
 
-  // Update source port value.
+  // Update capture source.
   @action
-  void setSourcePort(int value) {
-    _sourcePort = value;
-    _logger.d('Sender source port value changed to: ${_sourcePort}');
+  Future<void> setCaptureSource(CaptureSource value) async {
+    _config = _config.copyWith(captureSource: value);
+    await _save();
   }
 
-  // Update repair port value.
+  // Update receiver IP.
   @action
-  void setRepairPort(int value) {
-    _repairPort = value;
-    _logger.d('Sender repair port value changed to: ${_repairPort}');
+  Future<void> setReceiverIP(String value) async {
+    _config = _config.copyWith(receiverIP: value);
+    await _save();
   }
 
-  // Update the active source port.
+  // Update receiver source port.
   @action
-  void setReceiverIP(String value) {
-    _receiverIP = value;
-    _logger.d('Receiver IP value changed to: ${_receiverIP}');
+  Future<void> setSourcePort(int value) async {
+    _config = _config.copyWith(receiverSourcePort: value);
+    await _save();
   }
 
-  // Update the active the user-selected capture source enum.
+  // Update receiver repair port.
   @action
-  void setCaptureSource(CaptureSourceType value) {
-    _captureSource = value;
-    _logger.d('Receiver Capture Source value changed to: ${_captureSource}');
+  Future<void> setRepairPort(int value) async {
+    _config = _config.copyWith(receiverRepairPort: value);
+    await _save();
   }
 }

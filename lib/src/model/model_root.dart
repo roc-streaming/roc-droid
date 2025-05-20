@@ -3,6 +3,7 @@ import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../agent.dart';
+import '../storage.dart';
 import 'failure_event.dart';
 import 'receiver.dart';
 import 'sender.dart';
@@ -23,7 +24,7 @@ class ModelRoot {
     agent.eventSource.subscribe((args) {
       switch (args) {
         case AgentErrorEvent():
-          failureEvent.broadcast(FailureEvent.fromAgent(args.errorCode));
+          failureEvent.broadcast(FailureEvent(args.errorCode));
         case AgentStateEvent():
           break;
       }
@@ -31,13 +32,13 @@ class ModelRoot {
   }
 
   /// Public ModelRoot factory
-  static Future<ModelRoot> create(
-      Logger logger, Agent agent, PackageInfo packageInfo) async {
+  static Future<ModelRoot> create(Logger logger, Agent agent, Storage storage,
+      PackageInfo packageInfo) async {
     // ModelRoot, Receiver and Sender will all broadcast these events.
     final failureEvent = Event<FailureEvent>("ModelRoot.failureEvent");
 
-    final receiver = await Receiver.create(logger, agent, failureEvent);
-    final sender = await Sender.create(logger, agent, failureEvent);
+    final receiver = await Receiver.create(logger, agent, storage, failureEvent);
+    final sender = await Sender.create(logger, agent, storage, failureEvent);
 
     return ModelRoot._create(
         logger, agent, receiver, sender, packageInfo, failureEvent);

@@ -2,7 +2,7 @@ import 'package:event/event.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 
-import 'agent_error_code.dart';
+import '../dto.dart';
 import 'agent_event.dart';
 import 'agent_exception.dart';
 import 'android_bridge.g.dart';
@@ -111,7 +111,7 @@ class AndroidConnector implements AndroidListener {
 
       // If user want's to capture from microphone, we need to request
       // permission before starting the sender.
-      if (settings.captureType == AndroidCaptureType.captureMic) {
+      if (settings.captureSource == AndroidCaptureSource.captureMic) {
         if (!await _controller.requestMicrophone()) {
           return;
         }
@@ -183,11 +183,11 @@ class AndroidConnector implements AndroidListener {
     switch (errorCode) {
       case AndroidServiceError.audioRecordFailed:
       case AndroidServiceError.audioTrackFailed:
-        eventSource.broadcast(AgentErrorEvent(AgentErrorCode.deviceError));
+        eventSource.broadcast(AgentErrorEvent(ErrorCode.deviceError));
 
       case AndroidServiceError.senderConnectFailed:
       case AndroidServiceError.receiverBindFailed:
-        eventSource.broadcast(AgentErrorEvent(AgentErrorCode.networkError));
+        eventSource.broadcast(AgentErrorEvent(ErrorCode.networkError));
     }
   }
 
@@ -224,7 +224,7 @@ class AndroidConnector implements AndroidListener {
         return AgentPermissionException(ex.message ?? "Permission not granted");
       default:
         return AgentException(
-            AgentErrorCode.internalError, ex.message ?? "Unexpected error");
+            ErrorCode.internalError, ex.message ?? "Unexpected error");
     }
   }
 }

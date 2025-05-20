@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:event/event.dart';
 import 'package:logger/logger.dart';
 
+import '../dto.dart';
 import 'agent_event.dart';
 import 'android_bridge.g.dart';
 import 'android_connector.dart';
@@ -20,8 +21,8 @@ class Agent {
     final agent = Agent._create(logger);
 
     agent._androidConnector.eventSource.subscribe((args) {
-        // TODO: also forward events from DaemonConnector
-        agent.eventSource.broadcast(args);
+      // TODO: also forward events from DaemonConnector
+      agent.eventSource.broadcast(args);
     });
 
     await agent._androidConnector.refreshState();
@@ -33,13 +34,34 @@ class Agent {
   bool get receiverIsAlive => _androidConnector.receiverIsAlive;
   bool get senderIsAlive => _androidConnector.senderIsAlive;
 
-  Future<void> startReceiver(AndroidReceiverSettings settings) =>
-      _androidConnector.startReceiver(settings);
-  Future<void> stopReceiver() => _androidConnector.stopReceiver();
+  Future<void> startReceiver(ReceiverConfig config) async {
+    final settings = AndroidReceiverSettings(
+      sourcePort: config.sourcePort,
+      repairPort: config.repairPort,
+    );
+    return _androidConnector.startReceiver(settings);
+  }
 
-  Future<void> startSender(AndroidSenderSettings settings) =>
-      _androidConnector.startSender(settings);
-  Future<void> stopSender() => _androidConnector.stopSender();
+  Future<void> stopReceiver() async {
+    await _androidConnector.stopReceiver();
+  }
+
+  Future<void> startSender(SenderConfig config) async {
+    final settings = AndroidSenderSettings(
+      captureSource: switch (config.captureSource) {
+        CaptureSource.captureApps => AndroidCaptureSource.captureApps,
+        CaptureSource.captureMic => AndroidCaptureSource.captureMic,
+      },
+      host: config.receiverIP,
+      sourcePort: config.receiverSourcePort,
+      repairPort: config.receiverRepairPort,
+    );
+    return _androidConnector.startSender(settings);
+  }
+
+  Future<void> stopSender() async {
+    await _androidConnector.stopSender();
+  }
 
   /// Get list of IP addresses of this agent.
   Future<List<String>> discoverLocalAddresses() async {

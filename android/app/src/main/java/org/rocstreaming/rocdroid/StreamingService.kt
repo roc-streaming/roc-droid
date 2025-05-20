@@ -359,7 +359,7 @@ class StreamingService : Service() {
 
         try {
             try {
-                if (settings.captureType == AndroidCaptureType.CAPTURE_APPS) {
+                if (settings.captureSource == AndroidCaptureSource.CAPTURE_APPS) {
                     audioRecord = createProjectionAudioRecord(projection)
                 } else {
                     audioRecord = createMicrophoneAudioRecord()

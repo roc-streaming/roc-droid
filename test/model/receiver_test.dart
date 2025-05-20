@@ -9,14 +9,14 @@ void main() {
   test('Check the source port setter method.', () async {
     final receiver = await testReceiver();
     final testValue = 123;
-    receiver.setSourcePort(testValue);
+    await receiver.setSourcePort(testValue);
     expect(receiver.sourcePort, testValue);
   });
 
   test('Check the repair port setter method.', () async {
     final receiver = await testReceiver();
     final testValue = 123;
-    receiver.setRepairPort(testValue);
+    await receiver.setRepairPort(testValue);
     expect(receiver.repairPort, testValue);
   });
 }

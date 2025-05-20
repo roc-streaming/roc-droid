@@ -31,14 +31,14 @@ class AndroidReceiverSettings {
 /// Sender settings.
 class AndroidSenderSettings {
   AndroidSenderSettings({
-    required this.captureType,
+    required this.captureSource,
     required this.host,
     required this.sourcePort,
     required this.repairPort,
   });
 
   /// From where to capture stream.
-  final AndroidCaptureType captureType;
+  final AndroidCaptureSource captureSource;
 
   /// IP address or hostname where to send packets.
   final String host;
@@ -51,7 +51,7 @@ class AndroidSenderSettings {
 }
 
 /// Where sender gets sound.
-enum AndroidCaptureType {
+enum AndroidCaptureSource {
   /// Capture from locally playing apps.
   captureApps,
 
@@ -75,7 +75,7 @@ abstract class AndroidController {
   bool requestNotifications();
 
   /// Request permission to capture local microphone, if not already granted.
-  /// Must be called before starting sender when using AndroidCaptureType.captureMic.
+  /// Must be called before starting sender when using AndroidCaptureSource.captureMic.
   /// If returns false, user rejected permission and sender won't start.
   @async
   bool requestMicrophone();
