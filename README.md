@@ -30,6 +30,10 @@ Download pre-built APK from latest [github release](https://github.com/roc-strea
 
 Follow instructions here: [build project](https://roc-streaming.org/droid/building/build_project).
 
+## Screenshot
+
+<img src="https://raw.githubusercontent.com/roc-streaming/roc-droid/main/docs/screenshots/screencast.webp" data-canonical-src="https://raw.githubusercontent.com/roc-streaming/roc-droid/main/docs/screenshots/screencast.webp" width="300"/>
+
 ## Features
 
 Roc Droid is based on [Roc Toolkit](https://github.com/roc-streaming/roc-toolkit) streaming engine, which notable features are:
