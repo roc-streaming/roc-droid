@@ -71,6 +71,7 @@ class StreamingConnector(val context: Context, val handler: StreamingConnectionH
         Log.d(LOG_TAG, "Unbinding service")
 
         context.unbindService(serviceHandler)
+        service?.removeEventListener(eventHandler)
         service = null
     }
 

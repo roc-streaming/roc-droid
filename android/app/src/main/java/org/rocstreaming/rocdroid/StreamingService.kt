@@ -43,10 +43,8 @@ private const val BUFFER_SIZE = 100
 private const val NOTIFICATION_CHANNEL_ID = "StreamingService"
 private const val NOTIFICATION_ID = 1
 
-private const val NOTIFICATION_ACTION_DELETE =
-    "org.rocstreaming.rocdroid.NotificationActionDelete"
-private const val NOTIFICATION_ACTION_STOP =
-    "org.rocstreaming.rocdroid.NotificationActionStop"
+private const val NOTIFICATION_ACTION_DELETE = "org.rocstreaming.rocdroid.NotificationActionDelete"
+private const val NOTIFICATION_ACTION_STOP = "org.rocstreaming.rocdroid.NotificationActionStop"
 
 private const val LOG_TAG = "rocdroid.StreamingService"
 
@@ -69,19 +67,22 @@ class StreamingService : Service() {
     private var autoDetach: Boolean = true
     private var currentProjection: MediaProjection? = null
 
-    private val notificationActionHandler: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            Log.i(LOG_TAG, "Handling notification action: " + intent.action)
+    private var notificationEnabled: Boolean = true
+    private var notificationRegistered: Boolean = false
+    private val notificationActionHandler: BroadcastReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                Log.i(LOG_TAG, "Handling notification action: " + intent.action)
 
-            when (intent.action) {
-                NOTIFICATION_ACTION_DELETE -> stopAllNoNotification()
-                NOTIFICATION_ACTION_STOP -> {
-                    stopSender()
-                    stopReceiver()
+                when (intent.action) {
+                    NOTIFICATION_ACTION_DELETE -> stopAndExit()
+                    NOTIFICATION_ACTION_STOP -> {
+                        stopSender()
+                        stopReceiver()
+                    }
                 }
             }
         }
-    }
 
     private val binder = LocalBinder()
 
@@ -100,7 +101,7 @@ class StreamingService : Service() {
 
         super.onCreate()
 
-        initNotifications()
+        autoInitNotification()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -108,6 +109,7 @@ class StreamingService : Service() {
 
         startForeground(NOTIFICATION_ID, buildNotification())
 
+        // restart us if we got killed
         return START_STICKY
     }
 
@@ -115,7 +117,7 @@ class StreamingService : Service() {
         Log.i(LOG_TAG, "Destroying service")
 
         terminate()
-        deinitNotifications()
+        deinitNotification()
 
         super.onDestroy()
     }
@@ -136,7 +138,7 @@ class StreamingService : Service() {
         currentProjection?.stop()
         currentProjection = null
 
-        Log.d(LOG_TAG, "Stopping service")
+        Log.d(LOG_TAG, "Stopping foreground service")
 
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
@@ -215,7 +217,9 @@ class StreamingService : Service() {
         senderStarted = true
         senderThread!!.start()
 
+        autoEnableNotification()
         updateNotification()
+
         reportEvent(AndroidServiceEvent.SENDER_STATE_CHANGED)
     }
 
@@ -276,7 +280,9 @@ class StreamingService : Service() {
         receiverStarted = true
         receiverThread!!.start()
 
+        autoEnableNotification()
         updateNotification()
+
         reportEvent(AndroidServiceEvent.RECEIVER_STATE_CHANGED)
     }
 
@@ -296,9 +302,7 @@ class StreamingService : Service() {
     }
 
     @Synchronized
-    fun stopAllNoNotification() {
-        if (!senderStarted && !receiverStarted) return
-
+    fun stopAndExit() {
         if (senderStarted) {
             Log.i(LOG_TAG, "Stopping sender")
 
@@ -317,7 +321,16 @@ class StreamingService : Service() {
             reportEvent(AndroidServiceEvent.RECEIVER_STATE_CHANGED)
         }
 
+        // we don't need projection anymore
         autoDetachProjection()
+
+        // if notification is swiped away, stopAndExit() is called, and if there
+        // are no connected clients, stop service
+        autoStopService()
+
+        // even if we don't stop service, at least hide notification until
+        // sender/receiver is explicitly started
+        disableNotification()
     }
 
     @Synchronized
@@ -332,24 +345,37 @@ class StreamingService : Service() {
         Log.d(LOG_TAG, "Removing event listener")
 
         eventListeners.remove(listener)
+
+        // if notification was swiped away and stopAndExit() was called, but there
+        // were connected clients, so it didn't stop the service, and *now* last
+        // client disconnects (app or tile service), then stop the service
+        if (!notificationEnabled) {
+            autoStopService()
+        }
     }
 
     @Synchronized
     private fun reportEvent(event: AndroidServiceEvent) {
         Log.d(LOG_TAG, "Reporting event: " + event.toString())
 
-        eventListeners.forEach {
-            it.onEvent(event)
-        }
+        eventListeners.forEach { it.onEvent(event) }
     }
 
     @Synchronized
     private fun reportError(error: AndroidServiceError) {
         Log.d(LOG_TAG, "Reporting error: " + error.toString())
 
-        eventListeners.forEach {
-            it.onError(error)
+        eventListeners.forEach { it.onError(error) }
+    }
+
+    private fun autoStopService() {
+        if (eventListeners.count() != 0) {
+            Log.d(LOG_TAG, "Still has " + eventListeners.count() + " listener(s), keeping service")
+            return
         }
+
+        Log.i(LOG_TAG, "No registered listeners, stopping service")
+        stopSelf()
     }
 
     private fun runSenderThread(settings: AndroidSenderSettings, projection: MediaProjection) {
@@ -376,12 +402,13 @@ class StreamingService : Service() {
                 return
             }
 
-            val senderConfig = RocSenderConfig.builder()
-                .frameSampleRate(44100)
-                .frameChannels(ChannelSet.STEREO)
-                .frameEncoding(FrameEncoding.PCM_FLOAT)
-                .clockSource(ClockSource.EXTERNAL)
-                .build()
+            val senderConfig =
+                RocSenderConfig.builder()
+                    .frameSampleRate(44100)
+                    .frameChannels(ChannelSet.STEREO)
+                    .frameEncoding(FrameEncoding.PCM_FLOAT)
+                    .clockSource(ClockSource.EXTERNAL)
+                    .build()
 
             RocContext().use { context ->
                 RocSender(context, senderConfig).use useSender@{ sender ->
@@ -451,12 +478,13 @@ class StreamingService : Service() {
                 return
             }
 
-            val receiverConfig = RocReceiverConfig.builder()
-                .frameSampleRate(44100)
-                .frameChannels(ChannelSet.STEREO)
-                .frameEncoding(FrameEncoding.PCM_FLOAT)
-                .clockSource(ClockSource.EXTERNAL)
-                .build()
+            val receiverConfig =
+                RocReceiverConfig.builder()
+                    .frameSampleRate(44100)
+                    .frameChannels(ChannelSet.STEREO)
+                    .frameEncoding(FrameEncoding.PCM_FLOAT)
+                    .clockSource(ClockSource.EXTERNAL)
+                    .build()
 
             RocContext().use { context ->
                 RocReceiver(context, receiverConfig).use useReceiver@{ receiver ->
@@ -506,82 +534,111 @@ class StreamingService : Service() {
     private fun createAudioTrack(): AudioTrack {
         Log.d(LOG_TAG, "Creating audio track")
 
-        val audioAttributes = AudioAttributes.Builder().apply {
-            setUsage(AudioAttributes.USAGE_MEDIA)
-            setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-        }.build()
-        val audioFormat = AudioFormat.Builder().apply {
-            setSampleRate(SAMPLE_RATE)
-            setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
-            setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
-        }.build()
-        val bufferSize = AudioTrack.getMinBufferSize(
-            audioFormat.sampleRate,
-            audioFormat.channelMask,
-            audioFormat.encoding
-        )
-        return AudioTrack.Builder().apply {
-            setAudioAttributes(audioAttributes)
-            setAudioFormat(audioFormat)
-            setBufferSizeInBytes(bufferSize)
-            setTransferMode(AudioTrack.MODE_STREAM)
-            setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
-        }.build()
+        val audioAttributes =
+            AudioAttributes.Builder()
+                .apply {
+                    setUsage(AudioAttributes.USAGE_MEDIA)
+                    setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                }
+                .build()
+        val audioFormat =
+            AudioFormat.Builder()
+                .apply {
+                    setSampleRate(SAMPLE_RATE)
+                    setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
+                    setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
+                }
+                .build()
+        val bufferSize =
+            AudioTrack.getMinBufferSize(
+                audioFormat.sampleRate,
+                audioFormat.channelMask,
+                audioFormat.encoding
+            )
+        return AudioTrack.Builder()
+            .apply {
+                setAudioAttributes(audioAttributes)
+                setAudioFormat(audioFormat)
+                setBufferSizeInBytes(bufferSize)
+                setTransferMode(AudioTrack.MODE_STREAM)
+                setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
+            }
+            .build()
     }
 
     private fun createMicrophoneAudioRecord(): AudioRecord {
         Log.d(LOG_TAG, "Creating microphone audio record")
 
-        val format = AudioFormat.Builder().apply {
-            setSampleRate(SAMPLE_RATE)
-            setChannelMask(AudioFormat.CHANNEL_IN_STEREO)
-            setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
-        }.build()
-        val bufferSize = AudioRecord.getMinBufferSize(
-            SAMPLE_RATE,
-            AudioFormat.CHANNEL_IN_STEREO,
-            AudioFormat.ENCODING_PCM_FLOAT
-        )
-        return AudioRecord.Builder().apply {
-            setAudioSource(MediaRecorder.AudioSource.DEFAULT)
-            setAudioFormat(format)
-            setBufferSizeInBytes(bufferSize)
-        }.build()
+        val format =
+            AudioFormat.Builder()
+                .apply {
+                    setSampleRate(SAMPLE_RATE)
+                    setChannelMask(AudioFormat.CHANNEL_IN_STEREO)
+                    setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
+                }
+                .build()
+        val bufferSize =
+            AudioRecord.getMinBufferSize(
+                SAMPLE_RATE,
+                AudioFormat.CHANNEL_IN_STEREO,
+                AudioFormat.ENCODING_PCM_FLOAT
+            )
+        return AudioRecord.Builder()
+            .apply {
+                setAudioSource(MediaRecorder.AudioSource.DEFAULT)
+                setAudioFormat(format)
+                setBufferSizeInBytes(bufferSize)
+            }
+            .build()
     }
 
     private fun createProjectionAudioRecord(projection: MediaProjection): AudioRecord {
         Log.d(LOG_TAG, "Creating projection audio record")
 
-        val format = AudioFormat.Builder().apply {
-            setSampleRate(SAMPLE_RATE)
-            setChannelMask(AudioFormat.CHANNEL_IN_STEREO)
-            setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
-        }.build()
-        val bufferSize = AudioRecord.getMinBufferSize(
-            SAMPLE_RATE,
-            AudioFormat.CHANNEL_IN_STEREO,
-            AudioFormat.ENCODING_PCM_FLOAT
-        )
-        val config = AudioPlaybackCaptureConfiguration.Builder(projection).apply {
-            addMatchingUsage(AudioAttributes.USAGE_MEDIA)
-            addMatchingUsage(AudioAttributes.USAGE_UNKNOWN)
-            addMatchingUsage(AudioAttributes.USAGE_GAME)
-        }.build()
-        return AudioRecord.Builder().apply {
-            setAudioPlaybackCaptureConfig(config)
-            setAudioFormat(format)
-            setBufferSizeInBytes(bufferSize)
-        }.build()
+        val format =
+            AudioFormat.Builder()
+                .apply {
+                    setSampleRate(SAMPLE_RATE)
+                    setChannelMask(AudioFormat.CHANNEL_IN_STEREO)
+                    setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
+                }
+                .build()
+        val bufferSize =
+            AudioRecord.getMinBufferSize(
+                SAMPLE_RATE,
+                AudioFormat.CHANNEL_IN_STEREO,
+                AudioFormat.ENCODING_PCM_FLOAT
+            )
+        val config =
+            AudioPlaybackCaptureConfiguration.Builder(projection)
+                .apply {
+                    addMatchingUsage(AudioAttributes.USAGE_MEDIA)
+                    addMatchingUsage(AudioAttributes.USAGE_UNKNOWN)
+                    addMatchingUsage(AudioAttributes.USAGE_GAME)
+                }
+                .build()
+        return AudioRecord.Builder()
+            .apply {
+                setAudioPlaybackCaptureConfig(config)
+                setAudioFormat(format)
+                setBufferSizeInBytes(bufferSize)
+            }
+            .build()
     }
 
-    private fun initNotifications() {
-        Log.d(LOG_TAG, "Initializing notifications")
+    private fun autoInitNotification() {
+        if (!notificationEnabled || notificationRegistered) {
+            return
+        }
 
-        val channel = NotificationChannel(
-            NOTIFICATION_CHANNEL_ID,
-            getString(R.string.notification_channel_name),
-            NotificationManager.IMPORTANCE_LOW
-        )
+        Log.d(LOG_TAG, "Initializing notification")
+
+        val channel =
+            NotificationChannel(
+                NOTIFICATION_CHANNEL_ID,
+                getString(R.string.notification_channel_name),
+                NotificationManager.IMPORTANCE_LOW
+            )
 
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -596,12 +653,42 @@ class StreamingService : Service() {
             },
             RECEIVER_EXPORTED
         )
+
+        notificationRegistered = true
     }
 
-    private fun deinitNotifications() {
+    private fun deinitNotification() {
+        if (!notificationRegistered) {
+            return
+        }
+
         Log.d(LOG_TAG, "Deinitializing notifications")
 
         unregisterReceiver(notificationActionHandler)
+
+        notificationRegistered = false
+    }
+
+    private fun autoEnableNotification() {
+        if (notificationEnabled) {
+            return
+        }
+
+        Log.i(LOG_TAG, "Enabling notification")
+
+        notificationEnabled = true
+        autoInitNotification()
+    }
+
+    private fun disableNotification() {
+        if (!notificationEnabled) {
+            return
+        }
+
+        Log.i(LOG_TAG, "Disabling notification")
+
+        notificationEnabled = false
+        deinitNotification()
     }
 
     private fun buildNotification(): Notification {
@@ -610,59 +697,55 @@ class StreamingService : Service() {
         // invoked when notification is tapped
         // we want to open main activity
         val contentIntent = Intent(this, MainActivity::class.java)
-        val pendingContentIntent = PendingIntent.getActivity(
-            this,
-            0,
-            contentIntent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingContentIntent =
+            PendingIntent.getActivity(this, 0, contentIntent, PendingIntent.FLAG_IMMUTABLE)
 
         // invoked when notification is dismissed (swiped away)
         // we want to stop sender & receiver
         val deleteIntent = Intent(NOTIFICATION_ACTION_DELETE)
-        val pendingDeleteIntent = PendingIntent.getBroadcast(
-            this,
-            0,
-            deleteIntent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingDeleteIntent =
+            PendingIntent.getBroadcast(this, 0, deleteIntent, PendingIntent.FLAG_IMMUTABLE)
 
         // invoked when "stop streaming" notification button is pressed
         // we want to stop sender & receiver
         val stopIntent = Intent(NOTIFICATION_ACTION_STOP)
-        val pendingStopIntent = PendingIntent.getBroadcast(
-            this,
-            0,
-            stopIntent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
-        val stopAction = Notification.Action.Builder(
-            Icon.createWithResource(this@StreamingService, R.drawable.ic_stop),
-            getString(R.string.notification_stop_action),
-            pendingStopIntent
-        ).build()
+        val pendingStopIntent =
+            PendingIntent.getBroadcast(this, 0, stopIntent, PendingIntent.FLAG_IMMUTABLE)
+        val stopAction =
+            Notification.Action.Builder(
+                Icon.createWithResource(this@StreamingService, R.drawable.ic_stop),
+                getString(R.string.notification_stop_action),
+                pendingStopIntent
+            )
+                .build()
 
-        return Notification.Builder(this, NOTIFICATION_CHANNEL_ID).apply {
-            // appearance
-            setSmallIcon(R.drawable.ic_notification)
-            setContentTitle(getNotificationTitle())
-            setContentText(getNotificationText())
-            // when notification is tapped
-            setContentIntent(pendingContentIntent)
-            // when notification is swiped away
-            setDeleteIntent(pendingDeleteIntent)
-            // don't allow to dimiss notification on lock screen
-            setOngoing(true)
-            // show on lock screen
-            setVisibility(Notification.VISIBILITY_PUBLIC)
-            // notification buttons
-            if (senderStarted || receiverStarted) {
-                addAction(stopAction)
+        return Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
+            .apply {
+                // appearance
+                setSmallIcon(R.drawable.ic_notification)
+                setContentTitle(getNotificationTitle())
+                setContentText(getNotificationText())
+                // when notification is tapped
+                setContentIntent(pendingContentIntent)
+                // when notification is swiped away
+                setDeleteIntent(pendingDeleteIntent)
+                // don't allow to dimiss notification on lock screen
+                setOngoing(true)
+                // show on lock screen
+                setVisibility(Notification.VISIBILITY_PUBLIC)
+                // notification buttons
+                if (senderStarted || receiverStarted) {
+                    addAction(stopAction)
+                }
             }
-        }.build()
+            .build()
     }
 
     private fun updateNotification() {
+        if (!notificationRegistered) {
+            return
+        }
+
         Log.d(LOG_TAG, "Updating notification: actions=" + getNotificationDesc())
 
         val notification = buildNotification()

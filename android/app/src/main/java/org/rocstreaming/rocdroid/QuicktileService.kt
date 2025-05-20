@@ -49,6 +49,16 @@ class QuicktileService : TileService() {
         streamingConnector.bindService()
     }
 
+    // when app is closed
+    override fun onDestroy() {
+        Log.d(LOG_TAG, "Tile service destroyed")
+
+        // unbind if was bound
+        streamingConnector.unbindService()
+
+        super.onDestroy()
+    }
+
     override fun onTileAdded() {
         Log.d(LOG_TAG, "Tile added")
 
