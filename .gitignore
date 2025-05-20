@@ -63,3 +63,4 @@ app.*.map.json
 
 # Personal
 /TODO.org
+.aider.*
