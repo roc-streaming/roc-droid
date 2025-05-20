@@ -23,6 +23,9 @@ theme:
 
 markdown_extensions:
   - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.blocks.caption
 
 plugins:
   - search
@@ -36,7 +39,6 @@ nav:
     - Overview: architecture/overview.md
     - User interface: architecture/ui.md
     - Model: architecture/model.md
-    - Agent: architecture/agent.md
   - Building:
     - Build project: building/build_project.md
     - macOS and Linux setup: building/macos_linux_setup.md

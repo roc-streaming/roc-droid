@@ -2,47 +2,47 @@
 
 ## Widget types
 
-![](../diagrams/widget_types.png)
+![](../diagrams/widget_types.drawio.png)
 
-Widgets can be categorized into the following types:
+Widgets can be categorized into two layers: **Content Layer** and **Representation Layer**.
 
-* **Content Layer**
+### Content Layer
 
-    Widgets at this level define the application's structure (layout) and the binding of the content (models) to the representation (components from the representation layer). These widgets actively interact with the model layer using the Observer pattern.
+Widgets at this level define the application's structure (layout) and the binding of the content (models) to the representation (components from the representation layer). These widgets actively interact with the model layer using the Observer pattern.
 
-    Sublevels:
+Sublevels:
 
-    * `Screen`: This widget corresponds to the entire screen.
-    
-    * `Page`: This widget represents a page within the screen. Switching between pages is done via the lower tab bar or AppBar.
-    
-    * `Fragment`: This widget represents a smaller fragment of the UI, such as a separate block or item in a list.
+* `Screen`: This widget corresponds to the entire screen.
 
-* **Representation Layer**
+* `Page`: This widget represents a page within the screen. Switching between pages is done via the lower tab bar or AppBar.
 
-    Widgets at this level, known as components, are the building blocks of the UI. A component defines its appearance and user interaction but is not tied to specific content (model).
+* `Fragment`: This widget represents a smaller fragment of the UI, such as a separate block or item in a list.
 
-    Sublevels:
+### Representation Layer
 
-    * `roc Component`: Custom components that can implement application-specific styles or interface elements.
-    
-    * `Flutter Component`: Standard components from the Flutter SDK.
-    
-    Fragment vs. Component
-    
-    It's important to understand the difference between a fragment and a component:
+Widgets at this level, known as components, are the building blocks of the UI. A component defines its appearance and user interaction but is not tied to specific content (model).
 
-    * `Fragment`: Responsible for communication with specific data (models or defined data). However, it is not responsible for a specific representation; this task is delegated to the components.
-    
-    * `Component`: Not tied to specific data—it receives data from above and does not interact with models. It is responsible for implementing a specific representation, such as styles and responses to clicks.
-    
-    > **Note:** In our code, custom component classes are prefixed with `roc` to distinguish them from standard components or created as private widgets inside of a parent classes starting with `_` and without `roc`. Other types of widgets do not have a special prefix.
+Sublevels:
 
-    > **Note:** In some frameworks, an entity similar to a fragment is called a `widget`. We use the term `fragment` for clarity (like in Android SDK).
+* `Roc Component`: Custom components that can implement application-specific styles or interface elements.
+
+* `Flutter Component`: Standard components from the Flutter SDK.
+
+### Fragment vs. Component
+
+It's important to understand the difference between a fragment and a component:
+
+* `Fragment`: Responsible for communication with specific data (models or defined data). However, it is not responsible for a specific representation; this task is delegated to the components.
+
+* `Component`: Not tied to specific data—it receives data from above and does not interact with models. It is responsible for implementing a specific representation, such as styles and responses to clicks.
+
+> **Note:** In our code, custom component classes are prefixed with `Roc` to distinguish them from standard components or created as private widgets inside of a parent classes starting with `_` and without `roc`. Other types of widgets do not have a special prefix.
+
+> **Note:** In some frameworks, an entity similar to a fragment is called a `widget`. We use the term `fragment` for clarity (like in Android SDK).
 
 ## Widget tree
 
-![](../diagrams/widget_tree.png)
+![](../diagrams/widget_tree.drawio.png)
 
 The UI diagram of the Rock Droid application client illustrates a tree of widgets that form the visual presentation for the user.
 
