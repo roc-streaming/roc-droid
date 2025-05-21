@@ -37,7 +37,8 @@ class ModelRoot {
     // ModelRoot, Receiver and Sender will all broadcast these events.
     final failureEvent = Event<FailureEvent>("ModelRoot.failureEvent");
 
-    final receiver = await Receiver.create(logger, agent, storage, failureEvent);
+    final receiver =
+        await Receiver.create(logger, agent, storage, failureEvent);
     final sender = await Sender.create(logger, agent, storage, failureEvent);
 
     return ModelRoot._create(
