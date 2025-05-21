@@ -225,23 +225,26 @@ interface AndroidController {
   /**
    * Request permission to post notifications, if no already granted.
    * Must be called before acquiring projection first time.
-   * If returns false, user rejected permission and notifications won't appear.
+   * Throws exception if:
+   *  - permission was not granted
    */
-  fun requestNotifications(callback: (Result<Boolean>) -> Unit)
+  fun requestNotifications(callback: (Result<Unit>) -> Unit)
   /**
    * Request permission to capture local microphone, if not already granted.
    * Must be called before starting sender when using AndroidCaptureSource.captureMic.
-   * If returns false, user rejected permission and sender won't start.
+   * Throws exception if:
+   *  - permission was not granted
    */
-  fun requestMicrophone(callback: (Result<Boolean>) -> Unit)
+  fun requestMicrophone(callback: (Result<Unit>) -> Unit)
   /**
    * Request access to media projection, if not already granted.
    * Must be called before starting sender or receiver.
    * If returns false, user rejected access and sender/receiver won't start.
    * Throws exception if:
+   *  - media projection wasn't acquired
    *  - lost connection to foreground service
    */
-  fun acquireProjection(callback: (Result<Boolean>) -> Unit)
+  fun acquireProjection(callback: (Result<Unit>) -> Unit)
   /**
    * Allow service to stop projection when it's not needed.
    * Must be called after *starting* sender or receiver.
@@ -252,8 +255,8 @@ interface AndroidController {
    * Receiver gets stream from network and plays to local speakers.
    * Must be called between acquireProjection() and releaseProjection().
    * Throws exception if:
-   *  - lost connection to foreground service
    *  - media projection wasn't acquired
+   *  - lost connection to foreground service
    */
   fun startReceiver(settings: AndroidReceiverSettings)
   /** Stop receiver. */
@@ -265,9 +268,9 @@ interface AndroidController {
    * Sender gets stream from local microphone OR media system apps, and streams to network.
    * Must be called between acquireProjection() and releaseProjection().
    * Throws exception if:
-   *  - lost connection to foreground service
-   *  - media projection not acquired
    *  - microphone permission is needed and wasn't granted
+   *  - media projection not acquired
+   *  - lost connection to foreground service
    */
   fun startSender(settings: AndroidSenderSettings)
   /** Stop sender. */
@@ -288,13 +291,12 @@ interface AndroidController {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.requestNotifications$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
-            api.requestNotifications{ result: Result<Boolean> ->
+            api.requestNotifications{ result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(wrapError(error))
               } else {
-                val data = result.getOrNull()
-                reply.reply(wrapResult(data))
+                reply.reply(wrapResult(null))
               }
             }
           }
@@ -306,13 +308,12 @@ interface AndroidController {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.requestMicrophone$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
-            api.requestMicrophone{ result: Result<Boolean> ->
+            api.requestMicrophone{ result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(wrapError(error))
               } else {
-                val data = result.getOrNull()
-                reply.reply(wrapResult(data))
+                reply.reply(wrapResult(null))
               }
             }
           }
@@ -324,13 +325,12 @@ interface AndroidController {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.roc_droid.AndroidController.acquireProjection$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
-            api.acquireProjection{ result: Result<Boolean> ->
+            api.acquireProjection{ result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(wrapError(error))
               } else {
-                val data = result.getOrNull()
-                reply.reply(wrapResult(data))
+                reply.reply(wrapResult(null))
               }
             }
           }

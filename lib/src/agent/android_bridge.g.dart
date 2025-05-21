@@ -191,8 +191,9 @@ class AndroidController {
 
   /// Request permission to post notifications, if no already granted.
   /// Must be called before acquiring projection first time.
-  /// If returns false, user rejected permission and notifications won't appear.
-  Future<bool> requestNotifications() async {
+  /// Throws exception if:
+  ///  - permission was not granted
+  Future<void> requestNotifications() async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.requestNotifications$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
@@ -209,20 +210,16 @@ class AndroidController {
         message: pigeonVar_replyList[1] as String?,
         details: pigeonVar_replyList[2],
       );
-    } else if (pigeonVar_replyList[0] == null) {
-      throw PlatformException(
-        code: 'null-error',
-        message: 'Host platform returned null value for non-null return value.',
-      );
     } else {
-      return (pigeonVar_replyList[0] as bool?)!;
+      return;
     }
   }
 
   /// Request permission to capture local microphone, if not already granted.
   /// Must be called before starting sender when using AndroidCaptureSource.captureMic.
-  /// If returns false, user rejected permission and sender won't start.
-  Future<bool> requestMicrophone() async {
+  /// Throws exception if:
+  ///  - permission was not granted
+  Future<void> requestMicrophone() async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.requestMicrophone$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
@@ -239,13 +236,8 @@ class AndroidController {
         message: pigeonVar_replyList[1] as String?,
         details: pigeonVar_replyList[2],
       );
-    } else if (pigeonVar_replyList[0] == null) {
-      throw PlatformException(
-        code: 'null-error',
-        message: 'Host platform returned null value for non-null return value.',
-      );
     } else {
-      return (pigeonVar_replyList[0] as bool?)!;
+      return;
     }
   }
 
@@ -253,8 +245,9 @@ class AndroidController {
   /// Must be called before starting sender or receiver.
   /// If returns false, user rejected access and sender/receiver won't start.
   /// Throws exception if:
+  ///  - media projection wasn't acquired
   ///  - lost connection to foreground service
-  Future<bool> acquireProjection() async {
+  Future<void> acquireProjection() async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.acquireProjection$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
@@ -271,13 +264,8 @@ class AndroidController {
         message: pigeonVar_replyList[1] as String?,
         details: pigeonVar_replyList[2],
       );
-    } else if (pigeonVar_replyList[0] == null) {
-      throw PlatformException(
-        code: 'null-error',
-        message: 'Host platform returned null value for non-null return value.',
-      );
     } else {
-      return (pigeonVar_replyList[0] as bool?)!;
+      return;
     }
   }
 
@@ -309,8 +297,8 @@ class AndroidController {
   /// Receiver gets stream from network and plays to local speakers.
   /// Must be called between acquireProjection() and releaseProjection().
   /// Throws exception if:
-  ///  - lost connection to foreground service
   ///  - media projection wasn't acquired
+  ///  - lost connection to foreground service
   Future<void> startReceiver(AndroidReceiverSettings settings) async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.startReceiver$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -388,9 +376,9 @@ class AndroidController {
   /// Sender gets stream from local microphone OR media system apps, and streams to network.
   /// Must be called between acquireProjection() and releaseProjection().
   /// Throws exception if:
-  ///  - lost connection to foreground service
-  ///  - media projection not acquired
   ///  - microphone permission is needed and wasn't granted
+  ///  - media projection not acquired
+  ///  - lost connection to foreground service
   Future<void> startSender(AndroidSenderSettings settings) async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.roc_droid.AndroidController.startSender$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(

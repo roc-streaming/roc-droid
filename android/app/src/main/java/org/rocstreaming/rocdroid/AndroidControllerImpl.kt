@@ -31,7 +31,7 @@ class AndroidControllerImpl : AndroidController {
         return MainActivity.instance
     }
 
-    override fun requestNotifications(callback: (Result<Boolean>) -> Unit) {
+    override fun requestNotifications(callback: (Result<Unit>) -> Unit) {
         Log.i(LOG_TAG, "Requesting POST_NOTIFICATIONS permission")
 
         getMainActivity().requestPermission(
@@ -41,17 +41,17 @@ class AndroidControllerImpl : AndroidController {
             { isGranted: Boolean ->
                 if (!isGranted) {
                     Log.w(LOG_TAG, "Permission request failed")
-                    callback(Result.success(false))
+                    callback(Result.failure(FlutterError(NO_PERMISSION_CODE, NO_PERMISSION_TEXT)))
                     return@requestPermission
                 }
 
                 Log.d(LOG_TAG, "Permission request succeeded")
-                callback(Result.success(true))
+                callback(Result.success(Unit))
             }
         )
     }
 
-    override fun requestMicrophone(callback: (Result<Boolean>) -> Unit) {
+    override fun requestMicrophone(callback: (Result<Unit>) -> Unit) {
         Log.i(LOG_TAG, "Requesting RECORD_AUDIO permission")
 
         getMainActivity().requestPermission(
@@ -61,17 +61,17 @@ class AndroidControllerImpl : AndroidController {
             { isGranted: Boolean ->
                 if (!isGranted) {
                     Log.w(LOG_TAG, "Permission request failed")
-                    callback(Result.success(false))
+                    callback(Result.failure(FlutterError(NO_PERMISSION_CODE, NO_PERMISSION_TEXT)))
                     return@requestPermission
                 }
 
                 Log.d(LOG_TAG, "Permission request succeeded")
-                callback(Result.success(true))
+                callback(Result.success(Unit))
             }
         )
     }
 
-    override fun acquireProjection(callback: (Result<Boolean>) -> Unit) {
+    override fun acquireProjection(callback: (Result<Unit>) -> Unit) {
         Log.i(LOG_TAG, "Acquiring media projection")
 
         if (projectionAcquired) {
@@ -90,20 +90,20 @@ class AndroidControllerImpl : AndroidController {
 
             if (service.hasProjection()) {
                 Log.d(LOG_TAG, "Projection already acquired")
-                callback(Result.success(true))
+                callback(Result.success(Unit))
                 return@startStreamingService
             }
 
             getMainActivity().requestProjection({ projection: MediaProjection? ->
                 if (projection == null) {
                     Log.w(LOG_TAG, "Projection request failed")
-                    callback(Result.success(false))
+                    callback(Result.failure(FlutterError(NO_PROJECTION_CODE, NO_PROJECTION_TEXT)))
                     return@requestProjection
                 }
 
                 Log.d(LOG_TAG, "Projection request succeeded")
                 service.attachProjection(projection)
-                callback(Result.success(true))
+                callback(Result.success(Unit))
             })
         })
     }

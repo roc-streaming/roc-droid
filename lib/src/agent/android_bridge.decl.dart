@@ -70,23 +70,26 @@ enum AndroidCaptureSource {
 abstract class AndroidController {
   /// Request permission to post notifications, if no already granted.
   /// Must be called before acquiring projection first time.
-  /// If returns false, user rejected permission and notifications won't appear.
+  /// Throws exception if:
+  ///  - permission was not granted
   @async
-  bool requestNotifications();
+  void requestNotifications();
 
   /// Request permission to capture local microphone, if not already granted.
   /// Must be called before starting sender when using AndroidCaptureSource.captureMic.
-  /// If returns false, user rejected permission and sender won't start.
+  /// Throws exception if:
+  ///  - permission was not granted
   @async
-  bool requestMicrophone();
+  void requestMicrophone();
 
   /// Request access to media projection, if not already granted.
   /// Must be called before starting sender or receiver.
   /// If returns false, user rejected access and sender/receiver won't start.
   /// Throws exception if:
+  ///  - media projection wasn't acquired
   ///  - lost connection to foreground service
   @async
-  bool acquireProjection();
+  void acquireProjection();
 
   /// Allow service to stop projection when it's not needed.
   /// Must be called after *starting* sender or receiver.
@@ -96,8 +99,8 @@ abstract class AndroidController {
   /// Receiver gets stream from network and plays to local speakers.
   /// Must be called between acquireProjection() and releaseProjection().
   /// Throws exception if:
-  ///  - lost connection to foreground service
   ///  - media projection wasn't acquired
+  ///  - lost connection to foreground service
   void startReceiver(AndroidReceiverSettings settings);
 
   /// Stop receiver.
@@ -110,9 +113,9 @@ abstract class AndroidController {
   /// Sender gets stream from local microphone OR media system apps, and streams to network.
   /// Must be called between acquireProjection() and releaseProjection().
   /// Throws exception if:
-  ///  - lost connection to foreground service
-  ///  - media projection not acquired
   ///  - microphone permission is needed and wasn't granted
+  ///  - media projection not acquired
+  ///  - lost connection to foreground service
   void startSender(AndroidSenderSettings settings);
 
   /// Stop sender.

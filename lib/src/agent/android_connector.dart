@@ -44,16 +44,12 @@ class AndroidConnector implements AndroidListener {
       _logger.i("Starting receiver");
 
       // Ensure service can post notifications.
-      if (!await _controller.requestNotifications()) {
-        return;
-      }
+      await _controller.requestNotifications();
 
       try {
         // First request media projection if not granted yet and acquire it
         // while we're starting receiver.
-        if (!await _controller.acquireProjection()) {
-          return;
-        }
+        await _controller.acquireProjection();
 
         // Then start receiver.
         await _controller.startReceiver(settings);
@@ -105,24 +101,18 @@ class AndroidConnector implements AndroidListener {
       _logger.i("Starting sender");
 
       // Ensure service can post notifications.
-      if (!await _controller.requestNotifications()) {
-        return;
-      }
+      await _controller.requestNotifications();
 
       // If user want's to capture from microphone, we need to request
       // permission before starting the sender.
       if (settings.captureSource == AndroidCaptureSource.captureMic) {
-        if (!await _controller.requestMicrophone()) {
-          return;
-        }
+        await _controller.requestMicrophone();
       }
 
       try {
         // First request media projection if not granted yet and acquire it
         // while we're starting sender.
-        if (!await _controller.acquireProjection()) {
-          return;
-        }
+        await _controller.acquireProjection();
 
         // Then start sender.
         await _controller.startSender(settings);
