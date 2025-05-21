@@ -41,6 +41,8 @@ def persist_hash(s):
 def match_line(pid, level, tag, msg):
     if re.search(r'^(ViewRoot|SurfaceView|BLAST|OpenGL|Insets|Input|TextInput|RemoteInput|Ime)', tag):
         return False
+    if re.search(r'^(gralloc4|Gralloc4|GraphicBufferAllocator|AHardwareBuffer)', tag):
+        return False
 
     if pid in PIDS:
         return True

@@ -106,18 +106,27 @@ def _die(msg):
     sys.exit(1)
 
 class _InteractiveCmd(Interactive):
-    def __init__(self, cmd):
+    def __init__(self, cmd, cleanup_cmd=None):
         super().__init__(cmd)
         self._cmd = cmd
+        self._cleanup_cmd = cleanup_cmd
 
     def execute(self, *args, **kw):
-        if platform.system() != 'Windows':
-            # use execvp() to replace doit process with the command
-            os.execvp('bash', [
-                'bash', '-c',
-                # close file descriptors to release file locks
-                'eval exec {3..1024}">&-" && ' + self._cmd,
+        print(f'Running: {self._cmd}', file=sys.stderr)
+
+        if platform.system() == 'posix':
+            # execvp() replaces doit process with given command
+            os.execvp(sys.executable, [
+                sys.executable, 'script/wrap_command.py',
+                '--command', self._cmd,
+                '--cleanup', self._cleanup_cmd,
+                '--timeout', 2,
             ])
+
+        if self._cleanup_cmd:
+            atexit.register(
+                lambda: subprocess.call(self._cleanup_cmd, shell=True))
+
         super().execute(*args, **kw)
 
 class _HugeCmd(CmdAction):
@@ -259,7 +268,6 @@ def task_launch_desktop():
     def _launch_app():
         device = _device(_platform())
         cmd = f'flutter run --{VARIANT} -d "{device}"'
-        print(f'Running: {cmd}', file=sys.stderr)
         return _InteractiveCmd(cmd).execute()
 
     return {
@@ -274,22 +282,16 @@ def task_launch_desktop():
 # doit launch:android [variant=debug|release]
 def task_launch_android():
     """build android apk, then launch it on connected device"""
-    def _register_cleanup():
-        atexit.register(lambda: subprocess.call(
-            'adb shell am force-stop org.rocstreaming.rocdroid',
-            shell=True))
-
     def _launch_app():
         device = _device('android')
         cmd = f'flutter run --{VARIANT} -d "{device}"'
-        print(f'Running: {cmd}', file=sys.stderr)
-        return _InteractiveCmd(cmd).execute()
+        cleanup = 'adb shell am force-stop org.rocstreaming.rocdroid'
+        return _InteractiveCmd(cmd, cleanup).execute()
 
     return {
         'basename': 'launch:android',
         'task_dep': ['build:android'],
         'actions': [
-            _register_cleanup,
             _launch_app,
         ],
         'title': _color_title,
