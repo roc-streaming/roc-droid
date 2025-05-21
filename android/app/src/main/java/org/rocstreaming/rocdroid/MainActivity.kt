@@ -199,22 +199,19 @@ class MainActivity : FlutterFragmentActivity() {
         }
 
         if (shouldShowRequestPermissionRationale(permission)) {
-            Log.d(LOG_TAG, "Showing permission dialog and waiting for response")
-            AlertDialog.Builder(this).apply {
-                setTitle(titleID)
-                setMessage(messageID)
-                setPositiveButton(R.string.ok) { _, _ ->
-                    Log.d(LOG_TAG, "User approved permission, issuing request")
-                    // callback will be invoked from onPermissionResult()
-                    permissionRequestCallback = callback
-                    permissionRequestLauncher.launch(permission)
+            Log.d(LOG_TAG, "Showing rationale dialog")
+            AlertDialog.Builder(this, R.style.PermissionDialog)
+                .apply {
+                    setTitle(titleID)
+                    setMessage(messageID)
+                    setPositiveButton(R.string.ok) { _, _ ->
+                        Log.d(LOG_TAG, "Dialog finished, issuing request")
+                        // callback will be invoked from onPermissionResult()
+                        permissionRequestCallback = callback
+                        permissionRequestLauncher.launch(permission)
+                    }
                 }
-                setNegativeButton(R.string.cancel) { dialog, _ ->
-                    Log.w(LOG_TAG, "User declined permission, rejecting")
-                    dialog.dismiss()
-                    callback(false)
-                }
-            }.show()
+                .show()
         } else {
             Log.d(LOG_TAG, "Requesting permission directly")
             // callback will be invoked from onPermissionResult()

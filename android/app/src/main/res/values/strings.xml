@@ -5,10 +5,10 @@
     <string name="cancel">Cancel</string>
 
     <string name="allow_notifications_title">Notification permission</string>
-    <string name="allow_notifications_message">The app needs permission to post notifications.</string>
+    <string name="allow_notifications_message">Notification permission is required to display audio controls.</string>
 
-    <string name="allow_mic_title">Mic permission</string>
-    <string name="allow_mic_message">The app needs permission to record audio from your phone mic.</string>
+    <string name="allow_mic_title">Microphone permission</string>
+    <string name="allow_mic_message">Microphone permission is required to stream your audio to remote peers.</string>
 
     <string name="notification_channel_name">Streaming foreground service</string>
     <string name="notification_receiver_running">Receiver running</string>
