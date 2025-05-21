@@ -31,7 +31,19 @@ class AndroidControllerImpl : AndroidController {
         return MainActivity.instance
     }
 
+    // Note: When targetSdkVersion is 32 or below, we should not explicitly ask for
+    //       POST_NOTIFICATIONS permission. Instead, it will be asked automatically
+    //       when we'll try to create notification channel.
+    //
+    // See:
+    // https://developer.android.com/develop/ui/views/notifications/notification-permission#new-apps
     override fun requestNotifications(callback: (Result<Unit>) -> Unit) {
+        if (getMainActivity().getApplicationContext().getApplicationInfo().targetSdkVersion <= 32) {
+            Log.i(LOG_TAG, "No need to request POST_NOTIFICATIONS permission")
+            callback(Result.success(Unit))
+            return
+        }
+
         Log.i(LOG_TAG, "Requesting POST_NOTIFICATIONS permission")
 
         getMainActivity().requestPermission(
