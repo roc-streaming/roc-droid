@@ -62,19 +62,19 @@ jobs:
 
       - name: Run checks
         run: |
-          doit check:desktop
+          doit desktop:check
 
       - name: Run build (debug)
         run: |
-          doit build:desktop variant=debug
+          doit desktop:build variant=debug
 
       - name: Run build (release)
         run: |
-          doit build:desktop variant=release
+          doit desktop:build variant=release
 
       - name: Run tests
         run: |
-          doit test:desktop
+          doit desktop:test
 
   # build for android on different hosts
   android:
@@ -120,19 +120,19 @@ jobs:
 
       - name: Run checks
         run: |
-          doit check:android
+          doit android:check
 
       - name: Run build (debug)
         run: |
-          doit build:android variant=debug
+          doit android:build variant=debug
 
       - name: Run build (release)
         run: |
-          doit build:android variant=release
+          doit android:build variant=release
 
       - name: Run tests
         run: |
-          doit test:android
+          doit android:test
 
   # build for different targets on different hosts using docker
   docker:
@@ -153,7 +153,7 @@ jobs:
       - name: Build
         if: runner.os != 'Windows'
         run: |
-          ./script/docker_build.py
+          ./script/docker_build.sh
 
       - name: Build (Windows)
         if: runner.os == 'Windows'

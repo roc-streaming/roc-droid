@@ -1,6 +1,6 @@
 # Build project
 
-## Build with docker
+## Build with Docker
 
 The easiest way to build project is to use our pre-built [docker images](https://github.com/roc-streaming/dockerfiles) with Flutter SDK. In this case you don't need to set up build environment by yourself.
 
@@ -10,17 +10,17 @@ Then open terminal in project root and run:
 
    * On macOS and Linux:
 
-         ./script/docker_build.py
+        ./script/docker_build.sh
 
    * On Windows:
    
-         .\script\docker_build.bat
+        .\script\docker_build.bat
 
 After building, you can find APK here:
 
     dist/android/release/roc-droid-<version>.apk
 
-## Build without docker
+## Build without Docker
 
 First follow instructions to set up build environment:
 

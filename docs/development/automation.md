@@ -4,52 +4,52 @@ For development, it is recommended to use [doit](https://pydoit.org/) task runne
 
 Example workflow for Android development:
 
-- During development, you may frequently run `doit check:android` or `doit test:android`. These commands are quick and perform the most basic checks. They do not perform a full build and do not require a device to be connected.
+- During development, you may frequently run `doit android:check` (to check compilation) and `doit android:test` (to run unit tests on host). These commands are quick and perform the most basic checks. They do not perform a full build and do not require a device to be connected.
 
-- Run `doit build:android` from time to time to perform a full build and `doit integration:android` to run integration tests on the connected device. These commands are heavy.
+- Run `doit android:build` from time to time to perform a full build and `doit android:integration` to run integration tests on the connected device or emulator. These commands are heavy.
 
-- To test the app manually, use `doit install:android` or `doit launch:android`.
+- To test the app manually on connected device or emulator, use `doit android:install` or `doit android:launch`.
 
-All commands should be called from the root directory.
+All commands should be called from the project root directory.
 
 ## Run checks
 
 Run code checks for desktop app (dart analyzer):
 
 ```
-doit check:desktop
+doit desktop:check
 ```
 
-Run code checks for android app (dart analyzer, kotlin compiler, spotless linter):
+Run code checks for android app (dart analyzer, kotlin compiler):
 
 ```
-doit check:android
+doit android:check
 ```
 
 ## Run tests
 
-Run code checks for desktop app (`check:desktop`), then run unit tests on desktop:
+Run code checks for desktop app (`desktop:check`), then run unit tests on desktop:
 
 ```
-doit test:desktop
+doit desktop:test
 ```
 
-Run code checks for android app (`check:android`), then run unit tests on desktop (no android device needed):
+Run code checks for android app (`android:check`), then run unit tests on desktop (no android device needed):
 
 ```
-doit test:android
+doit android:test
 ```
 
-Run code checks for desktop app (`check:desktop`), then run integration tests on desktop:
+Run code checks for desktop app (`desktop:check`), then run integration tests on desktop:
 
 ```
-doit integration:desktop
+doit desktop:integration
 ```
 
-Run code checks for android app (`check:android`), then run integration tests on connected android device:
+Run code checks for android app (`android:check`), then run integration tests on connected android device:
 
 ```
-doit integration:android
+doit android:integration
 ```
 
 ## Build and clean
@@ -57,13 +57,13 @@ doit integration:android
 Build desktop app (some sort of bundle, depending on platform):
 
 ```
-doit build:desktop [variant=debug|release]
+doit desktop:build [variant=debug|release]
 ```
 
 Build android app (.apk file):
 
 ```
-doit build:android [variant=debug|release]
+doit android:build [variant=debug|release]
 ```
 
 Clean all build artifacts:
@@ -77,13 +77,13 @@ doit wipe
 Build desktop app and install system-wide on this machine:
 
 ```
-doit install:desktop [variant=debug|release]
+doit desktop:install [variant=debug|release]
 ```
 
 Build android app (.apk file) and install to connected device:
 
 ```
-doit install:android [variant=debug|release]
+doit android:install [variant=debug|release]
 ```
 
 ## Launch app
@@ -91,18 +91,16 @@ doit install:android [variant=debug|release]
 Build and launch desktop app:
 
 ```
-doit launch:desktop [variant=debug|release]
+doit desktop:launch [variant=debug|release]
 ```
 
 Build android app (.apk file) and launch on connected device:
 
 ```
-doit launch:android [variant=debug|release]
+doit android:launch [variant=debug|release]
 ```
 
-## Generate code
-
-Code generation is based on `build_runner` package.
+## Generate source code
 
 Run all code generation (but not resource generation, described in the next section):
 
@@ -110,21 +108,20 @@ Run all code generation (but not resource generation, described in the next sect
 doit gen
 ```
 
-Run individual steps:
+The command above is a shorthand for three sub-tasks:
 
-```
-doit gen:model
-doit gen:agent
+```console
+# run build_runner generator (for mobx, freezed, etc.)
+doit gen:build_runner
+
+# run pigeon generator (for platform channels)
+doit gen:pigeon
+
+# run localization generator
 doit gen:l10n
 ```
 
-`watch` parameter runs code generator in watch mode, when it monitors source files updates and automatically regenerates code when needed.
-
 Generated files have `*.g.dart` or `.g.kt` extension and must no be modified by hand.
-
-`model` package uses `mobx_codegen` to generate reactive model classes. `agent` package uses `pigeon` to generate android platform channels bridge.
-
-`l10n` step generates localization package from `.arb` file.
 
 ## Generate resources
 
@@ -154,19 +151,25 @@ doit gen:deps
 
 Documentation for website is written in markdown and lives in `docs` directory.
 
-This will build HTML documentation from markdown using `mkdocs` and place it into `site` directory. It will run `mkdocs` in docker container, so docker is required:
+This will build HTML documentation from markdown using `mkdocs` and place it into `site` directory:
 
 ```
-doit docs:build
+doit docs:site
 ```
 
-This will run a HTTP server on localhost that serves HTML documentation and automatically rebuilds it when markdown files (or other files in `docs` directory) are changed:
+Installing `mkdocs` and all its dependencies may be cumbersome, so there is a script that pulls a pre-built docker container and uses it to build documentation:
 
 ```
-doit docs:serve
+python3 ./script/generate_docs.py build
 ```
 
-Re-generate some markdown pages:
+It can also start mkdocs preview server (on localhost) that monitors file changes and automatically rebuilds documentation on change:
+
+```
+python3 ./script/generate_docs.py serve
+```
+
+To re-generate some markdown pages, run:
 
 ```
 doit docs:md

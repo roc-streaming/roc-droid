@@ -60,7 +60,7 @@ jobs:
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: |
           echo "${{ secrets.SIGNING_STORE_BASE64 }}" | base64 -di > app/${{ env.SIGNING_STORE_FILE }}
-          doit build:android variant=release
+          doit android:build variant=release
 
       - name: Deploy APK
         uses: softprops/action-gh-release@v2

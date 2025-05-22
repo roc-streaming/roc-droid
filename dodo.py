@@ -1,6 +1,6 @@
 from doit import get_var
 from doit.action import CmdAction
-from doit.tools import title_with_actions, LongRunning, Interactive
+from doit.tools import title_with_actions, Interactive
 import atexit
 import fnmatch
 import functools
@@ -23,13 +23,6 @@ if os.name == 'posix':
 sys.stdin.reconfigure(encoding='utf-8')
 sys.stdout.reconfigure(encoding='utf-8')
 
-DOIT_CONFIG = {
-    'default_tasks': ['check:desktop', 'test:desktop'],
-    'verbosity': 2,
-}
-
-VARIANT = get_var('variant', 'release')
-
 def _platform():
     if platform.system() == 'Linux':
         return 'linux'
@@ -51,9 +44,6 @@ def _gradlew():
         return 'gradlew.bat'
     else:
         return './gradlew'
-
-def _truish(s):
-    return s.lower() in ['true', 'yes', 'on', '1']
 
 def _copy_file(src, dst):
     def task():
@@ -105,22 +95,22 @@ def _die(msg):
     print(f'error: {msg}', file=sys.stderr)
     sys.exit(1)
 
-class _InteractiveCmd(Interactive):
-    def __init__(self, cmd, cleanup_cmd=None):
+class _Launcher(Interactive):
+    def __init__(self, cmd, cleanup_cmd=''):
+        if isinstance(cmd, list):
+            cmd = shlex.join(cmd)
         super().__init__(cmd)
         self._cmd = cmd
         self._cleanup_cmd = cleanup_cmd
 
     def execute(self, *args, **kw):
-        print(f'Running: {self._cmd}', file=sys.stderr)
-
-        if platform.system() == 'posix':
+        if os.name == 'posix':
             # execvp() replaces doit process with given command
             os.execvp(sys.executable, [
                 sys.executable, 'script/wrap_command.py',
                 '--command', self._cmd,
                 '--cleanup', self._cleanup_cmd,
-                '--timeout', 2,
+                '--timeout', '2',
             ])
 
         if self._cleanup_cmd:
@@ -141,22 +131,71 @@ class _HugeCmd(CmdAction):
     def __str__(self):
         return 'Cmd: ' + self._title
 
-# doit check:desktop
-def task_check_desktop():
+DOIT_CONFIG = {
+    'default_tasks': ['desktop:check', 'desktop:test'],
+    'verbosity': 2,
+}
+
+VARIANT = get_var('variant', 'release')
+
+# doit desktop:check
+def task_desktop_check():
     """run dart analyzer"""
     return {
-        'basename': 'check:desktop',
+        'basename': 'desktop:check',
         'actions': [
             'flutter analyze',
         ],
         'title': _color_title,
     }
 
-# doit check:android
-def task_check_android():
-    """run dart analyzer, kotlin compiler, and spotless linter"""
+# doit desktop:test
+def task_desktop_test():
+    """run desktop_check, then run unit tests locally"""
+    return {
+        'basename': 'desktop:test',
+        'task_dep': ['desktop:check'],
+        'actions': [
+            'flutter test -r github',
+        ],
+        'title': _color_title,
+    }
+
+# doit desktop:build [variant=debug|release]
+def task_desktop_build():
+    """run desktop_check, then build desktop app bundle"""
+    return {
+        'basename': 'desktop:build',
+        'task_dep': ['desktop:check'],
+        'actions': [
+            f'flutter build {_platform()} --{VARIANT}',
+        ],
+        'title': _color_title,
+    }
+
+# doit desktop:launch [variant=debug|release]
+def task_desktop_launch():
+    """build desktop app, then launch it locally"""
+    def _launch_app():
+        device = _device(_platform())
+        command = f'flutter run --{VARIANT} -d "{device}"'
+        print(f'Running: {command}', file=sys.stderr)
+        return _Launcher(command).execute()
+
+    return {
+        'basename': 'desktop:launch',
+        'task_dep': ['desktop:build'],
+        'actions': [
+            _launch_app,
+        ],
+        'title': _color_title,
+    }
+
+# doit android:check
+def task_android_check():
+    """run dart analyzer and kotlin compiler"""
     yield {
-        'basename': 'check:android',
+        'basename': 'android:check',
         'name': 'dart',
         'actions': [
             'flutter analyze',
@@ -164,63 +203,72 @@ def task_check_android():
         'title': _color_title,
     }
     yield {
-        'basename': 'check:android',
+        'basename': 'android:check',
         'name': 'kotlin',
         'actions': [
             f'cd android && {_gradlew()} compileDebugJavaWithJavac',
         ],
         'title': _color_title,
     }
-    yield {
-        'basename': 'check:android',
-        'name': 'spotless',
+
+# doit android:test
+def task_android_test():
+    """run android_check, then run unit tests locally"""
+    return {
+        'basename': 'android:test',
+        'task_dep': ['android:check'],
         'actions': [
-            f'cd android && {_gradlew()} spotlessCheck',
+            'flutter test -r github',
         ],
         'title': _color_title,
     }
 
-# doit test:desktop
-def task_test_desktop():
-    """run check:desktop, then run unit tests locally"""
+# doit android:build [variant=debug|release]
+def task_android_build():
+    """run android_check, then build android apk"""
     return {
-        'basename': 'test:desktop',
-        'task_dep': ['check:desktop'],
+        'basename': 'android:build',
+        'task_dep': ['android:check'],
         'actions': [
-            'flutter test -j1 -r github',
+            f'flutter build apk --{VARIANT}',
         ],
         'title': _color_title,
     }
 
-# doit test:android
-def task_test_android():
-    """run check:android, then run unit tests locally"""
+# doit android:install [variant=debug|release]
+def task_android_install():
+    """build android apk, then install it on connected device"""
+    def _install_app():
+        device = _device('android')
+        command = f'flutter install --{VARIANT} -d "{device}"'
+        print(f'Running: {command}', file=sys.stderr)
+        return Interactive(command).execute()
+
     return {
-        'basename': 'test:android',
-        'task_dep': ['check:android'],
+        'basename': 'android:install',
+        'task_dep': ['android:build'],
         'actions': [
-            'flutter test -j1 -r github',
+            _install_app,
         ],
         'title': _color_title,
     }
 
-# doit build:desktop [variant=debug|release]
-def task_build_desktop():
-    """run check:desktop, then build desktop app bundle"""
-    return {
-        'basename': 'build:desktop',
-        'task_dep': ['check:desktop'],
-        'actions': [f'flutter build {_platform()} --{VARIANT}'],
-        'title': _color_title,
-    }
+# doit android:launch [variant=debug|release]
+def task_android_launch():
+    """build android apk, then launch it on connected device"""
+    def _launch_app():
+        device = _device('android')
+        command = f'flutter run --{VARIANT} -d "{device}"'
+        cleanup = 'adb shell am force-stop org.rocstreaming.rocdroid'
+        print(f'Running: {command}', file=sys.stderr)
+        return _Launcher(command, cleanup).execute()
 
-# doit build:android [variant=debug|release]
-def task_build_android():
-    """run check:android, then build android apk"""
     return {
-        'basename': 'build:android',
-        'task_dep': ['check:android'],
-        'actions': [f'flutter build apk --{VARIANT}'],
+        'basename': 'android:launch',
+        'task_dep': ['android:build'],
+        'actions': [
+            _launch_app,
+        ],
         'title': _color_title,
     }
 
@@ -239,89 +287,31 @@ def task_wipe():
         'title': _color_title,
     }
 
-# TODO
-# doit install:deskop [variant=debug|release]
-def todo_install_desktop():
-    pass
-
-# doit install:android [variant=debug|release]
-def task_install_android():
-    """build android apk, then install it on connected device"""
-    def _install_app():
-        device = _device('android')
-        cmd = f'flutter install --{VARIANT} -d "{device}"'
-        print(f'Running: {cmd}', file=sys.stderr)
-        return LongRunning(cmd).execute()
-
-    return {
-        'basename': 'install:android',
-        'task_dep': ['build:android'],
-        'actions': [
-            _install_app,
-        ],
-        'title': _color_title,
-    }
-
-# doit launch:desktop [variant=debug|release]
-def task_launch_desktop():
-    """build desktop app, then launch it locally"""
-    def _launch_app():
-        device = _device(_platform())
-        cmd = f'flutter run --{VARIANT} -d "{device}"'
-        return _InteractiveCmd(cmd).execute()
-
-    return {
-        'basename': 'launch:desktop',
-        'task_dep': ['build:desktop'],
-        'actions': [
-            _launch_app,
-        ],
-        'title': _color_title,
-    }
-
-# doit launch:android [variant=debug|release]
-def task_launch_android():
-    """build android apk, then launch it on connected device"""
-    def _launch_app():
-        device = _device('android')
-        cmd = f'flutter run --{VARIANT} -d "{device}"'
-        cleanup = 'adb shell am force-stop org.rocstreaming.rocdroid'
-        return _InteractiveCmd(cmd, cleanup).execute()
-
-    return {
-        'basename': 'launch:android',
-        'task_dep': ['build:android'],
-        'actions': [
-            _launch_app,
-        ],
-        'title': _color_title,
-    }
-
 # doit gen
 def task_gen():
     """run all code generation (but not resource generation)"""
     return {
         'basename': 'gen',
-        'task_dep': ['gen:model', 'gen:agent', 'gen:l10n'],
-        'actions': None,
+        'actions': [],
+        'task_dep': ['gen:build_runner', 'gen:pigeon', 'gen:l10n'],
     }
 
-# doit gen:model [watch=true|false]
-def task_gen_model():
+# doit gen:build_runner
+def task_gen_build_runner():
     """run flutter build_runner Model code generation"""
     return {
-        'basename': 'gen:model',
+        'basename': 'gen:build_runner',
         'actions': [
             f'dart run build_runner build --delete-conflicting-outputs',
         ],
         'title': _color_title,
     }
 
-# doit gen:agent
-def task_gen_agent():
+# doit gen:pigeon
+def task_gen_pigeon():
     """run flutter pigeon Agent code generation"""
     return {
-        'basename': 'gen:agent',
+        'basename': 'gen:pigeon',
         'actions': [
             'dart run pigeon --input lib/src/agent/android_bridge.decl.dart',
         ],
@@ -352,7 +342,7 @@ def task_gen_deps():
             'flutter pub run flutter_oss_licenses:generate.dart '+
                 '--json -o build/flutter_licenses.json',
             # generate metadata/dependencies.json
-            f'{sys.executable} script/generate_dependencies.py',
+            [sys.executable, 'script/generate_dependencies.py'],
         ],
         'title': _color_title,
     }
@@ -362,7 +352,9 @@ def task_gen_icons():
     """run flutter icons generation (flutter_launcher_icons)"""
     return {
         'basename': 'gen:icons',
-        'actions': ['dart run flutter_launcher_icons'],
+        'actions': [
+            'dart run flutter_launcher_icons',
+        ],
         'title': _color_title,
     }
 
@@ -371,35 +363,26 @@ def task_gen_splash():
     """run flutter splash screens generation (flutter_native_splash)"""
     return {
         'basename': 'gen:splash',
-        'actions': ['dart run flutter_native_splash:create'],
-        'title': _color_title,
-    }
-
-# doit docs:build
-def task_docs_build():
-    """build html documentation"""
-    return {
-        'basename': 'docs:build',
         'actions': [
-            f'{sys.executable} script/generate_docs.py build',
+            'dart run flutter_native_splash:create',
         ],
         'title': _color_title,
     }
 
-# doit docs:serve
-def task_docs_serve():
-    """serve html documentation on localhost"""
+# doit docs:site
+def task_docs_site():
+    """generate html documentation"""
     return {
-        'basename': 'docs:serve',
+        'basename': 'docs:site',
         'actions': [
-            _InteractiveCmd(f'{sys.executable} script/generate_docs.py serve'),
+            'mkdocs build',
         ],
         'title': _color_title,
     }
 
-# doit docs:authors
+# doit docs:md
 def task_docs_md():
-    """re-generate authors list"""
+    """generate markdown files"""
     return {
         'basename': 'docs:md',
         'actions': [
@@ -413,8 +396,8 @@ def task_fmt():
     """run all code formatters"""
     return {
         'basename': 'fmt',
+        'actions': [],
         'task_dep': ['fmt:dart', 'fmt:kotlin'],
-        'actions': None,
     }
 
 # doit fmt:dart
@@ -445,6 +428,8 @@ def task_fmt_kotlin():
     """run spotless formatter"""
     return {
         'basename': 'fmt:kotlin',
-        'actions': [f'cd android && {_gradlew()} spotlessApply'],
+        'actions': [
+            f'cd android && {_gradlew()} spotlessApply',
+        ],
         'title': _color_title,
     }
