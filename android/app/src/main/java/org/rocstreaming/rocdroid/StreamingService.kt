@@ -49,9 +49,9 @@ private const val NOTIFICATION_ACTION_STOP = "org.rocstreaming.rocdroid.Notifica
 private const val LOG_TAG = "rocdroid.StreamingService"
 
 // Used to report asynchronous events and errors from service.
-interface StreamingEventListener {
-    fun onEvent(event: AndroidServiceEvent)
-    fun onError(error: AndroidServiceError)
+interface StreamingServiceSubscriber {
+    fun processEvent(event: AndroidServiceEvent)
+    fun processError(error: AndroidServiceError)
 }
 
 // This service runs even when the app is closed.
@@ -63,7 +63,7 @@ class StreamingService : Service() {
     private var senderThread: Thread? = null
     private var receiverStarted = false
     private var senderStarted = false
-    private var eventListeners: MutableList<StreamingEventListener> = mutableListOf()
+    private var eventListeners: MutableList<StreamingServiceSubscriber> = mutableListOf()
     private var autoDetach: Boolean = true
     private var currentProjection: MediaProjection? = null
 
@@ -334,14 +334,14 @@ class StreamingService : Service() {
     }
 
     @Synchronized
-    fun addEventListener(listener: StreamingEventListener) {
+    fun addEventListener(listener: StreamingServiceSubscriber) {
         Log.d(LOG_TAG, "Adding event listener")
 
         eventListeners.add(listener)
     }
 
     @Synchronized
-    fun removeEventListener(listener: StreamingEventListener) {
+    fun removeEventListener(listener: StreamingServiceSubscriber) {
         Log.d(LOG_TAG, "Removing event listener")
 
         eventListeners.remove(listener)
@@ -358,14 +358,14 @@ class StreamingService : Service() {
     private fun reportEvent(event: AndroidServiceEvent) {
         Log.d(LOG_TAG, "Reporting event: " + event.toString())
 
-        eventListeners.forEach { it.onEvent(event) }
+        eventListeners.forEach { it.processEvent(event) }
     }
 
     @Synchronized
     private fun reportError(error: AndroidServiceError) {
         Log.d(LOG_TAG, "Reporting error: " + error.toString())
 
-        eventListeners.forEach { it.onError(error) }
+        eventListeners.forEach { it.processError(error) }
     }
 
     private fun autoStopService() {

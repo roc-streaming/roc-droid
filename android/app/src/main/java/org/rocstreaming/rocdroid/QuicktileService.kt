@@ -16,8 +16,8 @@ class QuicktileService : TileService() {
     private var pendingStop = false
 
     // handler for StreamingConnector events
-    private val streamingHandler: StreamingConnectionHandler =
-        object : StreamingConnectionHandler {
+    private val streamingListener: StreamingListener =
+        object : StreamingListener {
             override fun onConnected() {
                 if (pendingStop) {
                     processStop()
@@ -38,7 +38,7 @@ class QuicktileService : TileService() {
             }
         }
 
-    val streamingConnector = StreamingConnector(this, streamingHandler)
+    val streamingConnector = StreamingConnector(this, streamingListener)
 
     override fun onCreate() {
         Log.d(LOG_TAG, "Tile service created")

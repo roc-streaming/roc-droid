@@ -12,14 +12,14 @@ import android.util.Log
 
 private const val LOG_TAG = "rocdroid.StreamingConnector"
 
-interface StreamingConnectionHandler {
+interface StreamingListener {
     fun onConnected()
     fun onEvent(event: AndroidServiceEvent)
     fun onError(error: AndroidServiceError)
     fun onDisconnected()
 }
 
-class StreamingConnector(val context: Context, val handler: StreamingConnectionHandler) {
+class StreamingConnector(val context: Context, val listener: StreamingListener) {
     // non-null once successfully connected to server
     // may temporarily become null when connection is lost
     private var service: StreamingService? = null
@@ -71,7 +71,7 @@ class StreamingConnector(val context: Context, val handler: StreamingConnectionH
         Log.d(LOG_TAG, "Unbinding service")
 
         context.unbindService(serviceHandler)
-        service?.removeEventListener(eventHandler)
+        service?.removeEventListener(serviceSubscriber)
         service = null
     }
 
@@ -84,9 +84,9 @@ class StreamingConnector(val context: Context, val handler: StreamingConnectionH
 
                 // remember service reference
                 service = (binder as StreamingService.LocalBinder).getService()
-                service?.addEventListener(eventHandler)
+                service?.addEventListener(serviceSubscriber)
 
-                handler.onConnected()
+                listener.onConnected()
             }
 
             // called when we've lost connectio to service
@@ -94,10 +94,10 @@ class StreamingConnector(val context: Context, val handler: StreamingConnectionH
                 Log.w(LOG_TAG, "Service disconnected")
 
                 // forget service reference
-                service?.removeEventListener(eventHandler)
+                service?.removeEventListener(serviceSubscriber)
                 service = null
 
-                handler.onDisconnected()
+                listener.onDisconnected()
 
                 // (re)start & reconnect
                 Log.d(LOG_TAG, "Initiating asynchronous reconnect")
@@ -106,14 +106,14 @@ class StreamingConnector(val context: Context, val handler: StreamingConnectionH
         }
 
     // handler for events produced by streaming service
-    private val eventHandler: StreamingEventListener =
-        object : StreamingEventListener {
-            override fun onEvent(event: AndroidServiceEvent) {
-                handler.onEvent(event)
+    private val serviceSubscriber: StreamingServiceSubscriber =
+        object : StreamingServiceSubscriber {
+            override fun processEvent(event: AndroidServiceEvent) {
+                listener.onEvent(event)
             }
 
-            override fun onError(error: AndroidServiceError) {
-                handler.onError(error)
+            override fun processError(error: AndroidServiceError) {
+                listener.onError(error)
             }
         }
 }

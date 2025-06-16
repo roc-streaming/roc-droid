@@ -105,8 +105,8 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     // handler for StreamingConnector events
-    private val streamingHandler: StreamingConnectionHandler =
-        object : StreamingConnectionHandler {
+    private val streamingListener: StreamingListener =
+        object : StreamingListener {
             override fun onConnected() {
                 // callback stored by startService()
                 val service = streamingConnector.getService()
@@ -138,7 +138,7 @@ class MainActivity : FlutterFragmentActivity() {
             }
         }
 
-    val streamingConnector = StreamingConnector(this, streamingHandler)
+    val streamingConnector = StreamingConnector(this, streamingListener)
 
     fun getStreamingService(): StreamingService? {
         return streamingConnector.getService()
