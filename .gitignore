@@ -1,12 +1,46 @@
-*.iml
-.gradle
-*.jks
-/local.properties
-/.idea/*
-.DS_Store
+# build
 /build
-/captures
-.externalNativeBuild
+/dist
+/site
+
+# flutter
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+app.*.map.json
+app.*.symbols
+
+# java
+*.class
+*.iml
+*.jks
 .cxx
-.idea
+.externalNativeBuild
+.gradle
+local.properties
+
+# doit and scripts
+.doit.db*
+*.pyc
+
+# temp
+.DS_Store
+.buildlog
+
+# editors
+*.iml
+*.ipr
+*.iws
+*.swp
+.atom
+.idea/
 .vscode
+.$*
+
+# personal
+/TODO.org
+.aider.*

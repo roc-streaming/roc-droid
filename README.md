@@ -1,6 +1,6 @@
 # Roc for Android!
 
-[![Build](https://github.com/roc-streaming/roc-droid/actions/workflows/build.yaml/badge.svg)](https://github.com/roc-streaming/roc-droid/actions/workflows/build.yaml) [![GitHub release](https://img.shields.io/github/release/roc-streaming/roc-droid.svg)](https://github.com/roc-streaming/roc-droid/releases) [![Matrix chat](https://matrix.to/img/matrix-badge.svg)](https://app.element.io/#/room/#roc-streaming:matrix.org)
+[![Build](https://github.com/roc-streaming/roc-droid/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/roc-streaming/roc-droid/actions/workflows/build.yaml) [![GitHub release](https://img.shields.io/github/release/roc-streaming/roc-droid.svg)](https://github.com/roc-streaming/roc-droid/releases) [![Matrix chat](https://matrix.to/img/matrix-badge.svg)](https://app.element.io/#/room/#roc-streaming:matrix.org)
 
 Android app implementing Roc sender and receiver. **Work in progress!**
 
@@ -9,29 +9,34 @@ Features:
 * **receive** sound from remote Roc-compatible sender and **play** to local audio device
 * **capture** sound from apps or microphone and **send** to remote Roc-compatible receiver
 
-Download
---------
+## Installation
 
-* Download APK from [latest release](https://github.com/roc-streaming/roc-droid/releases/latest)
+#### From repository
 
-* Download from F-Droid or IzzyOnDroid:
+Download from F-Droid or IzzyOnDroid:
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
-     height="80">](https://f-droid.org/packages/org.rocstreaming.rocdroid/)
+     height="70">](https://f-droid.org/packages/org.rocstreaming.rocdroid/)
 [<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png"
      alt="Get it on F-Droid"
-     height="80">](https://apt.izzysoft.de/fdroid/index/apk/org.rocstreaming.rocdroid)
+     height="70">](https://apt.izzysoft.de/fdroid/index/apk/org.rocstreaming.rocdroid)
 
-Screenshot
-----------
+#### From binaries
 
-<img src="https://raw.githubusercontent.com/roc-streaming/roc-droid/master/screenshot.webp" data-canonical-src="https://raw.githubusercontent.com/roc-streaming/roc-droid/master/screenshot.webp" width="300"/>
+Download pre-built APK from latest [github release](https://github.com/roc-streaming/roc-droid/releases/latest).
 
-Features
---------
+#### From sources
 
-Key features of [Roc Toolkit](https://github.com/roc-streaming/roc-toolkit) streaming engine, used by Roc Droid:
+Follow instructions here: [build project](https://roc-streaming.org/droid/building/build_project).
+
+## Screenshot
+
+<img src="https://raw.githubusercontent.com/roc-streaming/roc-droid/main/docs/screenshots/screencast.webp" data-canonical-src="https://raw.githubusercontent.com/roc-streaming/roc-droid/main/docs/screenshots/screencast.webp" width="300"/>
+
+## Features
+
+Roc Droid is based on [Roc Toolkit](https://github.com/roc-streaming/roc-toolkit) streaming engine, which notable features are:
 
 * real-time streaming with guaranteed latency;
 * robust work on unreliable networks like Wi-Fi, due to use of Forward Erasure Correction codes;
@@ -52,109 +57,20 @@ If you would like to support the project financially, please refer to [this page
 
 Thank you!
 
-<a href="https://liberapay.com/roc-streaming"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
+<a href="https://github.com/sponsors/roc-streaming"><img alt="Donate on GitHub Sponsors" src="https://roc-streaming.org/images/logos/github_sponsors.svg"></a>
 
-Building
---------
+## Hacking
 
-The app uses [Java bindings for Roc Toolkit](https://github.com/roc-streaming/roc-java). You don't need to install them manually; gradle will automatically download AAR from maven central, which contains both libroc and Java bindings built for all Android ABIs.
+Contributions in any form are very welcome! You can find issues needing help using [help wanted](https://github.com/roc-streaming/roc-droid/labels/help%20wanted) and [good first issue](https://github.com/roc-streaming/roc-droid/labels/good%20first%20issue) labels.
 
-The easiest way to build the app is using Android Studio.
+Please refer to [online documentation](https://roc-streaming.org/droid/) to get an idea about project internals and development flow.
 
-Alternatively, you can build and deploy APK from command-line.
-
-Build:
-
-```
-./gradlew build
-```
-
-Install to device:
-
-```
-adb install app/build/outputs/apk/debug/roc-droid-*.apk
-```
-
-Development
------------
-
-To check code style use:
-
-```
-./gradlew spotlessCheck
-```
-
-To apply code style use:
-
-```
-./gradlew spotlessApply
-```
-
-To check consistency of version name and code:
-
-```
-./gradlew checkVersion
-```
-
-Signing
--------
-
-Keystore with certificates was generated using this command:
-
-```
-keytool -genkey -v -keystore roc-droid.jks -alias apk -keyalg RSA -keysize 2048 -validity 10000
-```
-
-Then it was encoded to base64:
-
-```
-base64 roc-droid.jks
-```
-
-Then the following secrets were added to the repo:
-
-* `SIGNING_STORE_BASE64` - base64-encoded keystore (`roc-droid.jks`)
-* `SIGNING_STORE_PASSWORD` - keystore password
-* `SIGNING_KEY_ALIAS` - key alias (`apk`)
-* `SIGNING_KEY_PASSWORD` - key password (same as keystore password)
-
-GitHub actions decode `SIGNING_STORE_BASE64` into a temporary `.jks` file and set `SIGNING_*` environment variables with the name of the file and credentials.
-
-Then the following command is run:
-
-```
-./gradlew assembleRelease
-```
-
-It reads credentials from the environment variables and signs release APK using them.
-
-Release
--------
-
-To release a new version:
-
-* Create git tag
-
-   ```
-   ./tag.py --push <remote> <version>
-   ```
-
-  e.g.
-
-   ```
-   ./tag.py --push origin 1.2.3
-   ```
-
-  Or use **tag.py** without **--push** to only create a tag locally, and then push it manually.
-
-* Wait until "Release" CI job completes and creates GitHub release draft.
-
-* Edit GitHub release created by CI and publish it.
+Welcome to join our matrix chat rooms for [users](https://app.element.io/#/room/#roc-streaming:matrix.org) and [developers](https://app.element.io/#/room/#roc-streaming-dev:matrix.org).
 
 Authors
 -------
 
-See [here](https://github.com/roc-streaming/roc-droid/graphs/contributors).
+You can find the list of maintainer and contributors on [this page](https://roc-streaming.org/droid/authors/).
 
 License
 -------

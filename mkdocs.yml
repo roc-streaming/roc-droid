@@ -1,0 +1,55 @@
+site_name: Roc Droid documentation
+copyright: Copyright (c) Roc Streaming authors.
+
+repo_url: https://github.com/roc-streaming/roc-droid
+edit_uri: https://github.com/roc-streaming/roc-droid/edit/main/docs/
+
+strict: true
+use_directory_urls: false
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.blocks.caption
+
+plugins:
+  - search
+
+extra_css:
+  - stylesheets/extra.css
+
+nav:
+  - Home: index.md
+  - Authors: authors.md
+  - Architecture:
+    - Overview: architecture/overview.md
+    - User interface: architecture/ui.md
+    - Model: architecture/model.md
+  - Building:
+    - Build project: building/build_project.md
+    - macOS and Linux setup: building/macos_linux_setup.md
+    - Windows setup: building/windows_setup.md
+  - Development:
+    - Automation: development/automation.md
+    - Testing: development/testing.md
+    - Android development: development/android_development.md
+    - Release management: development/release_management.md
+
+exclude_docs: |
+  /screenshots
+  *.drawio

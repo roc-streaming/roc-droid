@@ -1,0 +1,71 @@
+import com.github.jk1.license.render.*
+
+buildscript {
+    ext {
+        // must be in-sync with settings.gradle
+        gradle_plugin_version = "8.6.0"
+        kotlin_version = "1.8.10"
+    }
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:$gradle_plugin_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.yaml:snakeyaml:2.2"
+    }
+}
+
+plugins {
+    id "com.diffplug.spotless" version "6.12.0"
+    id "com.github.jk1.dependency-license-report" version "2.9"
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+subprojects {
+    beforeEvaluate { project ->
+        if (project.name == "flutter_localization") {
+            project.buildscript.dependencies.classpath \
+                "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlin_version}"
+        }
+    }
+}
+
+spotless {
+    format "misc", {
+        target "**/*.gradle", "**/*.xml"
+        indentWithSpaces()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    kotlin {
+        target "**/*.kt"
+        targetExclude "**/*.g.kt"
+        ktlint()
+        trimTrailingWhitespace()
+        indentWithSpaces()
+        endWithNewline()
+    }
+}
+
+licenseReport {
+    configurations = ["releaseRuntimeClasspath"]
+    outputDir = project.layout.buildDirectory.get().asFile.path
+    renderers = [new ExtendedJsonReportRenderer("android_licenses.json")]
+}

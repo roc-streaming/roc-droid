@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Roc Droid</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="allow_notifications_title">Notification permission</string>
+    <string name="allow_notifications_message">Notification permission is required to display audio controls.</string>
+
+    <string name="allow_mic_title">Microphone permission</string>
+    <string name="allow_mic_message">Microphone permission is required to stream your audio to remote peers.</string>
+
+    <string name="notification_channel_name">Streaming foreground service</string>
+    <string name="notification_receiver_running">Receiver running</string>
+    <string name="notification_sender_running">Sender running</string>
+    <string name="notification_sender_and_receiver_running">Sender and receiver running</string>
+    <string name="notification_sender_and_receiver_not_running">Neither sender or receiver running</string>
+    <string name="notification_title_active">Streaming active</string>
+    <string name="notification_title_inactive">Streaming inactive</string>
+    <string name="notification_stop_action">Stop streaming</string>
+
+    <string name="tile_label">Roc Droid</string>
+</resources>

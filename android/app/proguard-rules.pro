@@ -1,0 +1,2 @@
+-dontwarn lombok.Generated
+-keep class org.rocstreaming.roctoolkit.** { *; }

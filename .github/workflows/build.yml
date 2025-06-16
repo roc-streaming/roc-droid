@@ -1,0 +1,161 @@
+name: "build"
+
+on:
+  push:
+    branches:
+      - flutter
+
+  pull_request:
+
+  repository_dispatch:
+    types:
+      - trigger_build
+
+  workflow_dispatch:
+  workflow_call:
+
+  schedule:
+    - cron: '0 0 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # native build on desktop
+  desktop:
+    strategy:
+      matrix:
+        include:
+          - host: linux
+            image: ubuntu-latest
+
+    runs-on: ${{ matrix.image }}
+    name: desktop/${{ matrix.host }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        uses: roc-streaming/ci/actions/install-packages@main
+        with:
+          packages: ninja-build libgtk-3-dev
+
+      - name: Install flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install doit
+        run: |
+          pip install doit
+
+      - name: Run checks
+        run: |
+          doit desktop:check
+
+      - name: Run build (debug)
+        run: |
+          doit desktop:build variant=debug
+
+      - name: Run build (release)
+        run: |
+          doit desktop:build variant=release
+
+      - name: Run tests
+        run: |
+          doit desktop:test
+
+  # build for android on different hosts
+  android:
+    strategy:
+      matrix:
+        include:
+          - host: linux
+            image: ubuntu-latest
+
+          - host: macos
+            image: macos-latest
+
+          - host: windows
+            image: windows-latest
+
+    runs-on: ${{ matrix.image }}
+    name: android/${{ matrix.host }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Install flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install doit
+        run: |
+          pip install doit
+
+      - name: Run checks
+        run: |
+          doit android:check
+
+      - name: Run build (debug)
+        run: |
+          doit android:build variant=debug
+
+      - name: Run build (release)
+        run: |
+          doit android:build variant=release
+
+      - name: Run tests
+        run: |
+          doit android:test
+
+  # build for different targets on different hosts using docker
+  docker:
+    strategy:
+      matrix:
+        include:
+          - host: linux
+            target: android
+            image: ubuntu-latest
+
+    runs-on: ${{ matrix.image }}
+    name: docker/${{ matrix.target }}-${{ matrix.host }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        if: runner.os != 'Windows'
+        run: |
+          ./script/docker_build.sh
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          .\script\docker_build.bat
