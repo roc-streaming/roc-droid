@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Roc Droid</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Anuluj</string>
+
+    <string name="allow_notifications_title">Uprawnienie powiadomień</string>
+    <string name="allow_notifications_message">Aby wyświetlać kontrolki audio, wymagane jest uprawnienie do powiadomień.</string>
+
+    <string name="allow_mic_title">Uprawnienie mikrofonu</string>
+    <string name="allow_mic_message">Uprawnienie do mikrofonu jest wymagane, aby przesyłać dźwięk do zdalnych urządzeń.</string>
+
+    <string name="notification_channel_name">Usługa pierwszoplanowa streamingu</string>
+    <string name="notification_receiver_running">Odbiornik uruchomiony</string>
+    <string name="notification_sender_running">Nadawca uruchomiony</string>
+    <string name="notification_sender_and_receiver_running">Nadawca i odbiornik uruchomione</string>
+    <string name="notification_sender_and_receiver_not_running">Ani nadawca, ani odbiornik nie są uruchomione</string>
+    <string name="notification_title_active">Streaming aktywny</string>
+    <string name="notification_title_inactive">Streaming nieaktywny</string>
+    <string name="notification_stop_action">Zatrzymaj streaming</string>
+
+    <string name="tile_label">Roc Droid</string>
+</resources>
