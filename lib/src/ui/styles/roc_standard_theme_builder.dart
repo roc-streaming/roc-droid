@@ -11,7 +11,7 @@ class RocStandardThemeBuilder {
       scaffoldBackgroundColor: RocColors.white,
       // Standard application AppBar theme
       appBarTheme: AppBarTheme(
-        color: RocColors.mainBlue,
+        backgroundColor: RocColors.mainBlue,
       ),
       // Standard application bottom navigation bar theme
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
