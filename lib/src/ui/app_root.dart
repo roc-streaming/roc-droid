@@ -17,6 +17,7 @@ class AppRoot extends StatelessWidget {
   ];
   static const List<Locale> _supportedLocales = [
     Locale('en', ''), // Supported english language
+    Locale('pl', ''), // Supported polish language
   ];
 
   AppRoot(ModelRoot modelRoot) : _modelRoot = modelRoot;

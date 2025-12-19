@@ -21,7 +21,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get receiverStartSenderStep => '1. Start sender on the remote device';
 
   @override
-  String get receiverUseIPStep => '2. Use one of IP addresses of this device as the remote on the sender';
+  String get receiverUseIPStep =>
+      '2. Use one of IP addresses of this device as the remote on the sender';
 
   @override
   String get receiverSourceStreamStep => '3. Use this port for source stream';
@@ -39,7 +40,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stopReceiverButton => 'STOP RECEIVER';
 
   @override
-  String get senderStartReceiverStep => '1. Start receiver on the remote device';
+  String get senderStartReceiverStep =>
+      '1. Start receiver on the remote device';
 
   @override
   String get senderSourceStreamStep => '2. Use this port for source stream';
@@ -48,7 +50,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get senderRepairStreamStep => '3. Use this port for repair stream';
 
   @override
-  String get senderPutIPStep => '4. Put IP address of the remote receiver device below';
+  String get senderPutIPStep =>
+      '4. Put IP address of the remote receiver device below';
 
   @override
   String get senderChooseSourceStep => '5. Choose source to capture audio from';
