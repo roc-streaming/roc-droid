@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
             pager.setCurrentItem(tab.position, true)
         }.attach()
 
-        prefs = getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
+        prefs = settings()
 
         val serviceIntent = Intent(this, SenderReceiverService::class.java)
         bindService(serviceIntent, senderReceiverServiceConnection, BIND_AUTO_CREATE)

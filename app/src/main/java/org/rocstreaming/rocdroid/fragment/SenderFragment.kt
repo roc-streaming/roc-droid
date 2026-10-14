@@ -23,9 +23,11 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import org.rocstreaming.rocdroid.PREF_SENDER_FEC
 import org.rocstreaming.rocdroid.R
 import org.rocstreaming.rocdroid.SenderReceiverService
 import org.rocstreaming.rocdroid.component.CopyBlock
+import org.rocstreaming.rocdroid.settings
 
 private const val LOG_TAG = "[rocdroid.fragment.SenderFragment]"
 
@@ -55,7 +57,7 @@ class SenderFragment : Fragment() {
         usePlaybackCapture = view.findViewById(R.id.audio_source)
         receiverIpEdit = view.findViewById(R.id.receiverIp)
 
-        prefs = activity?.getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)!!
+        prefs = requireActivity().settings()
 
         audioSources = arrayOf(
             getString(R.string.sender_audio_source_current_apps),
@@ -82,6 +84,8 @@ class SenderFragment : Fragment() {
         showAudioSourceDialog.setOnClickListener {
             showAudioSourcesDialog()
         }
+
+        bindFecSwitch(view, PREF_SENDER_FEC)
 
         view.findViewById<Button>(R.id.startSenderButton).setOnClickListener {
             startStopSender()

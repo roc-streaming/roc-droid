@@ -26,6 +26,7 @@ import androidx.appcompat.app.AlertDialog
 import org.rocstreaming.roctoolkit.ChannelSet
 import org.rocstreaming.roctoolkit.ClockSource
 import org.rocstreaming.roctoolkit.Endpoint
+import org.rocstreaming.roctoolkit.FecEncoding
 import org.rocstreaming.roctoolkit.FrameEncoding
 import org.rocstreaming.roctoolkit.Interface
 import org.rocstreaming.roctoolkit.Protocol
@@ -224,8 +225,10 @@ class SenderReceiverService : Service() {
 
         senderThread = Thread {
             val record = createAudioRecord(projection)
+            val useFec = settings().isFecEnabled(PREF_SENDER_FEC)
 
             val config = RocSenderConfig.builder()
+                .fecEncoding(if (useFec) FecEncoding.DEFAULT else FecEncoding.DISABLE)
                 .frameSampleRate(44100)
                 .frameChannels(ChannelSet.STEREO)
                 .frameEncoding(FrameEncoding.PCM_FLOAT)
@@ -240,16 +243,9 @@ class SenderReceiverService : Service() {
                 RocSender(context, config).use useSender@{ sender ->
 
                     try {
-                        sender.connect(
-                            Slot.DEFAULT,
-                            Interface.AUDIO_SOURCE,
-                            Endpoint(Protocol.RTP_RS8M_SOURCE, ip, DEFAULT_RTP_PORT_SOURCE)
-                        )
-                        sender.connect(
-                            Slot.DEFAULT,
-                            Interface.AUDIO_REPAIR,
-                            Endpoint(Protocol.RS8M_REPAIR, ip, DEFAULT_RTP_PORT_REPAIR)
-                        )
+                        streamEndpoints(ip, useFec).forEach { (iface, endpoint) ->
+                            sender.connect(Slot.DEFAULT, iface, endpoint)
+                        }
                     } catch (e: Exception) {
                         AlertDialog.Builder(this@SenderReceiverService).apply {
                             setTitle(getString(R.string.invalid_ip_title))
@@ -285,6 +281,7 @@ class SenderReceiverService : Service() {
         if (receiverThread?.isAlive == true) return
 
         receiverThread = Thread {
+            val useFec = settings().isFecEnabled(PREF_RECEIVER_FEC)
             val audioTrack = createAudioTrack()
             audioTrack.play()
 
@@ -297,16 +294,9 @@ class SenderReceiverService : Service() {
 
             RocContext().use { context ->
                 RocReceiver(context, config).use { receiver ->
-                    receiver.bind(
-                        Slot.DEFAULT,
-                        Interface.AUDIO_SOURCE,
-                        Endpoint(Protocol.RTP_RS8M_SOURCE, "0.0.0.0", DEFAULT_RTP_PORT_SOURCE)
-                    )
-                    receiver.bind(
-                        Slot.DEFAULT,
-                        Interface.AUDIO_REPAIR,
-                        Endpoint(Protocol.RS8M_REPAIR, "0.0.0.0", DEFAULT_RTP_PORT_REPAIR)
-                    )
+                    streamEndpoints("0.0.0.0", useFec).forEach { (iface, endpoint) ->
+                        receiver.bind(Slot.DEFAULT, iface, endpoint)
+                    }
 
                     receiverChanged?.invoke(true)
 
@@ -402,6 +392,19 @@ class SenderReceiverService : Service() {
             setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
         }.build()
     }
+
+    /** Endpoints for one stream: RTP source with an RS8M repair stream, or plain RTP. */
+    private fun streamEndpoints(host: String, useFec: Boolean): List<Pair<Interface, Endpoint>> =
+        if (useFec) {
+            listOf(
+                Interface.AUDIO_SOURCE to
+                    Endpoint(Protocol.RTP_RS8M_SOURCE, host, DEFAULT_RTP_PORT_SOURCE),
+                Interface.AUDIO_REPAIR to
+                    Endpoint(Protocol.RS8M_REPAIR, host, DEFAULT_RTP_PORT_REPAIR)
+            )
+        } else {
+            listOf(Interface.AUDIO_SOURCE to Endpoint(Protocol.RTP, host, DEFAULT_RTP_PORT_SOURCE))
+        }
 
     private fun createAudioRecord(projection: MediaProjection?): AudioRecord {
         Log.d(LOG_TAG, "Creating Audio Record")

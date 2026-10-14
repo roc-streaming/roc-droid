@@ -89,13 +89,22 @@
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/portForRepair"/>
 
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/fecSwitch"
+                style="@style/textViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="@string/use_fec"
+                app:layout_constraintTop_toBottomOf="@+id/repairPortValue" />
+
             <TextView
                 android:id="@+id/staertReceiver"
                 style="@style/textViewStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/receiver_start_receiver"
-                app:layout_constraintTop_toBottomOf="@+id/repairPortValue" />
+                app:layout_constraintTop_toBottomOf="@+id/fecSwitch" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

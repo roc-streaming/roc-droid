@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import org.rocstreaming.rocdroid.PREF_RECEIVER_FEC
 import org.rocstreaming.rocdroid.R
 import org.rocstreaming.rocdroid.SenderReceiverService
 import org.rocstreaming.rocdroid.component.CopyBlock
@@ -46,6 +47,8 @@ class ReceiverFragment : Fragment() {
 
         view.findViewById<TextView>(R.id.portForRepair).text =
             getString(R.string.receiver_sender_port_for_repair).format(4)
+
+        bindFecSwitch(view, PREF_RECEIVER_FEC)
 
         view.findViewById<Button>(R.id.startReceiverButton).setOnClickListener {
             startStopReceiver()

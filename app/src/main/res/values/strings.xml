@@ -41,6 +41,7 @@
 
     <string name="receiver_sender_port_for_source">%s. Use this port for source stream</string>
     <string name="receiver_sender_port_for_repair">%s. Use this port for repair stream</string>
+    <string name="use_fec">Use FEC (must match the other device)</string>
     <string name="app_about">About</string>
     <string name="about_source_code">Source Code</string>
     <string name="about_bug_tracker">Bug Tracker</string>
