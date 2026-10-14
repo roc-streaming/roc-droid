@@ -19,10 +19,12 @@ import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.os.Binder
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
 import org.rocstreaming.roctoolkit.ChannelSet
 import org.rocstreaming.roctoolkit.ClockSource
 import org.rocstreaming.roctoolkit.Endpoint
@@ -127,21 +129,21 @@ class SenderReceiverService : Service() {
             this,
             0,
             mainActivityIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val stopSenderIntent = Intent(BROADCAST_STOP_SENDER_ACTION)
         val pendingStopSenderIntent = PendingIntent.getBroadcast(
             this@SenderReceiverService,
             0,
             stopSenderIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val stopReceiverIntent = Intent(BROADCAST_STOP_RECEIVER_ACTION)
         val pendingStopReceiverIntent = PendingIntent.getBroadcast(
             this@SenderReceiverService,
             0,
             stopReceiverIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val stopSenderAction = Notification.Action.Builder(
             Icon.createWithResource(this@SenderReceiverService, R.drawable.ic_stop),
@@ -222,6 +224,10 @@ class SenderReceiverService : Service() {
 
         if (senderThread?.isAlive == true) return
 
+        // Every sender needs the foreground service, including microphone capture, which
+        // Android would otherwise silence once the app is no longer in the foreground.
+        preStartSender()
+
         senderThread = Thread {
             val record = createAudioRecord(projection)
 
@@ -251,12 +257,16 @@ class SenderReceiverService : Service() {
                             Endpoint(Protocol.RS8M_REPAIR, ip, DEFAULT_RTP_PORT_REPAIR)
                         )
                     } catch (e: Exception) {
-                        AlertDialog.Builder(this@SenderReceiverService).apply {
-                            setTitle(getString(R.string.invalid_ip_title))
-                            setMessage(getString(R.string.invalid_ip_message))
-                            setCancelable(false)
-                            setPositiveButton(R.string.ok) { _, _ -> }
-                        }.show()
+                        // This runs on the sender thread, which has no Looper, so a dialog
+                        // can't be shown here; report the error on the main thread instead.
+                        Log.e(LOG_TAG, "Failed to connect sender", e)
+                        Handler(Looper.getMainLooper()).post {
+                            Toast.makeText(
+                                this@SenderReceiverService,
+                                getString(R.string.invalid_ip_message),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                         return@useSender
                     }
 

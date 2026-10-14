@@ -10,7 +10,6 @@
     <string name="default_receiver_ip">192.168.0.1</string>
     <string name="start_sender">Start sender</string>
     <string name="stop_sender">Stop sender</string>
-    <string name="invalid_ip_title">Invalid IP address</string>
     <string name="invalid_ip_message">The receiver IP address looks invalid.</string>
     <string name="allow_mic_title">Mic permission</string>
     <string name="allow_mic_message">The app needs permission to record audio from your phone mic.</string>
