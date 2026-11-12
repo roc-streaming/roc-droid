@@ -60,6 +60,9 @@
   observe it. A stream keeps running across rotation and the screen re-syncs with it.
 - [x] Ports could not be edited (tapping a port only copies it): each port on the Sender
   tab has an edit button. Ports must be 1024–65535 and differ from each other.
+- [x] The notification's Stop Sender / Stop Receiver buttons did nothing on Android 14+:
+  the broadcast named no package, so it never reached the non-exported receiver. The
+  stop intents now name this app.
 
 ## Rulings
 - minSdkVersion kept at 26 due to Roc Toolkit library requirement
@@ -79,7 +82,7 @@
 - Lint: 0 errors, 3 pre-existing warnings
 
 ## Test Status
-✅ All unit tests pass (57 tests)
+✅ All unit tests pass (58 tests)
 - AudioLevelTest: 4 tests
 - ElapsedTimeTest: 3 tests
 - StreamStatusTest: 2 tests
@@ -89,7 +92,7 @@
 - SettingsRepositoryTest: 5 tests (Robolectric)
 - MainActivityTest: 12 tests (Robolectric; launch, restore, state sync, port editing,
   capture consent flow)
-- SenderReceiverServiceForegroundTest: 5 tests (Robolectric)
+- SenderReceiverServiceForegroundTest: 6 tests (Robolectric)
 - NetworkUtilsTest: 2 tests
 - ReceiverFragmentTest: 2 tests
 - SenderFragmentTest: 3 tests
@@ -107,8 +110,6 @@ streaming.
 - Kotlin daemon can hit a disk quota; falls back to non-daemon compilation. If the
   compiler reports stale unresolved references, run `./gradlew clean` once.
 - 3 pre-existing lint warnings: `textFontWeight` on API 26, missing monochrome icons.
-- The notification's Stop Sender / Stop Receiver buttons do nothing on Android 14+: the
-  broadcast is implicit and the receiver is not exported, so it is never delivered.
 - The microphone sender does not run in a foreground service (no `microphone` type), so
   it has no notification and is silenced once the app leaves the screen.
 - The service is still only bound, not started: it ends when the activity is finished.

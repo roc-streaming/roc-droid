@@ -52,4 +52,17 @@ class SenderReceiverServiceForegroundTest {
         assertTrue(shadowOf(service).isForegroundStopped)
         assertFalse(service.isSenderAlive())
     }
+
+    // The stop receiver is not exported, and Android 14+ only delivers a broadcast to such a
+    // receiver when the intent names the app.
+    @Test
+    fun notificationStopActionsAreAddressedToThisApp() {
+        val service = Robolectric.buildService(SenderReceiverService::class.java).create().get()
+
+        val actions = service.buildNotification(sending = true, receiving = true).actions
+        assertEquals(2, actions.size)
+        actions.forEach { action ->
+            assertEquals(service.packageName, shadowOf(action.actionIntent).savedIntent.`package`)
+        }
+    }
 }

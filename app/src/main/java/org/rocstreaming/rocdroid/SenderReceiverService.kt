@@ -146,7 +146,7 @@ class SenderReceiverService : Service() {
         service.createNotificationChannel(channel)
     }
 
-    private fun buildNotification(
+    internal fun buildNotification(
         sending: Boolean,
         receiving: Boolean,
     ): Notification {
@@ -167,7 +167,9 @@ class SenderReceiverService : Service() {
                 mainActivityIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
-        val stopSenderIntent = Intent(BROADCAST_STOP_SENDER_ACTION)
+        // Name this app: the receiver is not exported, and Android 14+ does not deliver a
+        // broadcast without a target package to it.
+        val stopSenderIntent = Intent(BROADCAST_STOP_SENDER_ACTION).setPackage(packageName)
         val pendingStopSenderIntent =
             PendingIntent.getBroadcast(
                 this@SenderReceiverService,
@@ -175,7 +177,7 @@ class SenderReceiverService : Service() {
                 stopSenderIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
-        val stopReceiverIntent = Intent(BROADCAST_STOP_RECEIVER_ACTION)
+        val stopReceiverIntent = Intent(BROADCAST_STOP_RECEIVER_ACTION).setPackage(packageName)
         val pendingStopReceiverIntent =
             PendingIntent.getBroadcast(
                 this@SenderReceiverService,
