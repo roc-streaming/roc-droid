@@ -12,7 +12,7 @@
         android:layout_height="0dp"
         android:fadeScrollbars="false"
         android:paddingBottom="@dimen/padding"
-        app:layout_constraintBottom_toTopOf="@+id/startSenderButton"
+        app:layout_constraintBottom_toTopOf="@+id/statusCard"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -142,6 +142,18 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
+
+    <include
+        android:id="@+id/statusCard"
+        layout="@layout/stream_status"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin"
+        android:layout_marginEnd="@dimen/margin"
+        android:layout_marginBottom="@dimen/margin"
+        app:layout_constraintBottom_toTopOf="@+id/startSenderButton"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
 
     <Button
         android:id="@+id/startSenderButton"

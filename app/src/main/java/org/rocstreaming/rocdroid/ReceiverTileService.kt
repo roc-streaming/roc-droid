@@ -11,20 +11,22 @@ import android.util.Log
 private const val LOG_TAG = "[rocdroid.ReceiverTileService]"
 
 class ReceiverTileService : TileService() {
-
     private var senderReceiverService: SenderReceiverService? = null
 
-    private val senderReceiverServiceConnection = object : ServiceConnection {
+    private val senderReceiverServiceConnection =
+        object : ServiceConnection {
+            override fun onServiceConnected(
+                componentName: ComponentName,
+                binder: IBinder,
+            ) {
+                senderReceiverService = (binder as SenderReceiverService.LocalBinder).getService()
+            }
 
-        override fun onServiceConnected(componentName: ComponentName, binder: IBinder) {
-            senderReceiverService = (binder as SenderReceiverService.LocalBinder).getService()
+            override fun onServiceDisconnected(componentName: ComponentName) {
+                senderReceiverService?.removeListeners()
+                senderReceiverService = null
+            }
         }
-
-        override fun onServiceDisconnected(componentName: ComponentName) {
-            senderReceiverService?.removeListeners()
-            senderReceiverService = null
-        }
-    }
 
     override fun onCreate() {
         Log.d(LOG_TAG, "Creating Receiver Tile Service")

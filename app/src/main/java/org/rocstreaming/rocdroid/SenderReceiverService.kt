@@ -1,5 +1,6 @@
 package org.rocstreaming.rocdroid
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -20,9 +21,11 @@ import android.media.projection.MediaProjection
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
+import kotlinx.coroutines.runBlocking
 import org.rocstreaming.roctoolkit.ChannelSet
 import org.rocstreaming.roctoolkit.ClockSource
 import org.rocstreaming.roctoolkit.Endpoint
@@ -39,9 +42,6 @@ import org.rocstreaming.roctoolkit.Slot
 private const val SAMPLE_RATE = 44100
 private const val BUFFER_SIZE = 100
 
-private const val DEFAULT_RTP_PORT_SOURCE = 10001
-private const val DEFAULT_RTP_PORT_REPAIR = 10002
-
 private const val CHANNEL_ID = "SenderReceiverService"
 private const val NOTIFICATION_ID = 1
 
@@ -57,16 +57,25 @@ class SenderReceiverService : Service() {
     private var senderThread: Thread? = null
     private var receiverChanged: ((Boolean) -> Unit)? = null
     private var senderChanged: ((Boolean) -> Unit)? = null
+    private var senderErrorCallback: ((String) -> Unit)? = null
+    private var senderStatusChanged: ((StreamStatus) -> Unit)? = null
+    private var receiverStatusChanged: ((StreamStatus) -> Unit)? = null
+
+    @Volatile private var receiverAudioTrack: AudioTrack? = null
     private var isForegroundRunning = false
 
-    private val notificationStopActionReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                BROADCAST_STOP_SENDER_ACTION -> stopSender()
-                BROADCAST_STOP_RECEIVER_ACTION -> stopReceiver()
+    private val notificationStopActionReceiver: BroadcastReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(
+                context: Context,
+                intent: Intent,
+            ) {
+                when (intent.action) {
+                    BROADCAST_STOP_SENDER_ACTION -> stopSender()
+                    BROADCAST_STOP_RECEIVER_ACTION -> stopReceiver()
+                }
             }
         }
-    }
 
     private val binder = LocalBinder()
 
@@ -84,12 +93,14 @@ class SenderReceiverService : Service() {
         Log.d(LOG_TAG, "Creating Sender/Receiver Service")
 
         createNotificationChannel()
-        registerReceiver(
+        ContextCompat.registerReceiver(
+            this,
             notificationStopActionReceiver,
             IntentFilter().apply {
                 addAction(BROADCAST_STOP_SENDER_ACTION)
                 addAction(BROADCAST_STOP_RECEIVER_ACTION)
-            }
+            },
+            ContextCompat.RECEIVER_NOT_EXPORTED,
         )
     }
 
@@ -103,56 +114,65 @@ class SenderReceiverService : Service() {
     private fun createNotificationChannel() {
         Log.d(LOG_TAG, "Creating Notification Channel")
 
-        val channel = NotificationChannel(
-            CHANNEL_ID,
-            getString(R.string.notification_channel_name),
-            NotificationManager.IMPORTANCE_LOW
-        )
+        val channel =
+            NotificationChannel(
+                CHANNEL_ID,
+                getString(R.string.notification_channel_name),
+                NotificationManager.IMPORTANCE_LOW,
+            )
         val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         service.createNotificationChannel(channel)
     }
 
-    private fun buildNotification(sending: Boolean, receiving: Boolean): Notification {
+    private fun buildNotification(
+        sending: Boolean,
+        receiving: Boolean,
+    ): Notification {
         Log.d(
             LOG_TAG,
             String.format(
                 "Building Notification for %s %s",
                 if (sending) "Sender" else "",
-                if (receiving) "Receiver" else ""
-            )
+                if (receiving) "Receiver" else "",
+            ),
         )
 
         val mainActivityIntent = Intent(this, MainActivity::class.java)
-        val pendingMainActivityIntent = PendingIntent.getActivity(
-            this,
-            0,
-            mainActivityIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        val pendingMainActivityIntent =
+            PendingIntent.getActivity(
+                this,
+                0,
+                mainActivityIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         val stopSenderIntent = Intent(BROADCAST_STOP_SENDER_ACTION)
-        val pendingStopSenderIntent = PendingIntent.getBroadcast(
-            this@SenderReceiverService,
-            0,
-            stopSenderIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        val pendingStopSenderIntent =
+            PendingIntent.getBroadcast(
+                this@SenderReceiverService,
+                0,
+                stopSenderIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         val stopReceiverIntent = Intent(BROADCAST_STOP_RECEIVER_ACTION)
-        val pendingStopReceiverIntent = PendingIntent.getBroadcast(
-            this@SenderReceiverService,
-            0,
-            stopReceiverIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        val stopSenderAction = Notification.Action.Builder(
-            Icon.createWithResource(this@SenderReceiverService, R.drawable.ic_stop),
-            getString(R.string.notification_stop_sender_action),
-            pendingStopSenderIntent
-        ).build()
-        val stopReceiverAction = Notification.Action.Builder(
-            Icon.createWithResource(this@SenderReceiverService, R.drawable.ic_stop),
-            getString(R.string.notification_stop_receiver_action),
-            pendingStopReceiverIntent
-        ).build()
+        val pendingStopReceiverIntent =
+            PendingIntent.getBroadcast(
+                this@SenderReceiverService,
+                0,
+                stopReceiverIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+        val stopSenderAction =
+            Notification.Action.Builder(
+                Icon.createWithResource(this@SenderReceiverService, R.drawable.ic_stop),
+                getString(R.string.notification_stop_sender_action),
+                pendingStopSenderIntent,
+            ).build()
+        val stopReceiverAction =
+            Notification.Action.Builder(
+                Icon.createWithResource(this@SenderReceiverService, R.drawable.ic_stop),
+                getString(R.string.notification_stop_receiver_action),
+                pendingStopReceiverIntent,
+            ).build()
         return Notification.Builder(this, CHANNEL_ID).apply {
             setContentTitle(getString(R.string.notification_title))
             setContentText(getContentText(sending, receiving))
@@ -168,14 +188,17 @@ class SenderReceiverService : Service() {
         }.build()
     }
 
-    private fun updateNotification(sending: Boolean, receiving: Boolean) {
+    private fun updateNotification(
+        sending: Boolean,
+        receiving: Boolean,
+    ) {
         Log.d(
             LOG_TAG,
             String.format(
                 "Updating Notification for %s %s",
                 if (sending) "Sender" else "",
-                if (receiving) "Receiver" else ""
-            )
+                if (receiving) "Receiver" else "",
+            ),
         )
 
         if (!isForegroundRunning) {
@@ -192,7 +215,10 @@ class SenderReceiverService : Service() {
         }
     }
 
-    private fun getContentText(sending: Boolean, receiving: Boolean): String {
+    private fun getContentText(
+        sending: Boolean,
+        receiving: Boolean,
+    ): String {
         Log.d(LOG_TAG, "Getting Notification Content Text")
 
         if (sending && receiving) {
@@ -204,7 +230,7 @@ class SenderReceiverService : Service() {
         if (sending) {
             return getString(R.string.notification_sender_running)
         }
-        return getString(R.string.notification_sender_and_receiver_not_running) // this shouldn't happen
+        return getString(R.string.notification_sender_and_receiver_not_running)
     }
 
     fun preStartSender() {
@@ -217,64 +243,106 @@ class SenderReceiverService : Service() {
         }
     }
 
-    fun startSender(ip: String, projection: MediaProjection?) {
+    fun startSender(
+        ip: String,
+        projection: MediaProjection?,
+    ) {
         Log.d(LOG_TAG, "Starting Sender")
 
         if (senderThread?.isAlive == true) return
 
-        senderThread = Thread {
-            val record = createAudioRecord(projection)
+        senderThread =
+            Thread {
+                val settings = runBlocking { SettingsRepository.get(this@SenderReceiverService).snapshot() }
+                val sourcePort = settings.sourcePort
+                val repairPort = settings.repairPort
+                val record = createAudioRecord(projection)
 
-            val config = RocSenderConfig.builder()
-                .frameSampleRate(44100)
-                .frameChannels(ChannelSet.STEREO)
-                .frameEncoding(FrameEncoding.PCM_FLOAT)
-                .clockSource(ClockSource.INTERNAL)
-                .build()
+                val config =
+                    RocSenderConfig.builder()
+                        .frameSampleRate(44100)
+                        .frameChannels(ChannelSet.STEREO)
+                        .frameEncoding(FrameEncoding.PCM_FLOAT)
+                        .clockSource(ClockSource.INTERNAL)
+                        .build()
 
-            RocContext().use { context ->
-                if (record.state != AudioRecord.STATE_INITIALIZED) return@use
+                RocContext().use { context ->
+                    if (record.state != AudioRecord.STATE_INITIALIZED) return@use
 
-                record.startRecording()
+                    record.startRecording()
 
-                RocSender(context, config).use useSender@{ sender ->
+                    RocSender(context, config).use useSender@{ sender ->
+                        try {
+                            sender.connect(
+                                Slot.DEFAULT,
+                                Interface.AUDIO_SOURCE,
+                                Endpoint(Protocol.RTP_RS8M_SOURCE, ip, sourcePort),
+                            )
+                            sender.connect(
+                                Slot.DEFAULT,
+                                Interface.AUDIO_REPAIR,
+                                Endpoint(Protocol.RS8M_REPAIR, ip, repairPort),
+                            )
+                        } catch (e: Exception) {
+                            Log.e(LOG_TAG, "Failed to connect sender", e)
+                            senderErrorCallback?.invoke(getString(R.string.invalid_ip_message))
+                            return@useSender
+                        }
 
-                    try {
-                        sender.connect(
-                            Slot.DEFAULT,
-                            Interface.AUDIO_SOURCE,
-                            Endpoint(Protocol.RTP_RS8M_SOURCE, ip, DEFAULT_RTP_PORT_SOURCE)
+                        senderChanged?.invoke(true)
+
+                        val samples = FloatArray(BUFFER_SIZE)
+                        val throttle = StatusThrottle()
+                        val startedAt = SystemClock.elapsedRealtime()
+                        var windowPeak = 0f
+                        var errors = 0
+
+                        try {
+                            while (!Thread.currentThread().isInterrupted) {
+                                record.read(samples, 0, samples.size, AudioRecord.READ_BLOCKING)
+                                sender.write(samples)
+
+                                windowPeak = maxOf(windowPeak, AudioLevel.rms(samples))
+
+                                val now = SystemClock.elapsedRealtime()
+                                if (throttle.shouldEmit(now)) {
+                                    senderStatusChanged?.invoke(
+                                        StreamStatus(
+                                            kind = StreamKind.SENDER,
+                                            active = true,
+                                            host = ip,
+                                            sourcePort = sourcePort,
+                                            repairPort = repairPort,
+                                            elapsedMs = now - startedAt,
+                                            level = windowPeak,
+                                            errors = errors,
+                                        ),
+                                    )
+                                    windowPeak = 0f
+                                }
+                            }
+                        } catch (e: Exception) {
+                            errors++
+                            Log.e(LOG_TAG, "Sender stream failed", e)
+                        }
+
+                        senderStatusChanged?.invoke(
+                            StreamStatus.inactive(
+                                StreamKind.SENDER,
+                                ip,
+                                sourcePort,
+                                repairPort,
+                                errors = errors,
+                            ),
                         )
-                        sender.connect(
-                            Slot.DEFAULT,
-                            Interface.AUDIO_REPAIR,
-                            Endpoint(Protocol.RS8M_REPAIR, ip, DEFAULT_RTP_PORT_REPAIR)
-                        )
-                    } catch (e: Exception) {
-                        AlertDialog.Builder(this@SenderReceiverService).apply {
-                            setTitle(getString(R.string.invalid_ip_title))
-                            setMessage(getString(R.string.invalid_ip_message))
-                            setCancelable(false)
-                            setPositiveButton(R.string.ok) { _, _ -> }
-                        }.show()
-                        return@useSender
                     }
 
-                    senderChanged?.invoke(true)
-
-                    val samples = FloatArray(BUFFER_SIZE)
-                    while (!Thread.currentThread().isInterrupted) {
-                        record.read(samples, 0, samples.size, AudioRecord.READ_BLOCKING)
-                        sender.write(samples)
-                    }
+                    record.stop()
+                    record.release()
+                    senderChanged?.invoke(false)
+                    updateNotification(false, isReceiverAlive())
                 }
-
-                record.stop()
-                record.release()
-                senderChanged?.invoke(false)
-                updateNotification(false, isReceiverAlive())
             }
-        }
 
         senderThread!!.start()
     }
@@ -284,44 +352,92 @@ class SenderReceiverService : Service() {
 
         if (receiverThread?.isAlive == true) return
 
-        receiverThread = Thread {
-            val audioTrack = createAudioTrack()
-            audioTrack.play()
+        receiverThread =
+            Thread {
+                val settings = runBlocking { SettingsRepository.get(this@SenderReceiverService).snapshot() }
+                val sourcePort = settings.sourcePort
+                val repairPort = settings.repairPort
+                val audioTrack = createAudioTrack()
+                receiverAudioTrack = audioTrack
+                audioTrack.setVolume(PlaybackVolume.toGain(settings.playbackVolume))
+                audioTrack.play()
 
-            val config = RocReceiverConfig.builder()
-                .frameSampleRate(44100)
-                .frameChannels(ChannelSet.STEREO)
-                .frameEncoding(FrameEncoding.PCM_FLOAT)
-                .clockSource(ClockSource.INTERNAL)
-                .build()
+                val config =
+                    RocReceiverConfig.builder()
+                        .frameSampleRate(44100)
+                        .frameChannels(ChannelSet.STEREO)
+                        .frameEncoding(FrameEncoding.PCM_FLOAT)
+                        .clockSource(ClockSource.INTERNAL)
+                        .build()
 
-            RocContext().use { context ->
-                RocReceiver(context, config).use { receiver ->
-                    receiver.bind(
-                        Slot.DEFAULT,
-                        Interface.AUDIO_SOURCE,
-                        Endpoint(Protocol.RTP_RS8M_SOURCE, "0.0.0.0", DEFAULT_RTP_PORT_SOURCE)
-                    )
-                    receiver.bind(
-                        Slot.DEFAULT,
-                        Interface.AUDIO_REPAIR,
-                        Endpoint(Protocol.RS8M_REPAIR, "0.0.0.0", DEFAULT_RTP_PORT_REPAIR)
-                    )
+                RocContext().use { context ->
+                    RocReceiver(context, config).use { receiver ->
+                        receiver.bind(
+                            Slot.DEFAULT,
+                            Interface.AUDIO_SOURCE,
+                            Endpoint(Protocol.RTP_RS8M_SOURCE, "0.0.0.0", sourcePort),
+                        )
+                        receiver.bind(
+                            Slot.DEFAULT,
+                            Interface.AUDIO_REPAIR,
+                            Endpoint(Protocol.RS8M_REPAIR, "0.0.0.0", repairPort),
+                        )
 
-                    receiverChanged?.invoke(true)
+                        receiverChanged?.invoke(true)
 
-                    val samples = FloatArray(BUFFER_SIZE)
-                    while (!Thread.currentThread().isInterrupted) {
-                        receiver.read(samples)
-                        audioTrack.write(samples, 0, samples.size, AudioTrack.WRITE_BLOCKING)
+                        val samples = FloatArray(BUFFER_SIZE)
+                        val throttle = StatusThrottle()
+                        val startedAt = SystemClock.elapsedRealtime()
+                        var windowPeak = 0f
+                        var errors = 0
+
+                        try {
+                            while (!Thread.currentThread().isInterrupted) {
+                                receiver.read(samples)
+                                audioTrack.write(samples, 0, samples.size, AudioTrack.WRITE_BLOCKING)
+
+                                windowPeak = maxOf(windowPeak, AudioLevel.rms(samples))
+
+                                val now = SystemClock.elapsedRealtime()
+                                if (throttle.shouldEmit(now)) {
+                                    receiverStatusChanged?.invoke(
+                                        StreamStatus(
+                                            kind = StreamKind.RECEIVER,
+                                            active = true,
+                                            sourcePort = sourcePort,
+                                            repairPort = repairPort,
+                                            elapsedMs = now - startedAt,
+                                            level = windowPeak,
+                                            underruns = audioTrack.underrunCount,
+                                            errors = errors,
+                                        ),
+                                    )
+                                    windowPeak = 0f
+                                }
+                            }
+                        } catch (e: Exception) {
+                            errors++
+                            Log.e(LOG_TAG, "Receiver stream failed", e)
+                        }
+
+                        receiverStatusChanged?.invoke(
+                            StreamStatus.inactive(
+                                StreamKind.RECEIVER,
+                                "",
+                                sourcePort,
+                                repairPort,
+                                underruns = audioTrack.underrunCount,
+                                errors = errors,
+                            ),
+                        )
                     }
                 }
-            }
 
-            audioTrack.release()
-            receiverChanged?.invoke(false)
-            updateNotification(isSenderAlive(), false)
-        }
+                receiverAudioTrack = null
+                audioTrack.release()
+                receiverChanged?.invoke(false)
+                updateNotification(isSenderAlive(), false)
+            }
 
         receiverThread!!.start()
 
@@ -344,6 +460,16 @@ class SenderReceiverService : Service() {
         receiverThread?.interrupt()
     }
 
+    fun setReceiverVolume(percent: Int) {
+        val audioTrack = receiverAudioTrack ?: return
+
+        try {
+            audioTrack.setVolume(PlaybackVolume.toGain(percent))
+        } catch (e: IllegalStateException) {
+            Log.w(LOG_TAG, "Failed to set receiver volume", e)
+        }
+    }
+
     fun isReceiverAlive(): Boolean {
         Log.d(LOG_TAG, "Checking If Receiver Alive")
 
@@ -356,14 +482,17 @@ class SenderReceiverService : Service() {
         return senderThread?.isAlive == true
     }
 
-    private fun startForegroundService(sending: Boolean, receiving: Boolean) {
+    private fun startForegroundService(
+        sending: Boolean,
+        receiving: Boolean,
+    ) {
         Log.d(
             LOG_TAG,
             String.format(
                 "Starting Foreground Service for %s %s",
                 if (sending) "Sender" else "",
-                if (receiving) "Receiver" else ""
-            )
+                if (receiving) "Receiver" else "",
+            ),
         )
 
         isForegroundRunning = true
@@ -374,26 +503,29 @@ class SenderReceiverService : Service() {
         Log.d(LOG_TAG, "Stopping Foreground Service")
 
         isForegroundRunning = false
-        stopForeground(true)
+        stopForeground(Service.STOP_FOREGROUND_REMOVE)
     }
 
     private fun createAudioTrack(): AudioTrack {
         Log.d(LOG_TAG, "Creating Audio Track")
 
-        val audioAttributes = AudioAttributes.Builder().apply {
-            setUsage(AudioAttributes.USAGE_MEDIA)
-            setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-        }.build()
-        val audioFormat = AudioFormat.Builder().apply {
-            setSampleRate(SAMPLE_RATE)
-            setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
-            setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
-        }.build()
-        val bufferSize = AudioTrack.getMinBufferSize(
-            audioFormat.sampleRate,
-            audioFormat.channelMask,
-            audioFormat.encoding
-        )
+        val audioAttributes =
+            AudioAttributes.Builder().apply {
+                setUsage(AudioAttributes.USAGE_MEDIA)
+                setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            }.build()
+        val audioFormat =
+            AudioFormat.Builder().apply {
+                setSampleRate(SAMPLE_RATE)
+                setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
+                setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
+            }.build()
+        val bufferSize =
+            AudioTrack.getMinBufferSize(
+                audioFormat.sampleRate,
+                audioFormat.channelMask,
+                audioFormat.encoding,
+            )
         return AudioTrack.Builder().apply {
             setAudioAttributes(audioAttributes)
             setAudioFormat(audioFormat)
@@ -403,19 +535,22 @@ class SenderReceiverService : Service() {
         }.build()
     }
 
+    @SuppressLint("MissingPermission")
     private fun createAudioRecord(projection: MediaProjection?): AudioRecord {
         Log.d(LOG_TAG, "Creating Audio Record")
 
-        val format = AudioFormat.Builder().apply {
-            setSampleRate(SAMPLE_RATE)
-            setChannelMask(AudioFormat.CHANNEL_IN_STEREO)
-            setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
-        }.build()
-        val bufferSize = AudioRecord.getMinBufferSize(
-            SAMPLE_RATE,
-            AudioFormat.CHANNEL_IN_STEREO,
-            AudioFormat.ENCODING_PCM_FLOAT
-        )
+        val format =
+            AudioFormat.Builder().apply {
+                setSampleRate(SAMPLE_RATE)
+                setChannelMask(AudioFormat.CHANNEL_IN_STEREO)
+                setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
+            }.build()
+        val bufferSize =
+            AudioRecord.getMinBufferSize(
+                SAMPLE_RATE,
+                AudioFormat.CHANNEL_IN_STEREO,
+                AudioFormat.ENCODING_PCM_FLOAT,
+            )
 
         return if (projection != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             createPaybackRecord(projection, format, bufferSize)
@@ -428,19 +563,21 @@ class SenderReceiverService : Service() {
         }
     }
 
+    @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun createPaybackRecord(
         projection: MediaProjection,
         format: AudioFormat,
-        bufferSize: Int
+        bufferSize: Int,
     ): AudioRecord {
         Log.d(LOG_TAG, "Creating Playback Record")
 
-        val config = AudioPlaybackCaptureConfiguration.Builder(projection).apply {
-            addMatchingUsage(AudioAttributes.USAGE_MEDIA)
-            addMatchingUsage(AudioAttributes.USAGE_UNKNOWN)
-            addMatchingUsage(AudioAttributes.USAGE_GAME)
-        }.build()
+        val config =
+            AudioPlaybackCaptureConfiguration.Builder(projection).apply {
+                addMatchingUsage(AudioAttributes.USAGE_MEDIA)
+                addMatchingUsage(AudioAttributes.USAGE_UNKNOWN)
+                addMatchingUsage(AudioAttributes.USAGE_GAME)
+            }.build()
 
         return AudioRecord.Builder().apply {
             setAudioPlaybackCaptureConfig(config)
@@ -449,20 +586,34 @@ class SenderReceiverService : Service() {
         }.build()
     }
 
-    fun setSenderStateChangedListeners(
-        senderChanged: (Boolean) -> Unit
-    ) {
+    fun setSenderStateChangedListeners(senderChanged: (Boolean) -> Unit) {
         Log.d(LOG_TAG, "Setting Sender State Changed Listener")
 
         this.senderChanged = senderChanged
     }
 
-    fun setReceiverStateChangedListeners(
-        receiverChanged: (Boolean) -> Unit
-    ) {
+    fun setReceiverStateChangedListeners(receiverChanged: (Boolean) -> Unit) {
         Log.d(LOG_TAG, "Setting Receiver State Changed Listener")
 
         this.receiverChanged = receiverChanged
+    }
+
+    fun setSenderErrorCallback(callback: (String) -> Unit) {
+        Log.d(LOG_TAG, "Setting Sender Error Callback")
+
+        this.senderErrorCallback = callback
+    }
+
+    fun setSenderStatusListener(listener: (StreamStatus) -> Unit) {
+        Log.d(LOG_TAG, "Setting Sender Status Listener")
+
+        this.senderStatusChanged = listener
+    }
+
+    fun setReceiverStatusListener(listener: (StreamStatus) -> Unit) {
+        Log.d(LOG_TAG, "Setting Receiver Status Listener")
+
+        this.receiverStatusChanged = listener
     }
 
     fun removeListeners() {
@@ -470,5 +621,8 @@ class SenderReceiverService : Service() {
 
         this.receiverChanged = null
         this.senderChanged = null
+        this.senderErrorCallback = null
+        this.senderStatusChanged = null
+        this.receiverStatusChanged = null
     }
 }

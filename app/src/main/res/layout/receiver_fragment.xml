@@ -12,7 +12,7 @@
         android:layout_height="0dp"
         android:fadeScrollbars="false"
         android:paddingBottom="@dimen/padding"
-        app:layout_constraintBottom_toTopOf="@+id/startReceiverButton"
+        app:layout_constraintBottom_toTopOf="@+id/statusCard"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -90,15 +90,48 @@
                 app:layout_constraintTop_toBottomOf="@+id/portForRepair"/>
 
             <TextView
+                android:id="@+id/playbackVolumeLabel"
+                style="@style/textViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:labelFor="@+id/playbackVolume"
+                android:text="@string/receiver_playback_volume"
+                app:layout_constraintTop_toBottomOf="@+id/repairPortValue" />
+
+            <SeekBar
+                android:id="@+id/playbackVolume"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin"
+                android:layout_marginEnd="@dimen/margin"
+                android:contentDescription="@string/receiver_playback_volume"
+                android:max="100"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/playbackVolumeLabel" />
+
+            <TextView
                 android:id="@+id/staertReceiver"
                 style="@style/textViewStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/receiver_start_receiver"
-                app:layout_constraintTop_toBottomOf="@+id/repairPortValue" />
+                app:layout_constraintTop_toBottomOf="@+id/playbackVolume" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
+
+    <include
+        android:id="@+id/statusCard"
+        layout="@layout/stream_status"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin"
+        android:layout_marginEnd="@dimen/margin"
+        android:layout_marginBottom="@dimen/margin"
+        app:layout_constraintBottom_toTopOf="@+id/startReceiverButton"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/startReceiverButton"
