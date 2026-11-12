@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/status_card_background"
+    android:orientation="vertical"
+    android:padding="@dimen/margin_divider">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/statusDot"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/status_dot_inactive" />
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/status_stopped"
+            android:textColor="@color/colorBlack"
+            android:textSize="@dimen/font_big"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/statusUptime"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:textColor="@color/colorBlack"
+            android:textSize="@dimen/font_medium" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/statusEndpoint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="@color/colorBlack"
+        android:textSize="@dimen/font_medium" />
+
+    <LinearLayout
+        android:id="@+id/statusLevelRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_level"
+            android:textColor="@color/colorBlack"
+            android:textSize="12sp" />
+
+        <ProgressBar
+            android:id="@+id/statusLevel"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/status_audio_level"
+            android:max="100"
+            android:progress="0"
+            android:progressTint="@color/colorGreen" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/statusStats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="@color/colorBlack"
+        android:textSize="12sp" />
+</LinearLayout>

@@ -17,6 +17,7 @@
     <string name="allow_mic_ok_message">Thanks! The sender will now start.</string>
 
     <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
 
     <string name="notification_channel_name">Sender and Receiver foreground service</string>
     <string name="notification_receiver_running">Receiver running</string>
@@ -29,7 +30,9 @@
 
     <string name="receiver_start_remote_sender">1. Start sender on the remote device</string>
     <string name="receiver_use_IP">2. Use one of IP addresses of this device as the remote on the sender</string>
-    <string name="receiver_start_receiver">5. Start receiver on this device</string>
+    <string name="receiver_playback_volume">5. Playback volume</string>
+    <string name="receiver_playback_volume_value">5. Playback volume: %1$d%%</string>
+    <string name="receiver_start_receiver">6. Start receiver on this device</string>
 
     <string name="sender_start_remote_receiver">1. Start receiver on the remote device</string>
     <string name="sender_put_IP_address">4. Put IP address of the remote receiver device below</string>
@@ -41,6 +44,10 @@
 
     <string name="receiver_sender_port_for_source">%s. Use this port for source stream</string>
     <string name="receiver_sender_port_for_repair">%s. Use this port for repair stream</string>
+
+    <string name="dialog_source_port">Source Stream Port</string>
+    <string name="dialog_repair_port">Repair Stream Port</string>
+
     <string name="app_about">About</string>
     <string name="about_source_code">Source Code</string>
     <string name="about_bug_tracker">Bug Tracker</string>
@@ -55,4 +62,14 @@
     <string name="icon_copy">Copy</string>
     <string name="open_dropdown_icon">Open dropdown</string>
     <string name="quick_tile_receiver">Roc Droid receiver</string>
+    <string name="quick_tile_sender">Roc Droid sender</string>
+
+    <string name="status_stopped">Stopped</string>
+    <string name="status_streaming">Streaming</string>
+    <string name="status_sender_endpoint">To %1$s · ports %2$d / %3$d</string>
+    <string name="status_receiver_endpoint">Listening on ports %1$d / %2$d</string>
+    <string name="status_level">Level</string>
+    <string name="status_audio_level">Audio level</string>
+    <string name="status_sender_stats">I/O errors: %1$d</string>
+    <string name="status_receiver_stats">Underruns: %1$d · I/O errors: %2$d</string>
 </resources>
