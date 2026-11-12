@@ -46,6 +46,21 @@
   - Service worker threads load a settings snapshot without blocking the main thread
   - Quick Settings receiver start still uses the saved ports and volume
 
+## ✅ Runtime fixes found by running the app (Android 15 emulator, API 35)
+- [x] Crash on launch: `TabItem`s in `activity_main.xml` had ids, which view binding
+  requires but `TabLayout` never adds as views. Ids removed.
+- [x] Start receiver / Start sender crashed with a `SecurityException` on Android 14+:
+  `startForeground()` asked for every manifest type. The service now asks only for the
+  types in use (`mediaPlayback` while receiving, `mediaProjection` while capturing other
+  apps), and starts the capture sender only after the user accepts the capture prompt
+  (`SenderReceiverService.startProjectionSender`).
+- [x] Crash after the activity was recreated (restore after process death, rotation):
+  the service was handed to fragment instances that were not the restored ones.
+  `StreamServiceViewModel` now owns the service connection; fragments and the activity
+  observe it. A stream keeps running across rotation and the screen re-syncs with it.
+- [x] Ports could not be edited (tapping a port only copies it): each port on the Sender
+  tab has an edit button. Ports must be 1024–65535 and differ from each other.
+
 ## Rulings
 - minSdkVersion kept at 26 due to Roc Toolkit library requirement
 - Used binding.root.findViewById() for LinearLayout with ID IPAddresses
@@ -64,26 +79,40 @@
 - Lint: 0 errors, 3 pre-existing warnings
 
 ## Test Status
-✅ All unit tests pass (37 tests)
+✅ All unit tests pass (57 tests)
 - AudioLevelTest: 4 tests
 - ElapsedTimeTest: 3 tests
 - StreamStatusTest: 2 tests
 - StatusThrottleTest: 3 tests
 - PlaybackVolumeTest: 6 tests
-- AppSettingsTest: 3 tests
+- AppSettingsTest: 6 tests
 - SettingsRepositoryTest: 5 tests (Robolectric)
+- MainActivityTest: 12 tests (Robolectric; launch, restore, state sync, port editing,
+  capture consent flow)
+- SenderReceiverServiceForegroundTest: 5 tests (Robolectric)
 - NetworkUtilsTest: 2 tests
 - ReceiverFragmentTest: 2 tests
 - SenderFragmentTest: 3 tests
 - SenderReceiverServiceTest: 3 tests
 - CopyBlockTest: 1 test
 
+Checked by hand on an Android 15 emulator: launch, start/stop receiver, start/stop sender
+(other apps and microphone), both together, receiver quick settings tile with the app in
+the background, port editing, restore after the process is killed, rotation while
+streaming.
+
 ## Known Issues
+- The build needs JDK 17. With a newer default JDK (seen with 27) AGP 8.5.2 fails in
+  `compileDebugJavaWithJavac` (jlink).
 - Kotlin daemon can hit a disk quota; falls back to non-daemon compilation. If the
   compiler reports stale unresolved references, run `./gradlew clean` once.
 - 3 pre-existing lint warnings: `textFontWeight` on API 26, missing monochrome icons.
-- No emulator/device UI test has been run for the status card or volume slider;
-  Espresso tests require a connected device.
+- The notification's Stop Sender / Stop Receiver buttons do nothing on Android 14+: the
+  broadcast is implicit and the receiver is not exported, so it is never delivered.
+- The microphone sender does not run in a foreground service (no `microphone` type), so
+  it has no notification and is silenced once the app leaves the screen.
+- The service is still only bound, not started: it ends when the activity is finished.
+- The Espresso tests in `androidTest` do not compile (missing import and dependency).
 - `SettingsRepositoryTest` uses Robolectric, which downloads an `android-all-instrumented`
   runtime jar on first run. On environments with a restricted home/temp quota, set
   `robolectric.dependency.dir` to a writable directory (and `java.io.tmpdir` if needed).

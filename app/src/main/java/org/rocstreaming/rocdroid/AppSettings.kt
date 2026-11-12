@@ -17,6 +17,16 @@ data class AppSettings(
         const val DEFAULT_SOURCE_PORT = 10001
         const val DEFAULT_REPAIR_PORT = 10002
         const val DEFAULT_USE_PLAYBACK_CAPTURE = true
+
+        // The same two ports are sent to and listened on, and an app may not listen below 1024.
+        const val MIN_PORT = 1024
+        const val MAX_PORT = 65535
+
+        /** Whether [port] can carry one stream while the other stream uses [otherPort]. */
+        fun isValidPort(
+            port: Int,
+            otherPort: Int,
+        ): Boolean = port in MIN_PORT..MAX_PORT && port != otherPort
     }
 }
 

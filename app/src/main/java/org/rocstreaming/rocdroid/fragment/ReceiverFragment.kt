@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -16,9 +17,9 @@ import org.rocstreaming.rocdroid.AppSettings
 import org.rocstreaming.rocdroid.AudioLevel
 import org.rocstreaming.rocdroid.PlaybackVolume
 import org.rocstreaming.rocdroid.R
-import org.rocstreaming.rocdroid.SenderReceiverService
 import org.rocstreaming.rocdroid.SettingsRepository
 import org.rocstreaming.rocdroid.StreamKind
+import org.rocstreaming.rocdroid.StreamServiceViewModel
 import org.rocstreaming.rocdroid.StreamStatus
 import org.rocstreaming.rocdroid.component.CopyBlock
 import org.rocstreaming.rocdroid.databinding.ReceiverFragmentBinding
@@ -30,7 +31,7 @@ private const val LOG_TAG = "[rocdroid.fragment.ReceiverFragment]"
 
 class ReceiverFragment : Fragment() {
     private lateinit var binding: ReceiverFragmentBinding
-    private lateinit var receiverService: SenderReceiverService
+    private val streamService: StreamServiceViewModel by activityViewModels()
     private lateinit var settingsRepository: SettingsRepository
     private var lastAppliedPorts: Pair<Int, Int>? = null
     private var displayedLevel = 0f
@@ -83,6 +84,23 @@ class ReceiverFragment : Fragment() {
                 }
             }
         }
+
+        // These follow the service for as long as the view exists, not only while it is
+        // visible, so that the final state of a stream that ends in the background is shown.
+        viewLifecycleOwner.lifecycleScope.launch {
+            streamService.service.collect { service ->
+                service?.setReceiverVolume(settingsRepository.settings.value.playbackVolume)
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            streamService.receiverRunning.collect { running ->
+                binding.startReceiverButton.text =
+                    getString(if (running) R.string.stop_receiver else R.string.start_receiver)
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            streamService.receiverStatus.collect { status -> updateReceiverStatus(status) }
+        }
     }
 
     override fun onResume() {
@@ -105,7 +123,8 @@ class ReceiverFragment : Fragment() {
         updatePlaybackVolumeLabel(settings.playbackVolume)
 
         val ports = settings.sourcePort to settings.repairPort
-        if (::receiverService.isInitialized && receiverService.isReceiverAlive()) {
+        val receiverService = streamService.service.value
+        if (receiverService?.isReceiverAlive() == true) {
             receiverService.setReceiverVolume(settings.playbackVolume)
         } else if (ports != lastAppliedPorts) {
             showInactiveReceiverStatus(settings)
@@ -130,9 +149,7 @@ class ReceiverFragment : Fragment() {
                     val percent = PlaybackVolume.clamp(progress)
                     updatePlaybackVolumeLabel(percent)
 
-                    if (::receiverService.isInitialized) {
-                        receiverService.setReceiverVolume(percent)
-                    }
+                    streamService.service.value?.setReceiverVolume(percent)
 
                     lifecycleScope.launch {
                         settingsRepository.setPlaybackVolume(percent)
@@ -152,6 +169,9 @@ class ReceiverFragment : Fragment() {
     }
 
     private fun startStopReceiver() {
+        // Null only for the instant before the service connection is established.
+        val receiverService = streamService.service.value ?: return
+
         if (receiverService.isReceiverAlive()) {
             Log.d(LOG_TAG, "Stopping Receiver")
 
@@ -160,36 +180,6 @@ class ReceiverFragment : Fragment() {
             Log.d(LOG_TAG, "Starting Receiver")
 
             receiverService.startReceiver()
-        }
-    }
-
-    fun onServiceConnected(
-        service: SenderReceiverService,
-        showActiveIcon: () -> Unit,
-        hideActiveIcon: () -> Unit,
-    ) {
-        Log.d(LOG_TAG, "Add Receiver State Changed Listener")
-
-        receiverService = service
-
-        receiverService.setReceiverStateChangedListeners(
-            receiverChanged = { state: Boolean ->
-                activity?.runOnUiThread {
-                    binding.startReceiverButton.text =
-                        getString(if (state) R.string.stop_receiver else R.string.start_receiver)
-                    if (state) showActiveIcon() else hideActiveIcon()
-                }
-            },
-        )
-
-        receiverService.setReceiverStatusListener { status ->
-            activity?.runOnUiThread {
-                if (isAdded && view != null) updateReceiverStatus(status)
-            }
-        }
-
-        if (::settingsRepository.isInitialized) {
-            receiverService.setReceiverVolume(settingsRepository.settings.value.playbackVolume)
         }
     }
 

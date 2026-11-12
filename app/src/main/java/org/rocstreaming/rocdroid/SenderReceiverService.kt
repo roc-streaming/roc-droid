@@ -10,6 +10,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ServiceInfo
 import android.graphics.drawable.Icon
 import android.media.AudioAttributes
 import android.media.AudioFormat
@@ -18,12 +19,14 @@ import android.media.AudioRecord
 import android.media.AudioTrack
 import android.media.MediaRecorder
 import android.media.projection.MediaProjection
+import android.media.projection.MediaProjectionManager
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.runBlocking
 import org.rocstreaming.roctoolkit.ChannelSet
@@ -52,6 +55,22 @@ private const val BROADCAST_STOP_RECEIVER_ACTION =
 
 private const val LOG_TAG = "[rocdroid.SenderReceiverService]"
 
+/**
+ * The foreground service types needed for what is currently running, or 0 if none is.
+ *
+ * Capturing the microphone is deliberately absent: the service does not declare that type.
+ */
+@SuppressLint("InlinedApi") // Plain ints; ServiceCompat ignores them where they don't exist.
+internal fun foregroundServiceTypes(
+    receiving: Boolean,
+    capturingPlayback: Boolean,
+): Int {
+    var types = 0
+    if (receiving) types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+    if (capturingPlayback) types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+    return types
+}
+
 class SenderReceiverService : Service() {
     private var receiverThread: Thread? = null
     private var senderThread: Thread? = null
@@ -63,6 +82,9 @@ class SenderReceiverService : Service() {
 
     @Volatile private var receiverAudioTrack: AudioTrack? = null
     private var isForegroundRunning = false
+
+    // True from the moment the user allows capturing other apps until that sender stops.
+    @Volatile private var senderCapturesPlayback = false
 
     private val notificationStopActionReceiver: BroadcastReceiver =
         object : BroadcastReceiver() {
@@ -188,31 +210,47 @@ class SenderReceiverService : Service() {
         }.build()
     }
 
-    private fun updateNotification(
+    /**
+     * Makes the foreground state and its notification match the streams that are running.
+     *
+     * Android 14+ checks every foreground service type the service asks for against what the
+     * app is allowed to do at that moment, so this asks only for the types in use right now
+     * instead of everything the manifest declares.
+     */
+    @Synchronized
+    private fun updateForeground(
         sending: Boolean,
         receiving: Boolean,
     ) {
         Log.d(
             LOG_TAG,
             String.format(
-                "Updating Notification for %s %s",
+                "Updating Foreground State for %s %s",
                 if (sending) "Sender" else "",
                 if (receiving) "Receiver" else "",
             ),
         )
 
-        if (!isForegroundRunning) {
+        val types =
+            foregroundServiceTypes(
+                receiving = receiving,
+                capturingPlayback = sending && senderCapturesPlayback,
+            )
+
+        if (types == 0) {
+            if (isForegroundRunning) {
+                stopForegroundService()
+            }
             return
         }
 
-        if (receiving || sending) {
-            val notification = buildNotification(sending, receiving)
-            val notificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.notify(NOTIFICATION_ID, notification)
-        } else {
-            stopForegroundService()
-        }
+        isForegroundRunning = true
+        ServiceCompat.startForeground(
+            this,
+            NOTIFICATION_ID,
+            buildNotification(sending, receiving),
+            types,
+        )
     }
 
     private fun getContentText(
@@ -233,14 +271,42 @@ class SenderReceiverService : Service() {
         return getString(R.string.notification_sender_and_receiver_not_running)
     }
 
-    fun preStartSender() {
-        Log.d(LOG_TAG, "Prestart Sender")
+    /**
+     * Starts the sender on audio captured from other apps.
+     *
+     * [resultCode] and [data] are the result of the screen capture prompt, and the order of
+     * the steps is dictated by the platform: the user has to accept the prompt before a media
+     * projection foreground service may start (Android 14+), and that service has to be
+     * running before the projection can be obtained (Android 10+).
+     */
+    fun startProjectionSender(
+        ip: String,
+        resultCode: Int,
+        data: Intent,
+    ) {
+        Log.d(LOG_TAG, "Starting Sender With Playback Capture")
 
-        if (isForegroundRunning) {
-            updateNotification(true, isReceiverAlive())
-        } else {
-            startForegroundService(true, isReceiverAlive())
+        if (isSenderAlive()) return
+
+        senderCapturesPlayback = true
+        updateForeground(sending = true, receiving = isReceiverAlive())
+
+        val projectionManager =
+            getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+        val projection = projectionManager.getMediaProjection(resultCode, data)
+        if (projection == null) {
+            Log.e(LOG_TAG, "Failed to get media projection")
+            onSenderStopped()
+            return
         }
+
+        startSender(ip, projection)
+    }
+
+    private fun onSenderStopped() {
+        senderCapturesPlayback = false
+        senderChanged?.invoke(false)
+        updateForeground(sending = false, receiving = isReceiverAlive())
     }
 
     fun startSender(
@@ -267,7 +333,12 @@ class SenderReceiverService : Service() {
                         .build()
 
                 RocContext().use { context ->
-                    if (record.state != AudioRecord.STATE_INITIALIZED) return@use
+                    if (record.state != AudioRecord.STATE_INITIALIZED) {
+                        Log.e(LOG_TAG, "Failed to initialize audio record")
+                        record.release()
+                        onSenderStopped()
+                        return@use
+                    }
 
                     record.startRecording()
 
@@ -339,8 +410,7 @@ class SenderReceiverService : Service() {
 
                     record.stop()
                     record.release()
-                    senderChanged?.invoke(false)
-                    updateNotification(false, isReceiverAlive())
+                    onSenderStopped()
                 }
             }
 
@@ -436,16 +506,12 @@ class SenderReceiverService : Service() {
                 receiverAudioTrack = null
                 audioTrack.release()
                 receiverChanged?.invoke(false)
-                updateNotification(isSenderAlive(), false)
+                updateForeground(sending = isSenderAlive(), receiving = false)
             }
 
         receiverThread!!.start()
 
-        if (isForegroundRunning) {
-            updateNotification(isSenderAlive(), true)
-        } else {
-            startForegroundService(isSenderAlive(), true)
-        }
+        updateForeground(sending = isSenderAlive(), receiving = true)
     }
 
     fun stopSender() {
@@ -480,23 +546,6 @@ class SenderReceiverService : Service() {
         Log.d(LOG_TAG, "Checking If Sender Alive")
 
         return senderThread?.isAlive == true
-    }
-
-    private fun startForegroundService(
-        sending: Boolean,
-        receiving: Boolean,
-    ) {
-        Log.d(
-            LOG_TAG,
-            String.format(
-                "Starting Foreground Service for %s %s",
-                if (sending) "Sender" else "",
-                if (receiving) "Receiver" else "",
-            ),
-        )
-
-        isForegroundRunning = true
-        startForeground(NOTIFICATION_ID, buildNotification(sending, receiving))
     }
 
     private fun stopForegroundService() {

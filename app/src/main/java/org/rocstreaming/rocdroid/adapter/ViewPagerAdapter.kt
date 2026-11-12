@@ -11,24 +11,14 @@ private const val NUM_TABS = 2
 
 class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
     FragmentStateAdapter(fragmentManager, lifecycle) {
-    private lateinit var receiverFragment: ReceiverFragment
-    private lateinit var senderFragment: SenderFragment
-
     override fun getItemCount(): Int {
         return NUM_TABS
     }
 
+    // Always hand out new instances. When the activity is recreated Android restores the
+    // previous fragments by itself and does not call this, so instances created and kept
+    // elsewhere would never be the ones on screen.
     override fun createFragment(position: Int): Fragment {
-        return if (position == 0) receiverFragment else senderFragment
-    }
-
-    fun setFragments(
-        receiver: ReceiverFragment,
-        sender: SenderFragment,
-    ): ViewPagerAdapter {
-        receiverFragment = receiver
-        senderFragment = sender
-
-        return this
+        return if (position == 0) ReceiverFragment() else SenderFragment()
     }
 }

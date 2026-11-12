@@ -2,6 +2,8 @@ package org.rocstreaming.rocdroid
 
 import androidx.datastore.preferences.core.mutablePreferencesOf
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AppSettingsTest {
@@ -41,5 +43,23 @@ class AppSettingsTest {
 
         assertEquals(PlaybackVolume.MAX_PERCENT, tooHigh.toAppSettings().playbackVolume)
         assertEquals(PlaybackVolume.MIN_PERCENT, tooLow.toAppSettings().playbackVolume)
+    }
+
+    @Test
+    fun acceptsPortsAnAppCanListenOn() {
+        assertTrue(AppSettings.isValidPort(1024, otherPort = 10002))
+        assertTrue(AppSettings.isValidPort(65535, otherPort = 10002))
+    }
+
+    @Test
+    fun rejectsPortsAnAppCannotListenOn() {
+        assertFalse(AppSettings.isValidPort(0, otherPort = 10002))
+        assertFalse(AppSettings.isValidPort(1023, otherPort = 10002))
+        assertFalse(AppSettings.isValidPort(65536, otherPort = 10002))
+    }
+
+    @Test
+    fun rejectsPortOfTheOtherStream() {
+        assertFalse(AppSettings.isValidPort(10002, otherPort = 10002))
     }
 }

@@ -1,22 +1,24 @@
 package org.rocstreaming.rocdroid.fragment
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context.MEDIA_PROJECTION_SERVICE
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -25,9 +27,9 @@ import kotlinx.coroutines.launch
 import org.rocstreaming.rocdroid.AppSettings
 import org.rocstreaming.rocdroid.AudioLevel
 import org.rocstreaming.rocdroid.R
-import org.rocstreaming.rocdroid.SenderReceiverService
 import org.rocstreaming.rocdroid.SettingsRepository
 import org.rocstreaming.rocdroid.StreamKind
+import org.rocstreaming.rocdroid.StreamServiceViewModel
 import org.rocstreaming.rocdroid.StreamStatus
 import org.rocstreaming.rocdroid.databinding.SenderFragmentBinding
 import org.rocstreaming.rocdroid.formatElapsed
@@ -40,11 +42,9 @@ class SenderFragment : Fragment() {
     private lateinit var selectedAudioSource: String
     private lateinit var audioSources: Array<String>
     private var selectedAudioSourceIndex: Int = 0
-    private lateinit var senderService: SenderReceiverService
+    private val streamService: StreamServiceViewModel by activityViewModels()
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var projectionLauncher: ActivityResultLauncher<Intent>
-    private lateinit var projectionManager: MediaProjectionManager
-    private lateinit var projection: MediaProjection
     private lateinit var settingsRepository: SettingsRepository
     private var lastAppliedReceiverIp: String? = null
     private var lastStatusEndpoint: Triple<String, Int, Int>? = null
@@ -79,11 +79,11 @@ class SenderFragment : Fragment() {
             showAudioSourcesDialog()
         }
 
-        binding.sourcePortValue.setOnClickListener {
+        binding.editSourcePort.setOnClickListener {
             showPortDialog(true)
         }
 
-        binding.repairPortValue.setOnClickListener {
+        binding.editRepairPort.setOnClickListener {
             showPortDialog(false)
         }
 
@@ -93,10 +93,10 @@ class SenderFragment : Fragment() {
 
         projectionLauncher =
             registerForActivityResult(StartActivityForResult()) { result ->
-                if (result.data != null) {
-                    projection = projectionManager.getMediaProjection(result.resultCode, result.data!!)
+                val data = result.data
+                if (result.resultCode == Activity.RESULT_OK && data != null) {
                     val ip = binding.receiverIp.text.toString()
-                    senderService.startSender(ip, projection)
+                    streamService.service.value?.startProjectionSender(ip, result.resultCode, data)
                 }
             }
 
@@ -128,27 +128,17 @@ class SenderFragment : Fragment() {
                 }
             }
         }
-    }
 
-    fun onServiceConnected(
-        service: SenderReceiverService,
-        showActiveIcon: () -> Unit,
-        hideActiveIcon: () -> Unit,
-    ) {
-        Log.d(LOG_TAG, "Add Receiver State Changed Listener")
-
-        senderService = service
-
-        senderService.setSenderStateChangedListeners(senderChanged = { state: Boolean ->
-            activity?.runOnUiThread {
+        // These follow the service for as long as the view exists, not only while it is
+        // visible, so that the final state of a stream that ends in the background is shown.
+        viewLifecycleOwner.lifecycleScope.launch {
+            streamService.senderRunning.collect { running ->
                 binding.startSenderButton.text =
-                    getString(if (state) R.string.stop_sender else R.string.start_sender)
-                if (state) showActiveIcon() else hideActiveIcon()
+                    getString(if (running) R.string.stop_sender else R.string.start_sender)
             }
-        })
-
-        senderService.setSenderErrorCallback { errorMessage ->
-            activity?.runOnUiThread {
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            streamService.senderErrors.collect { errorMessage ->
                 AlertDialog.Builder(requireActivity()).apply {
                     setTitle(getString(R.string.invalid_ip_title))
                     setMessage(errorMessage)
@@ -157,11 +147,8 @@ class SenderFragment : Fragment() {
                 }.show()
             }
         }
-
-        senderService.setSenderStatusListener { status ->
-            activity?.runOnUiThread {
-                if (isAdded && view != null) updateSenderStatus(status)
-            }
+        viewLifecycleOwner.lifecycleScope.launch {
+            streamService.senderStatus.collect { status -> updateSenderStatus(status) }
         }
     }
 
@@ -179,7 +166,7 @@ class SenderFragment : Fragment() {
         val endpointChanged = endpoint != lastStatusEndpoint
         lastStatusEndpoint = endpoint
 
-        if ((!::senderService.isInitialized || !senderService.isSenderAlive()) && endpointChanged) {
+        if (streamService.service.value?.isSenderAlive() != true && endpointChanged) {
             showInactiveSenderStatus(settings)
         }
     }
@@ -248,8 +235,9 @@ class SenderFragment : Fragment() {
 
     private fun showPortDialog(isSourcePort: Boolean) {
         val title = if (isSourcePort) getString(R.string.dialog_source_port) else getString(R.string.dialog_repair_port)
-        val currentPort =
-            if (isSourcePort) settingsRepository.settings.value.sourcePort else settingsRepository.settings.value.repairPort
+        val settings = settingsRepository.settings.value
+        val currentPort = if (isSourcePort) settings.sourcePort else settings.repairPort
+        val otherPort = if (isSourcePort) settings.repairPort else settings.sourcePort
         val input =
             android.widget.EditText(requireActivity()).apply {
                 inputType = android.text.InputType.TYPE_CLASS_NUMBER
@@ -262,7 +250,7 @@ class SenderFragment : Fragment() {
             .setView(input)
             .setPositiveButton(R.string.ok) { _, _ ->
                 val newPort = input.text.toString().toIntOrNull()
-                if (newPort != null && newPort in 1..65535) {
+                if (newPort != null && AppSettings.isValidPort(newPort, otherPort)) {
                     if (isSourcePort) {
                         binding.sourcePortValue.setText(newPort.toString())
                     } else {
@@ -276,6 +264,12 @@ class SenderFragment : Fragment() {
                             settingsRepository.setRepairPort(newPort)
                         }
                     }
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.invalid_port_message, AppSettings.MIN_PORT, AppSettings.MAX_PORT),
+                        Toast.LENGTH_LONG,
+                    ).show()
                 }
             }
             .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
@@ -287,6 +281,9 @@ class SenderFragment : Fragment() {
     }
 
     private fun startStopSender() {
+        // Null only for the instant before the service connection is established.
+        val senderService = streamService.service.value ?: return
+
         if (senderService.isSenderAlive()) {
             Log.d(LOG_TAG, "Stopping Sender")
 
@@ -305,8 +302,9 @@ class SenderFragment : Fragment() {
             if (!askForRecordAudioPermission()) return@launch
 
             if (usePlayback) {
-                senderService.preStartSender()
-                projectionManager =
+                // Only ask here. The service goes to the foreground and takes the projection
+                // once the user has agreed; Android 14+ refuses it any earlier.
+                val projectionManager =
                     activity?.getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
                 val projectionIntent = projectionManager.createScreenCaptureIntent()
                 projectionLauncher.launch(projectionIntent)

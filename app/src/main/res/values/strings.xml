@@ -47,6 +47,9 @@
 
     <string name="dialog_source_port">Source Stream Port</string>
     <string name="dialog_repair_port">Repair Stream Port</string>
+    <string name="edit_source_port">Edit source stream port</string>
+    <string name="edit_repair_port">Edit repair stream port</string>
+    <string name="invalid_port_message">The two ports must differ and be in the range %1$d–%2$d.</string>
 
     <string name="app_about">About</string>
     <string name="about_source_code">Source Code</string>

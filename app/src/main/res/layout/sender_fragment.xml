@@ -43,6 +43,18 @@
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/portForSource"/>
 
+            <!-- Tapping the port itself copies it, so editing needs a control of its own. -->
+            <ImageButton
+                android:id="@+id/editSourcePort"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/edit_source_port"
+                app:layout_constraintBottom_toBottomOf="@+id/sourcePortValue"
+                app:layout_constraintStart_toEndOf="@+id/sourcePortValue"
+                app:layout_constraintTop_toTopOf="@+id/sourcePortValue"
+                app:srcCompat="@drawable/ic_edit" />
+
             <TextView
                 android:id="@+id/portForRepair"
                 style="@style/textViewStyle"
@@ -58,6 +70,17 @@
                 app:layout_constraintRight_toRightOf="parent"
                 android:layout_margin="@dimen/margin"
                 app:layout_constraintTop_toBottomOf="@+id/portForRepair"/>
+
+            <ImageButton
+                android:id="@+id/editRepairPort"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/edit_repair_port"
+                app:layout_constraintBottom_toBottomOf="@+id/repairPortValue"
+                app:layout_constraintStart_toEndOf="@+id/repairPortValue"
+                app:layout_constraintTop_toTopOf="@+id/repairPortValue"
+                app:srcCompat="@drawable/ic_edit" />
 
             <TextView
                 android:id="@+id/putIpAddress"

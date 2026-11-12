@@ -1,37 +1,35 @@
 package org.rocstreaming.rocdroid
 
 import android.Manifest
-import android.content.ComponentName
 import android.content.Intent
-import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
-import android.os.IBinder
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.coroutines.launch
 import org.rocstreaming.rocdroid.adapter.ViewPagerAdapter
 import org.rocstreaming.rocdroid.databinding.ActivityMainBinding
-import org.rocstreaming.rocdroid.fragment.ReceiverFragment
-import org.rocstreaming.rocdroid.fragment.SenderFragment
 
 private const val LOG_TAG = "[rocdroid.MainActivity]"
 private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1001
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private val senderFragment = SenderFragment()
-    private val receiverFragment = ReceiverFragment()
 
     private lateinit var tabsTitle: Array<String>
 
-    private lateinit var senderReceiverService: SenderReceiverService
+    private val streamService: StreamServiceViewModel by viewModels()
 
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -42,37 +40,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-    private val senderReceiverServiceConnection =
-        object : ServiceConnection {
-            override fun onServiceConnected(
-                componentName: ComponentName,
-                binder: IBinder,
-            ) {
-                senderReceiverService = (binder as SenderReceiverService.LocalBinder).getService()
-
-                senderFragment.onServiceConnected(
-                    senderReceiverService,
-                    { showActiveIcon(1) },
-                    { hideActiveIcon(1) },
-                )
-                receiverFragment.onServiceConnected(
-                    senderReceiverService,
-                    { showActiveIcon(0) },
-                    { hideActiveIcon(0) },
-                )
-            }
-
-            override fun onServiceDisconnected(componentName: ComponentName) {
-                senderReceiverService.removeListeners()
-            }
-        }
-
-    fun showActiveIcon(tabIdx: Int) {
-        binding.tabs.getTabAt(tabIdx)?.icon?.alpha = 255
+    private fun setTabActive(
+        tabIdx: Int,
+        active: Boolean,
+    ) {
+        binding.tabs.getTabAt(tabIdx)?.icon?.alpha = if (active) 255 else 0
     }
 
-    fun hideActiveIcon(tabIdx: Int) {
-        binding.tabs.getTabAt(tabIdx)?.icon?.alpha = 0
+    // Tab 0 is the receiver and tab 1 the sender, as in ViewPagerAdapter.
+    private fun showActiveStreams() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch { streamService.receiverRunning.collect { running -> setTabActive(0, running) } }
+                launch { streamService.senderRunning.collect { running -> setTabActive(1, running) } }
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,16 +72,7 @@ class MainActivity : AppCompatActivity() {
                 getString(R.string.sender),
             )
 
-        val adapter =
-            ViewPagerAdapter(
-                supportFragmentManager,
-                lifecycle,
-            ).setFragments(
-                receiverFragment,
-                senderFragment,
-            )
-
-        binding.viewPager.adapter = adapter
+        binding.viewPager.adapter = ViewPagerAdapter(supportFragmentManager, lifecycle)
 
         TabLayoutMediator(binding.tabs, binding.viewPager) { tab, position ->
             tab.text = tabsTitle[position]
@@ -108,8 +81,7 @@ class MainActivity : AppCompatActivity() {
             binding.viewPager.setCurrentItem(tab.position, true)
         }.attach()
 
-        val serviceIntent = Intent(this, SenderReceiverService::class.java)
-        bindService(serviceIntent, senderReceiverServiceConnection, BIND_AUTO_CREATE)
+        showActiveStreams()
 
         // Request notification permission on Android 13+
         requestNotificationPermission()
@@ -147,11 +119,6 @@ class MainActivity : AppCompatActivity() {
         if (intent.getBooleanExtra("open_sender_tab", false)) {
             binding.viewPager.currentItem = 1
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        unbindService(senderReceiverServiceConnection)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
