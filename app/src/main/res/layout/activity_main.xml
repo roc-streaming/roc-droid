@@ -18,13 +18,13 @@
         app:tabInlineLabel="true"
         app:tabMode="fixed">
 
+        <!-- No ids here: TabLayout turns TabItems into tabs instead of keeping them as
+             child views, so view binding would look for them and fail. -->
         <com.google.android.material.tabs.TabItem
-            android:id="@+id/receiverTab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <com.google.android.material.tabs.TabItem
-            android:id="@+id/senderTab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </com.google.android.material.tabs.TabLayout>

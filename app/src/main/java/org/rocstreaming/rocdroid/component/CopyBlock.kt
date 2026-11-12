@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
@@ -39,7 +40,11 @@ class CopyBlock : ConstraintLayout {
         textBlock?.text = text
     }
 
-    private fun setClipboard(context: Context, text: CharSequence, icon: ImageView) {
+    private fun setClipboard(
+        context: Context,
+        text: CharSequence,
+        icon: ImageView,
+    ) {
         Log.d(LOG_TAG, String.format("Copying Text: %s", text))
 
         val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -48,24 +53,32 @@ class CopyBlock : ConstraintLayout {
         clipboardManager.setPrimaryClip(clipData)
 
         animateImageChange(context, icon, R.drawable.ic_done)
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             animateImageChange(context, icon, R.drawable.ic_copy)
         }, 1000)
     }
 
-    private fun animateImageChange(c: Context?, icon: ImageView, image: Int) {
+    private fun animateImageChange(
+        c: Context?,
+        icon: ImageView,
+        image: Int,
+    ) {
         Log.d(LOG_TAG, String.format("Changing image in Copy Block"))
 
         val animOut: Animation = AnimationUtils.loadAnimation(c, android.R.anim.fade_out)
         val animIn: Animation = AnimationUtils.loadAnimation(c, android.R.anim.fade_in)
-        animOut.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation?) {}
-            override fun onAnimationRepeat(animation: Animation?) {}
-            override fun onAnimationEnd(animation: Animation?) {
-                icon.setImageResource(image)
-                icon.startAnimation(animIn)
-            }
-        })
+        animOut.setAnimationListener(
+            object : Animation.AnimationListener {
+                override fun onAnimationStart(animation: Animation?) {}
+
+                override fun onAnimationRepeat(animation: Animation?) {}
+
+                override fun onAnimationEnd(animation: Animation?) {
+                    icon.setImageResource(image)
+                    icon.startAnimation(animIn)
+                }
+            },
+        )
         icon.startAnimation(animOut)
     }
 }
