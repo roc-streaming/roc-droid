@@ -22,7 +22,10 @@ class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
         return if (position == 0) receiverFragment else senderFragment
     }
 
-    fun setFragments(receiver: ReceiverFragment, sender: SenderFragment): ViewPagerAdapter {
+    fun setFragments(
+        receiver: ReceiverFragment,
+        sender: SenderFragment,
+    ): ViewPagerAdapter {
         receiverFragment = receiver
         senderFragment = sender
 

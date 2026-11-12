@@ -4,43 +4,35 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import org.rocstreaming.rocdroid.databinding.ActivityAboutBinding
 import java.lang.String.format
 
 class AboutActivity : AppCompatActivity() {
-    private lateinit var sourceCodeButton: Button
-    private lateinit var bugTrackerButton: Button
-    private lateinit var contributorsButton: Button
-    private lateinit var licenseButton: Button
+    private lateinit var binding: ActivityAboutBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_about)
+        binding = ActivityAboutBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        sourceCodeButton = findViewById(R.id.about_source_code)
-        bugTrackerButton = findViewById(R.id.about_bug_tracker)
-        contributorsButton = findViewById(R.id.about_contributors)
-        licenseButton = findViewById(R.id.app_license)
 
         val manager = this.packageManager
         val info = manager.getPackageInfo(this.packageName, PackageManager.GET_ACTIVITIES)
 
-        findViewById<TextView>(R.id.app_version).text = format("v%s", info.versionName)
+        binding.appVersion.text = format("v%s", info.versionName)
 
-        sourceCodeButton.setOnClickListener {
+        binding.aboutSourceCode.setOnClickListener {
             openLink(getString(R.string.url_repo))
         }
-        bugTrackerButton.setOnClickListener {
+        binding.aboutBugTracker.setOnClickListener {
             openLink(getString(R.string.url_bugs))
         }
-        contributorsButton.setOnClickListener {
+        binding.aboutContributors.setOnClickListener {
             openLink(getString(R.string.url_contributors))
         }
-        licenseButton.setOnClickListener {
+        binding.appLicense.setOnClickListener {
             openLink(getString(R.string.uri_license))
         }
     }
