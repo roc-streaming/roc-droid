@@ -1,34 +1,31 @@
 buildscript {
-    ext.kotlin_version = '1.7.21'
+    ext.kotlin_version = '2.0.0'
 
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:8.5.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 plugins {
-    id "com.diffplug.spotless" version "6.12.0"
+    id "com.diffplug.spotless" version "6.25.0"
 }
 
 allprojects {
     repositories {
         google()
-        jcenter()
         mavenCentral()
     }
 }
 
 spotless {
     format 'misc', {
-        // define the files to apply `misc` to
         target '**/*.gradle', '**/*.md', '**/.gitignore'
 
-        // define the steps to apply to those files
         indentWithSpaces()
         trimTrailingWhitespace()
         endWithNewline()
