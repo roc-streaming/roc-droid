@@ -90,12 +90,39 @@
                 app:layout_constraintTop_toBottomOf="@+id/portForRepair"/>
 
             <TextView
+                android:id="@+id/receiverLatencyLabel"
+                style="@style/textViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/receiver_target_latency"
+                app:layout_constraintTop_toBottomOf="@+id/repairPortValue" />
+
+            <EditText
+                android:id="@+id/receiverLatency"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin"
+                android:autofillHints=""
+                android:ems="10"
+                android:fontFamily="@font/montserrat_regular"
+                android:gravity="center_horizontal"
+                android:hint="@string/receiver_target_latency_hint"
+                android:inputType="number"
+                android:minHeight="48dp"
+                android:singleLine="true"
+                android:textSize="@dimen/font_big"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/receiverLatencyLabel" />
+
+            <TextView
                 android:id="@+id/staertReceiver"
                 style="@style/textViewStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/receiver_start_receiver"
-                app:layout_constraintTop_toBottomOf="@+id/repairPortValue" />
+                app:layout_constraintTop_toBottomOf="@+id/receiverLatency" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

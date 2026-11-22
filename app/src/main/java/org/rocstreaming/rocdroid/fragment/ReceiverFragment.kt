@@ -1,11 +1,13 @@
 package org.rocstreaming.rocdroid.fragment
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -19,6 +21,7 @@ private const val LOG_TAG = "[rocdroid.fragment.ReceiverFragment]"
 class ReceiverFragment : Fragment() {
 
     private lateinit var receiverService: SenderReceiverService
+    private lateinit var latencyInput: EditText
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,6 +31,12 @@ class ReceiverFragment : Fragment() {
         Log.d(LOG_TAG, "Create Receiver Fragment View")
 
         val view = inflater.inflate(R.layout.receiver_fragment, container, false)
+
+        latencyInput = view.findViewById(R.id.receiverLatency)
+        latencyInput.setText(
+            requireActivity().getSharedPreferences("settings", Context.MODE_PRIVATE)
+                .getInt("receiver_latency_ms", 60).coerceIn(20, 200).toString()
+        )
 
         view.findViewById<CopyBlock>(R.id.sourcePortValue)?.setText("10001")
         view.findViewById<CopyBlock>(R.id.repairPortValue)?.setText("10002")
@@ -55,6 +64,13 @@ class ReceiverFragment : Fragment() {
     }
 
     private fun startStopReceiver() {
+        val latency = (latencyInput.text.toString().toIntOrNull() ?: 60).coerceIn(20, 200)
+        requireActivity().getSharedPreferences("settings", Context.MODE_PRIVATE)
+            .edit()
+            .putInt("receiver_latency_ms", latency)
+            .apply()
+        latencyInput.setText(latency.toString())
+
         if (receiverService.isReceiverAlive()) {
             Log.d(LOG_TAG, "Stopping Receiver")
 

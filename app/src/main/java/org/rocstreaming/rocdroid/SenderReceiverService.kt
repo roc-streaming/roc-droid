@@ -36,8 +36,14 @@ import org.rocstreaming.roctoolkit.RocSender
 import org.rocstreaming.roctoolkit.RocSenderConfig
 import org.rocstreaming.roctoolkit.Slot
 
-private const val SAMPLE_RATE = 44100
+private const val SAMPLE_RATE = 48000
 private const val BUFFER_SIZE = 100
+private const val DEFAULT_TARGET_LATENCY_MS = 60
+private const val MIN_TARGET_LATENCY_MS = 20
+private const val MAX_TARGET_LATENCY_MS = 200
+private const val PREF_TARGET_LATENCY_MS = "receiver_latency_ms"
+private const val PREF_SENDER_LATENCY_MS = "sender_latency_ms"
+private const val SENDER_PACKET_LENGTH_NS = 7L * 1000 * 1000
 
 private const val DEFAULT_RTP_PORT_SOURCE = 10001
 private const val DEFAULT_RTP_PORT_REPAIR = 10002
@@ -225,11 +231,27 @@ class SenderReceiverService : Service() {
         senderThread = Thread {
             val record = createAudioRecord(projection)
 
+            val senderLatencyMs = getSharedPreferences("settings", Context.MODE_PRIVATE)
+                .getInt(PREF_SENDER_LATENCY_MS, DEFAULT_TARGET_LATENCY_MS)
+                .coerceIn(MIN_TARGET_LATENCY_MS, MAX_TARGET_LATENCY_MS)
+            val fecBlockSourcePackets =
+                (
+                    (senderLatencyMs.toLong() * 1000 * 1000 + SENDER_PACKET_LENGTH_NS - 1) /
+                        SENDER_PACKET_LENGTH_NS
+                    ).toInt()
+            check(fecBlockSourcePackets in 1..256)
+            Log.d(
+                LOG_TAG,
+                "Sender latency: $senderLatencyMs ms, FEC block source packets: $fecBlockSourcePackets"
+            )
+
             val config = RocSenderConfig.builder()
-                .frameSampleRate(44100)
+                .frameSampleRate(48000)
                 .frameChannels(ChannelSet.STEREO)
                 .frameEncoding(FrameEncoding.PCM_FLOAT)
                 .clockSource(ClockSource.INTERNAL)
+                .packetLength(SENDER_PACKET_LENGTH_NS)
+                .fecBlockSourcePackets(fecBlockSourcePackets)
                 .build()
 
             RocContext().use { context ->
@@ -288,11 +310,18 @@ class SenderReceiverService : Service() {
             val audioTrack = createAudioTrack()
             audioTrack.play()
 
+            val latencyMs = getSharedPreferences("settings", Context.MODE_PRIVATE)
+                .getInt(PREF_TARGET_LATENCY_MS, DEFAULT_TARGET_LATENCY_MS)
+                .coerceIn(MIN_TARGET_LATENCY_MS, MAX_TARGET_LATENCY_MS)
+            Log.d(LOG_TAG, "Target latency: $latencyMs ms")
+            val targetLatencyNs = latencyMs.toLong() * 1000 * 1000
+
             val config = RocReceiverConfig.builder()
-                .frameSampleRate(44100)
+                .frameSampleRate(48000)
                 .frameChannels(ChannelSet.STEREO)
                 .frameEncoding(FrameEncoding.PCM_FLOAT)
                 .clockSource(ClockSource.INTERNAL)
+                .targetLatency(targetLatencyNs)
                 .build()
 
             RocContext().use { context ->
