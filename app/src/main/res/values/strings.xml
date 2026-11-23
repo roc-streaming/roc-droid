@@ -31,7 +31,17 @@
     <string name="receiver_use_IP">2. Use one of this device\'s IP addresses as the remote on the sender</string>
     <string name="receiver_target_latency">5. Target latency (ms), 20–200</string>
     <string name="receiver_target_latency_hint">60</string>
-    <string name="receiver_start_receiver">6. Start receiver on this device</string>
+    <string name="receiver_choose_output_device">6. Choose output device</string>
+    <string name="dialog_choose_output_device">Output device</string>
+    <string name="receiver_output_device_system_default">System default</string>
+    <string name="receiver_output_device_speaker">Speaker</string>
+    <string name="receiver_output_device_earpiece">Earpiece</string>
+    <string name="receiver_output_device_wired_headset">Wired headset</string>
+    <string name="receiver_output_device_bluetooth_sco">Bluetooth SCO</string>
+    <string name="receiver_output_device_bluetooth_a2dp">Bluetooth A2DP</string>
+    <string name="receiver_output_device_usb">USB audio</string>
+    <string name="receiver_output_device_other">Other</string>
+    <string name="receiver_start_receiver">7. Start receiver on this device</string>
 
     <string name="sender_start_remote_receiver">1. Start receiver on the remote device</string>
     <string name="sender_put_IP_address">4. Put IP address of the remote receiver device below</string>

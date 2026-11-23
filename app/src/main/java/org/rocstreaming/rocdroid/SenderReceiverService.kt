@@ -12,6 +12,7 @@ import android.content.IntentFilter
 import android.graphics.drawable.Icon
 import android.media.AudioAttributes
 import android.media.AudioFormat
+import android.media.AudioManager
 import android.media.AudioPlaybackCaptureConfiguration
 import android.media.AudioRecord
 import android.media.AudioTrack
@@ -42,6 +43,7 @@ private const val DEFAULT_TARGET_LATENCY_MS = 60
 private const val MIN_TARGET_LATENCY_MS = 20
 private const val MAX_TARGET_LATENCY_MS = 200
 private const val PREF_TARGET_LATENCY_MS = "receiver_latency_ms"
+private const val PREF_OUTPUT_DEVICE_ID = "receiver_output_device_id"
 private const val PREF_SENDER_LATENCY_MS = "sender_latency_ms"
 private const val SENDER_PACKET_LENGTH_NS = 7L * 1000 * 1000
 
@@ -423,13 +425,29 @@ class SenderReceiverService : Service() {
             audioFormat.channelMask,
             audioFormat.encoding
         )
-        return AudioTrack.Builder().apply {
+        val track = AudioTrack.Builder().apply {
             setAudioAttributes(audioAttributes)
             setAudioFormat(audioFormat)
             setBufferSizeInBytes(bufferSize)
             setTransferMode(AudioTrack.MODE_STREAM)
             setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
         }.build()
+
+        val outputDeviceId = getSharedPreferences("settings", Context.MODE_PRIVATE)
+            .getInt(PREF_OUTPUT_DEVICE_ID, 0)
+        if (outputDeviceId != 0) {
+            val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            val device = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+                .firstOrNull { it.id == outputDeviceId }
+            when {
+                device == null -> Log.w(LOG_TAG, "Output device $outputDeviceId is unavailable")
+                !track.setPreferredDevice(device) ->
+                    Log.w(LOG_TAG, "Failed to select output device $outputDeviceId")
+                else -> Log.d(LOG_TAG, "Output device: $outputDeviceId")
+            }
+        }
+
+        return track
     }
 
     private fun createAudioRecord(projection: MediaProjection?): AudioRecord {
@@ -450,7 +468,7 @@ class SenderReceiverService : Service() {
             createPaybackRecord(projection, format, bufferSize)
         } else {
             AudioRecord.Builder().apply {
-                setAudioSource(MediaRecorder.AudioSource.DEFAULT)
+                setAudioSource(MediaRecorder.AudioSource.MIC)
                 setAudioFormat(format)
                 setBufferSizeInBytes(bufferSize)
             }.build()

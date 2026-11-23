@@ -63,6 +63,9 @@ class SenderFragment : Fragment() {
             getString(R.string.sender_audio_source_microphone)
         )
 
+        selectedAudioSourceIndex =
+            if (prefs.getBoolean("playback_capture", false)) 0 else 1
+
         val receiverIp = prefs.getString("receiver_ip", null)
             ?: resources.getString(R.string.default_receiver_ip)
 
