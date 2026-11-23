@@ -90,12 +90,82 @@
                 app:layout_constraintTop_toBottomOf="@+id/portForRepair"/>
 
             <TextView
+                android:id="@+id/receiverLatencyLabel"
+                style="@style/textViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/receiver_target_latency"
+                app:layout_constraintTop_toBottomOf="@+id/repairPortValue" />
+
+            <EditText
+                android:id="@+id/receiverLatency"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin"
+                android:autofillHints=""
+                android:ems="10"
+                android:fontFamily="@font/montserrat_regular"
+                android:gravity="center_horizontal"
+                android:hint="@string/receiver_target_latency_hint"
+                android:inputType="number"
+                android:minHeight="48dp"
+                android:singleLine="true"
+                android:textSize="@dimen/font_big"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/receiverLatencyLabel" />
+
+            <TextView
+                android:id="@+id/receiverOutputDeviceLabel"
+                style="@style/textViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/receiver_choose_output_device"
+                app:layout_constraintTop_toBottomOf="@+id/receiverLatency" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/receiver_output_device_dialog_button"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin"
+                android:background="@drawable/dropdown_button"
+                android:orientation="horizontal"
+                android:padding="5dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/receiverOutputDeviceLabel">
+
+                <TextView
+                    android:id="@+id/receiver_output_device"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/montserrat_regular"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="@dimen/font_medium"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/triangle"
+                    android:contentDescription="@string/open_dropdown_icon" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
                 android:id="@+id/staertReceiver"
                 style="@style/textViewStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/receiver_start_receiver"
-                app:layout_constraintTop_toBottomOf="@+id/repairPortValue" />
+                app:layout_constraintTop_toBottomOf="@+id/receiver_output_device_dialog_button" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

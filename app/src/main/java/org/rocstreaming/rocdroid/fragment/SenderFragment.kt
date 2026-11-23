@@ -38,6 +38,7 @@ class SenderFragment : Fragment() {
     private lateinit var projectionLauncher: ActivityResultLauncher<Intent>
     private lateinit var projectionManager: MediaProjectionManager
     private lateinit var receiverIpEdit: EditText
+    private lateinit var latencyInput: EditText
     private lateinit var usePlaybackCapture: TextView
     private lateinit var projection: MediaProjection
 
@@ -62,10 +63,18 @@ class SenderFragment : Fragment() {
             getString(R.string.sender_audio_source_microphone)
         )
 
+        selectedAudioSourceIndex =
+            if (prefs.getBoolean("playback_capture", false)) 0 else 1
+
         val receiverIp = prefs.getString("receiver_ip", null)
             ?: resources.getString(R.string.default_receiver_ip)
 
         receiverIpEdit.setText(receiverIp)
+
+        latencyInput = view.findViewById(R.id.senderLatency)
+        latencyInput.setText(
+            prefs.getInt("sender_latency_ms", 60).coerceIn(20, 200).toString()
+        )
 
         usePlaybackCapture.text = audioSources[selectedAudioSourceIndex]
         view.findViewById<CopyBlock>(R.id.sourcePortValue)?.setText("10001")
@@ -159,9 +168,12 @@ class SenderFragment : Fragment() {
         } else {
             Log.d(LOG_TAG, "Starting Sender")
 
+            val latency = (latencyInput.text.toString().toIntOrNull() ?: 60).coerceIn(20, 200)
             val editor = prefs.edit()
             editor.putBoolean("playback_capture", isUsePlayback())
             editor.putString("receiver_ip", receiverIpEdit.text.toString())
+            editor.putInt("sender_latency_ms", latency)
+            latencyInput.setText(latency.toString())
             editor.apply()
 
             if (!askForRecordAudioPermission()) return
